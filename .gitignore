@@ -1,0 +1,19 @@
+# 臨時檔案
+make_icons.py
+*.pyc
+__pycache__/
+
+# 系統檔案
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# npm / node
+node_modules/
+.wrangler/
+.dev.vars
+.env
+.env.*
+
+# 備份
+*.backup

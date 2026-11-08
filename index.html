@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0d0d0d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="佛學系統">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<title>佛學系統</title>
+<style>
+/* ========== 主題變量 ========== */
+:root{
+  --bg:#0d0d0d; --panel:#161616; --panel2:#1e1e1e; --text:#e8e8e8; --muted:#9a9a9a;
+  --gold:#d4af37; --gold-solid:#d4af37; --gold-text:#0d0d0d; --green:#4ade80;
+  --border:#2a2a2a; --danger:#e07070; --shadow:0 4px 16px rgba(0,0,0,.4);
+}
+[data-theme="light"]{
+  --bg:#fafafa; --panel:#ffffff; --panel2:#f2f2f2; --text:#222222; --muted:#666666;
+  --gold:#b8860b; --gold-solid:#b8860b; --gold-text:#ffffff; --green:#2e7d32;
+  --border:#e0e0e0; --danger:#c0392b; --shadow:0 4px 16px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:"Microsoft JhengHei","PingFang TC",-apple-system,"Segoe UI",sans-serif;
+  line-height:1.7; -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;cursor:pointer;border:none;border-radius:8px}
+input,textarea,select{font-family:inherit;border-radius:8px;border:1px solid var(--border);background:var(--panel2);color:var(--text);padding:10px 12px;font-size:15px;width:100%}
+textarea{resize:vertical;min-height:90px}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* ========== 登入門 ========== */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:38px 30px;width:100%;max-width:380px;box-shadow:var(--shadow);text-align:center}
+.login-mark{font-size:44px;color:var(--gold);line-height:1;margin-bottom:10px}
+.login-card h1{font-size:22px;color:var(--gold);letter-spacing:2px;margin-bottom:6px}
+.login-card p{color:var(--muted);font-size:13px;margin-bottom:22px}
+.login-card input{margin-bottom:14px;text-align:center;letter-spacing:3px}
+.btn-gold{background:var(--gold-solid);color:var(--gold-text);font-weight:700;padding:12px 20px;font-size:16px;width:100%;letter-spacing:2px}
+.btn-gold:hover{filter:brightness(1.08)}
+.login-err{color:var(--danger);font-size:13px;min-height:20px;margin-top:8px}
+
+/* ========== 版面 ========== */
+.app-header{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:12px}
+.app-title{font-size:18px;color:var(--gold);letter-spacing:2px;font-weight:700;flex:1}
+.icon-btn{background:var(--panel2);color:var(--text);border:1px solid var(--border);padding:8px 12px;font-size:13px}
+.icon-btn:hover{border-color:var(--gold);color:var(--gold)}
+.tab-bar{display:flex;gap:6px;flex-wrap:wrap;padding:10px 12px;overflow-x:auto;background:var(--panel);border-bottom:1px solid var(--border);position:sticky;top:53px;z-index:19}
+.tab-btn{background:transparent;color:var(--muted);padding:8px 14px;font-size:14px;white-space:nowrap;border-radius:999px}
+.tab-btn.active{background:var(--gold-solid);color:var(--gold-text);font-weight:700}
+main{max-width:980px;margin:0 auto;padding:18px 14px 80px}
+.hidden{display:none !important}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+.section-title{font-size:17px;color:var(--gold);margin-bottom:12px;letter-spacing:1px}
+.muted{color:var(--muted);font-size:13px}
+.green{color:var(--green)}
+
+/* ========== 經文 ========== */
+.sutra-head{margin-bottom:6px}
+.sutra-head h2{font-size:20px;color:var(--gold);letter-spacing:2px}
+.passage{border-top:1px solid var(--border);padding:16px 0}
+.passage:first-of-type{border-top:none}
+.yuanwen{font-family:"Noto Serif TC","PMingLiU","Songti TC",serif;font-size:19px;letter-spacing:1px;color:var(--text);margin-bottom:10px}
+.baihua{background:var(--panel2);border-left:3px solid var(--green);padding:10px 12px;border-radius:0 8px 8px 0;font-size:15px;margin-bottom:12px}
+.lang-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:10px}
+@media(min-width:760px){.lang-grid{grid-template-columns:1fr 1fr}}
+.lang-cell{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.lang-cell .lang-name{font-size:12px;color:var(--gold);margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.lang-cell .lang-text{font-size:14px}
+.tts-btn{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:11px;padding:3px 8px;border-radius:999px}
+.tts-btn:hover{color:var(--green);border-color:var(--green)}
+.act-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:7px 13px;font-size:13px;border-radius:999px}
+.chip.on{background:var(--gold-solid);color:var(--gold-text);border-color:var(--gold-solid);font-weight:700}
+.note-edit{margin-top:10px}
+
+/* ========== 打卡 ========== */
+.stat-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.stat{flex:1;min-width:130px;background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
+.stat .num{font-size:28px;color:var(--gold);font-weight:700}
+.stat .lab{font-size:12px;color:var(--muted)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
+.cal-head{text-align:center;font-size:12px;color:var(--muted);padding:4px 0}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:13px;background:var(--panel2);color:var(--muted);border:1px solid transparent}
+.cal-day.done{background:rgba(212,175,55,.18);color:var(--gold);border-color:var(--gold);font-weight:700}
+.cal-day.today{border-color:var(--green)}
+.cal-day.empty{background:transparent}
+
+/* ========== 收藏 / 設定 ========== */
+.list-item{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--border)}
+.list-item:first-child{border-top:none}
+.btn-ghost{background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:7px 12px;font-size:13px}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-danger{background:transparent;border:1px solid var(--danger);color:var(--danger);padding:7px 12px;font-size:13px}
+.field-row{margin-bottom:12px}
+.field-row label{display:block;font-size:13px;color:var(--gold);margin-bottom:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:var(--gold-solid);color:var(--gold-text);padding:10px 22px;border-radius:999px;font-weight:700;z-index:99;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.show{opacity:1}
+
+/* ========== 帳號／大頭照 ========== */
+.user-chip{margin-left:auto;display:flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border:1px solid var(--gold-solid);border-radius:999px;background:var(--panel2)}
+.user-chip img{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold-solid);display:block}
+.user-chip .u-name{font-size:12px;color:var(--gold);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-chip.guest .u-name{color:var(--muted);border:none}
+.acct-row{display:flex;gap:12px;align-items:center}
+.acct-av{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--gold-solid);flex:0 0 auto;display:block}
+.acct-name{color:var(--gold);font-size:15px;font-weight:700}
+.acct-mail{font-size:12px;color:var(--muted);word-break:break-all}
+
+/* ========== 唱誦計次＋播音 ========== */
+.counter-wrap{text-align:center;padding:12px 0 4px}
+.counter-num{font-size:58px;color:var(--gold);font-weight:700;line-height:1.15}
+.counter-lab{font-size:13px;color:var(--muted);margin-bottom:14px}
+.player{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:10px}
+.player-title{font-size:15px;color:var(--gold);font-weight:700}
+.player-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.play-row{display:flex;gap:8px;align-items:center;margin:12px 0;flex-wrap:wrap}
+.btn-play{background:var(--gold-solid);color:var(--gold-text);font-weight:700;padding:11px 20px;font-size:15px}
+.btn-play:hover{filter:brightness(1.08)}
+.btn-loop{background:var(--panel);border:1px solid var(--border);color:var(--muted);padding:11px 16px;font-size:13px}
+.btn-loop:hover{border-color:var(--gold);color:var(--gold)}
+.btn-loop.on{border-color:var(--green);color:var(--green);font-weight:700}
+.progress{height:8px;background:var(--panel);border:1px solid var(--border);border-radius:999px;overflow:hidden;margin:10px 0 5px}
+.progress .bar{height:100%;width:0;background:var(--gold-solid);border-radius:999px;transition:width .25s linear}
+.time-row{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.recit-line{font-size:13px;color:var(--green);margin-top:10px}
+.recit-stats{display:flex;gap:12px;margin:10px 0 14px}
+.recit-stat{flex:1;background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.recit-stat .num{font-size:24px;color:var(--gold);font-weight:700}
+.recit-stat .lab{font-size:11px;color:var(--muted)}
+.recit-hist{max-height:240px;overflow:auto;margin-top:10px}
+.recit-item{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);padding:7px 2px;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<!-- ================= 登入門 ================= -->
+<div id="login" class="login-wrap">
+  <div class="login-card">
+    <div class="login-mark">佛</div>
+    <h1>佛學系統</h1>
+    <p>用 Google 帳號登入：每個帳號獨立記錄＋Google 大頭照<br>唔登入都用到（訪客模式）</p>
+    <button class="btn-gold" id="googleBtn">使用 Google 帳號登入</button>
+    <div class="login-err" id="loginErr"></div>
+    <button class="btn-ghost" id="guestBtn" style="width:100%;margin-top:12px">先逛下（唔登入）</button>
+  </div>
+</div>
+
+<!-- ================= 主介面 ================= -->
+<div id="app" class="hidden">
+  <header class="app-header">
+    <div class="app-title">佛學系統</div>
+    <div class="user-chip" id="userChip"></div>
+    <button class="icon-btn" id="themeBtn">主題</button>
+    <button class="icon-btn" id="logoutBtn">登出</button>
+  </header>
+
+  <nav class="tab-bar" id="tabBar">
+    <button class="tab-btn active" data-tab="read">經文閱讀</button>
+    <button class="tab-btn" data-tab="chant">唱誦計次</button>
+    <button class="tab-btn" data-tab="checkin">修行打卡</button>
+    <button class="tab-btn" data-tab="notes">收藏筆記</button>
+    <button class="tab-btn" data-tab="settings">設置</button>
+  </nav>
+
+  <main>
+    <!-- 經文閱讀 -->
+    <section id="tab-read">
+      <div class="card">
+        <div class="section-title">經文閱讀（原文＋白話＋四語對照）</div>
+        <input id="searchInput" type="search" placeholder="搜尋經文、段落…">
+        <div class="hint">內容：《光明真言》（真言宗流通本）；可喺「設置 → 內容管理」修改或加其他經文。</div>
+      </div>
+      <div id="readerBox"></div>
+    </section>
+
+    <!-- 唱誦計次＋播音 -->
+    <section id="tab-chant" class="hidden">
+      <div class="card">
+        <div class="section-title">唱誦計次（手動）</div>
+        <div class="counter-wrap">
+          <div class="counter-num" id="manualCount">0</div>
+          <div class="counter-lab">遍數</div>
+          <div class="act-row" style="justify-content:center">
+            <button class="btn-play" id="manualPlus">誦讀 +1</button>
+            <button class="btn-ghost" id="manualReset">歸零</button>
+          </div>
+        </div>
+        <div class="hint">自己誦經時逐下撳；下面兩個播音一開即自動計次，唔使撳。播音支援熄屏鎖屏後繼續播。</div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">播音 ① 光明真言唱誦</div>
+        <div class="player">
+          <div class="player-title">光明真言唱誦（約 78 分鐘 · 含手印觀想教學）</div>
+          <div class="player-sub">完整經咒唱誦</div>
+          <div class="play-row">
+            <button class="btn-play" id="p1Play">播放唱誦</button>
+            <button class="btn-loop" id="p1Loop">循環播放</button>
+          </div>
+          <div class="progress"><div class="bar" id="p1Bar"></div></div>
+          <div class="time-row"><span id="p1Time">0:00</span><span id="p1Total">1:18:17</span></div>
+          <div class="recit-line" id="p1Recit"></div>
+        </div>
+        <audio id="p1Audio" preload="none" playsinline></audio>
+      </div>
+
+      <div class="card">
+        <div class="section-title">播音 ② 大日如來光明真言</div>
+        <div class="player">
+          <div class="player-title">大日如來光明真言（約 30 分鐘 · 純唱誦）</div>
+          <div class="player-sub">完整唱誦</div>
+          <div class="play-row">
+            <button class="btn-play" id="p2Play">播放唱誦</button>
+            <button class="btn-loop" id="p2Loop">循環播放</button>
+          </div>
+          <div class="progress"><div class="bar" id="p2Bar"></div></div>
+          <div class="time-row"><span id="p2Time">0:00</span><span id="p2Total">29:45</span></div>
+          <div class="recit-line" id="p2Recit"></div>
+        </div>
+        <audio id="p2Audio" preload="none" playsinline></audio>
+      </div>
+
+      <div class="card">
+        <div class="section-title">誦經記錄（自動計次）</div>
+        <div class="recit-stats">
+          <div class="recit-stat"><div class="num" id="recitTotal">0</div><div class="lab">累計總次數</div></div>
+          <div class="recit-stat"><div class="num" id="recitToday">0</div><div class="lab">今日自動計次</div></div>
+        </div>
+        <button class="btn-ghost" id="recitClear">清空記錄</button>
+        <div class="recit-hist" id="recitHist"></div>
+        <div class="hint">播音每唱完一句咒自動 +1；記錄存在本機瀏覽器。</div>
+      </div>
+    </section>
+
+    <!-- 修行打卡 -->
+    <section id="tab-checkin" class="hidden">
+      <div class="card">
+        <div class="section-title">修行打卡</div>
+        <div class="stat-row">
+          <div class="stat"><div class="num" id="streakNum">0</div><div class="lab">連續打卡（日）</div></div>
+          <div class="stat"><div class="num" id="totalNum">0</div><div class="lab">累計打卡（日）</div></div>
+          <div class="stat"><div class="num" id="monthNum">0</div><div class="lab">今月打卡（日）</div></div>
+        </div>
+        <button class="btn-gold" id="checkinBtn">今日打卡</button>
+        <div class="hint" id="checkinHint" style="margin-top:10px"></div>
+      </div>
+      <div class="card">
+        <div class="section-title" id="calTitle">打卡日曆</div>
+        <div class="cal-grid" id="calHead"></div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+    </section>
+
+    <!-- 收藏筆記 -->
+    <section id="tab-notes" class="hidden">
+      <div class="card">
+        <div class="section-title">我的收藏</div>
+        <div id="bmList"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">我的筆記</div>
+        <div id="noteList"></div>
+      </div>
+    </section>
+
+    <!-- 設置 -->
+    <section id="tab-settings" class="hidden">
+      <div class="card">
+        <div class="section-title">外觀</div>
+        <button class="btn-ghost" id="themeBtn2">切換 暗金／淺色 主題</button>
+      </div>
+
+      <div class="card">
+        <div class="section-title">帳號</div>
+        <div class="acct-row" id="acctBox"></div>
+        <div class="act-row" style="margin-top:12px">
+          <button class="btn-ghost" id="switchAcctBtn" style="width:auto">切換 Google 帳號</button>
+          <button class="btn-ghost" id="signOutBtn" style="width:auto">登出</button>
+        </div>
+        <div class="hint">登入咗先有 Google 大頭照，每個帳號嘅打卡、計次、筆記獨立記錄；唔登入就用訪客身份，一樣用到。記錄存在本機瀏覽器。</div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">四語名稱（可自訂）</div>
+        <div class="grid2">
+          <div class="field-row"><label>語言一</label><input id="lang1"></div>
+          <div class="field-row"><label>語言二</label><input id="lang2"></div>
+          <div class="field-row"><label>語言三</label><input id="lang3"></div>
+          <div class="field-row"><label>語言四</label><input id="lang4"></div>
+        </div>
+        <button class="btn-gold" id="saveLangsBtn" style="width:auto">儲存語言名稱</button>
+        <div class="hint">四語固定順序：粵語／普通話／English／越南文；語音自動配對粵語、普通話、英語、越南語發音。</div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">數據管理</div>
+        <div class="act-row">
+          <button class="btn-ghost" id="exportBtn">匯出備份（JSON）</button>
+          <button class="btn-ghost" id="importBtn">匯入備份</button>
+          <input id="importFile" type="file" accept="application/json" class="hidden">
+        </div>
+        <div class="hint">打卡、收藏、筆記、內容全部存在呢部裝置嘅瀏覽器入面。換裝置請先匯出備份再匯入。</div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">內容管理（經文 JSON）</div>
+        <textarea id="contentTa" rows="14" style="font-family:Consolas,monospace;font-size:12px"></textarea>
+        <div class="act-row" style="margin-top:10px">
+          <button class="btn-gold" id="saveContentBtn" style="width:auto">儲存內容</button>
+          <button class="btn-ghost" id="resetContentBtn">重置為《光明真言》</button>
+        </div>
+        <div class="hint">結構：sutra 標題 + passages 段落（原文 yuanwen、白話 baihua、四語 l1-l4）。改完撳「儲存內容」即時生效。</div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase Auth（Google 登入） -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<script>
+"use strict";
+/* ===================== 資料層 ===================== */
+const LS_KEY = "foapp_v2";
+const ST_PREFIX = "foapp_v4_";
+const TTS_LANGS = ["yue-Hant-HK","zh-CN","en-US","vi-VN"];
+
+const SEED_SUTRAS = [{
+  id: "guangming",
+  title: "光明真言（經文）",
+  author: "真言宗流通本 · 不空羂索毘盧遮那佛大灌頂光真言",
+  passages: [
+    {
+      id: "gm1",
+      yuanwen: "曩謨三滿多沒馱喃",
+      baihua: "歸命三世一切諸佛。（真言開頭嘅禮敬句）",
+      l1: "歸命三世一切諸佛。（真言開頭嘅禮敬句）",
+      l2: "归命三世一切诸佛。（真言开头的礼敬句）",
+      l3: "Homage to all Buddhas of the three times. (Opening salutation of the mantra.)",
+      l4: "Nam mô tất cả chư Phật ba đời. (Câu đảnh lễ mở đầu của chân ngôn.)"
+    },
+    {
+      id: "gm2",
+      yuanwen: "唵 阿謨伽 尾盧左曩 摩訶母捺囉 摩尼 鉢納摩 入嚩攞 鉢囉韈哆野 吽",
+      baihua: "唵——不空成就·大日如來（毘盧遮那），以大印之力，令寶珠與蓮花之光明熾盛照耀！吽——圓滿成就。",
+      l1: "唵——不空·大日如來，靠大印嘅力量，令寶珠同蓮花嘅光明熾盛照耀！吽，圓滿成就。",
+      l2: "唵——不空·大日如来，以大印之力，令宝珠与莲华之光明炽盛照耀！吽，圆满成就。",
+      l3: "Oṃ — By the great seal of Amogha Vairocana, may the light of the jewel and lotus blaze forth! Hūṃ — accomplished.",
+      l4: "Án — Do đại ấn của Đại Nhật Như Lai bất không, ánh sáng của bảo châu và hoa sen hãy chiếu sáng rực rỡ! Hùm — viên mãn thành tựu."
+    },
+    {
+      id: "gm3",
+      yuanwen: "oṃ amogha vairocana mahāmudrā maṇipadma jvāla pravarttaya hūṃ（羅馬轉寫）",
+      baihua: "譯意：「唵！不空光明遍照！大手印！蓮花珍寶！火焰！請進行！吽！」——以大日如來不空真實大印，產生寶珠、蓮花、光明等功德，照破無明煩惱，轉地獄苦而生淨土。",
+      l1: "譯意：「唵！不空光明遍照！大手印！蓮花珍寶！火焰！請進行！吽！」——靠大日如來不空真實大印，生出寶珠、蓮花、光明等功德，照破無明煩惱，由地獄苦轉生淨土。",
+      l2: "译意：「唵！不空光明遍照！大手印！莲花珍宝！火焰！请进行！吽！」——以大日如来不空真实大印，产生宝珠、莲华、光明等功德，照破无明烦恼，转地狱苦而生净土。",
+      l3: "Meaning: 'Oṃ! Unsurpassed light shining everywhere! Great seal! Jewel-lotus! Flame! Proceed! Hūṃ!' — Through the true great seal of Mahāvairocana (Amogha), the merits of jewel, lotus and light blaze forth.",
+      l4: "Nghĩa: 'Án! Bất không quang minh chiếu khắp! Đại ấn! Bảo liên! Hỏa diệm! Xin tiến hành! Hùm!' — Nhờ đại ấn chân thật bất không của Đại Nhật Như Lai, công đức bảo châu, hoa sen, quang minh rực sáng."
+    }
+  ]
+}, {
+  id: "teaching",
+  title: "使用教學（手印・修法）",
+  author: "金剛拳印＋放光印＋日課持修儀軌 · 四語對照",
+  passages: [
+    {
+      id: "t1",
+      yuanwen: "一、準備與發心",
+      baihua: "誦持之前先清淨身口：刷牙漱口、整齊衣著、揀安靜地方。盤腿坐或者端坐都得。至誠恭敬，發利益眾生之心。",
+      l1: "誦持之前先清淨身口：刷牙漱口、整齊衣著、揀安靜地方。盤腿坐或者端坐都得。至誠恭敬，發利益眾生之心。",
+      l2: "诵持之前先清净身口：刷牙漱口、整齐衣着、拣安静地方。盘腿坐或者端坐都行。至诚恭敬，发利益众生之心。",
+      l3: "Preparation & motivation: Before practice, purify body and speech — brush teeth, rinse mouth, dress neatly, choose a quiet place. Sit cross-legged or upright. With sincere reverence, arouse the mind of benefiting all beings.",
+      l4: "Chuẩn bị và phát tâm: trước khi trì tụng, thanh tịnh thân khẩu — đánh răng súc miệng, mặc gọn gàng, chọn nơi yên tĩnh. Ngồi kiết già hoặc ngồi ngay ngắn. Thành kính, phát tâm lợi ích chúng sinh."
+    }
+  ]
+}];
+
+function defaultState() {
+  return {
+    theme: "dark",
+    langs: ["粵語","普通話","English","越南文"],
+    checkins: {},
+    bookmarks: {},
+    notes: {},
+    customSutras: null,
+    manualCount: 0,
+    recit: { total: 0, days: {}, log: [] }
+  };
+}
+function stateKey() {
+  return (typeof FB_USER !== "undefined" && FB_USER) ? ST_PREFIX + "acct_" + FB_USER.uid : ST_PREFIX + "guest";
+}
+function loadState() {
+  try {
+    if (!localStorage.getItem(ST_PREFIX + "guest") && localStorage.getItem(LS_KEY)) {
+      localStorage.setItem(ST_PREFIX + "guest", localStorage.getItem(LS_KEY));
+    }
+    const s = JSON.parse(localStorage.getItem(stateKey()));
+    return s ? Object.assign(defaultState(), s) : defaultState();
+  } catch (e) { return defaultState(); }
+}
+function saveState() { localStorage.setItem(stateKey(), JSON.stringify(state)); }
+let state = loadState();
+function getSutras() { return state.customSutras || SEED_SUTRAS; }
+
+/* ===================== 小工具 ===================== */
+const $ = (id) => document.getElementById(id);
+function esc(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => t.classList.remove("show"), 1800);
+}
+function localDateKey(d) {
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,"0"), day = String(d.getDate()).padStart(2,"0");
+  return y + "-" + m + "-" + day;
+}
+function todayKey() { return localDateKey(new Date()); }
+
+/* ===================== 主題 ===================== */
+function applyTheme() { document.documentElement.setAttribute("data-theme", state.theme); }
+function toggleTheme() {
+  state.theme = state.theme === "dark" ? "light" : "dark";
+  saveState(); applyTheme();
+  toast(state.theme === "dark" ? "已切換：暗金主題" : "已切換：淺色主題");
+}
+
+/* ===================== 登入／帳號 ===================== */
+let FB_USER = null;
+let entered = false;
+
+function showApp() {
+  $("login").classList.add("hidden");
+  $("app").classList.remove("hidden");
+  renderAll(); renderUserChip();
+}
+function enterAs(user) {
+  FB_USER = user;
+  state = loadState();
+  applyTheme();
+  showApp();
+  entered = true;
+}
+function renderUserChip() {
+  const c = $("userChip");
+  if (FB_USER) {
+    const img = FB_USER.photoURL ? '<img src="' + esc(FB_USER.photoURL) + '" alt="">' : "";
+    c.className = "user-chip";
+    c.innerHTML = img + '<span class="u-name">' + esc(FB_USER.displayName || FB_USER.email || "已登入") + '</span>';
+  } else {
+    c.className = "user-chip guest";
+    c.innerHTML = '<span class="u-name">訪客</span>';
+  }
+}
+function backToLogin() {
+  entered = false; FB_USER = null;
+  $("app").classList.add("hidden");
+  $("login").classList.remove("hidden");
+}
+
+/* ===================== 語音朗讀 ===================== */
+function speak(text, langIdx) {
+  if (!("speechSynthesis" in window)) { toast("呢個瀏覽器唔支援語音朗讀"); return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = TTS_LANGS[langIdx] || "zh-HK";
+  u.rate = 0.95;
+  window.speechSynthesis.speak(u);
+  toast("開始朗讀：" + (state.langs[langIdx] || ""));
+}
+
+/* ===================== 經文閱讀 ===================== */
+function renderReader() {
+  const kw = ($("searchInput").value || "").trim().toLowerCase();
+  const sutras = getSutras();
+  let html = "";
+  sutras.forEach(function (st) {
+    const passages = (st.passages || []).filter(function (p) {
+      if (!kw) return true;
+      const blob = [p.yuanwen, p.baihua, p.l1, p.l2, p.l3, p.l4].join(" ").toLowerCase();
+      return blob.indexOf(kw) >= 0;
+    });
+    if (!passages.length) return;
+    html += '<div class="card"><div class="sutra-head"><h2>' + esc(st.title) + '</h2>' +
+            '<div class="muted">' + esc(st.author || "") + '</div></div>';
+    passages.forEach(function (p) {
+      const key = st.id + ":" + p.id;
+      const bmOn = !!state.bookmarks[key];
+      const noteVal = state.notes[key] || "";
+      html += '<div class="passage" data-key="' + esc(key) + '">' +
+        '<div class="yuanwen">' + esc(p.yuanwen) + '</div>' +
+        '<div class="baihua"><b class="green">白話：</b>' + esc(p.baihua) + '</div>' +
+        '<div class="lang-grid">';
+      for (let i = 0; i < 4; i++) {
+        html += '<div class="lang-cell"><div class="lang-name"><span>' + esc(state.langs[i] || ("語言" + (i+1))) +
+          '</span><button class="tts-btn" data-tts="' + esc(key) + '" data-lang="' + i + '">朗讀</button></div>' +
+          '<div class="lang-text">' + esc(p["l" + (i + 1)] || "") + '</div></div>';
+      }
+      html += '</div><div class="act-row">' +
+        '<button class="chip ' + (bmOn ? "on" : "") + '" data-bm="' + esc(key) + '">' + (bmOn ? "已收藏" : "收藏") + '</button>' +
+        '<button class="chip" data-note-toggle="' + esc(key) + '">' + (noteVal ? "修改筆記" : "寫筆記") + '</button>' +
+        '</div>';
+      if (noteVal) html += '<div class="muted" style="margin-top:8px">筆記：' + esc(noteVal) + '</div>';
+      html += '<div class="note-edit hidden" data-note-edit="' + esc(key) + '">' +
+        '<textarea rows="3" placeholder="寫低你嘅修行心得…">' + esc(noteVal) + '</textarea>' +
+        '<div class="act-row" style="margin-top:8px">' +
+        '<button class="btn-gold" data-note-save="' + esc(key) + '" style="width:auto">儲存筆記</button>' +
+        '<button class="btn-ghost" data-note-cancel="' + esc(key) + '">收起</button></div></div>';
+      html += '</div>';
+    });
+    html += "</div>";
+  });
+  if (!html) html = '<div class="card"><div class="muted">搵唔到相關段落，試下另一個關鍵詞。</div></div>';
+  $("readerBox").innerHTML = html;
+}
+
+$("readerBox").addEventListener("click", function (e) {
+  const t = e.target;
+  const ttsKey = t.getAttribute && t.getAttribute("data-tts");
+  if (ttsKey != null) {
+    const li = parseInt(t.getAttribute("data-lang"), 10) || 0;
+    const p = findPassage(ttsKey);
+    if (p) speak(p["l" + (li + 1)] || p.baihua || p.yuanwen, li);
+    return;
+  }
+  const bmKey = t.getAttribute && t.getAttribute("data-bm");
+  if (bmKey) {
+    if (state.bookmarks[bmKey]) { delete state.bookmarks[bmKey]; toast("已取消收藏"); }
+    else {
+      const p = findPassage(bmKey);
+      state.bookmarks[bmKey] = { title: (findSutraOf(bmKey) || {}).title || "", text: p ? (p.yuanwen || "") : "" };
+      toast("已收藏");
+    }
+    saveState(); renderReader(); renderNotes();
+    return;
+  }
+  const nt = t.getAttribute && t.getAttribute("data-note-toggle");
+  if (nt) {
+    const box = document.querySelector('[data-note-edit="' + CSS.escape(nt) + '"]');
+    if (box) box.classList.toggle("hidden");
+    return;
+  }
+  const ns = t.getAttribute && t.getAttribute("data-note-save");
+  if (ns) {
+    const box = document.querySelector('[data-note-edit="' + CSS.escape(ns) + '"]');
+    const val = box ? box.querySelector("textarea").value.trim() : "";
+    if (val) state.notes[ns] = val; else delete state.notes[ns];
+    saveState(); renderReader(); renderNotes();
+    toast(val ? "筆記已儲存" : "筆記已清除");
+    return;
+  }
+  const nc = t.getAttribute && t.getAttribute("data-note-cancel");
+  if (nc) {
+    const box = document.querySelector('[data-note-edit="' + CSS.escape(nc) + '"]');
+    if (box) box.classList.add("hidden");
+  }
+});
+$("searchInput").addEventListener("input", renderReader);
+
+function findPassage(key) {
+  const parts = String(key).split(":");
+  const st = getSutras().find(function (s) { return s.id === parts[0]; });
+  if (!st) return null;
+  return (st.passages || []).find(function (p) { return p.id === parts[1]; }) || null;
+}
+function findSutraOf(key) {
+  const sid = String(key).split(":")[0];
+  return getSutras().find(function (s) { return s.id === sid; }) || null;
+}
+
+/* ===================== 修行打卡 ===================== */
+function renderCheckin() {
+  const tk = todayKey();
+  const done = !!state.checkins[tk];
+  const btn = $("checkinBtn");
+  btn.textContent = done ? "今日已打卡 ✓" : "今日打卡";
+  btn.style.opacity = done ? ".75" : "1";
+  $("checkinHint").textContent = done
+    ? "今日（" + tk + "）已打卡，功德 +1。"
+    : "今日（" + tk + "）仲未打卡。";
+
+  const keys = Object.keys(state.checkins).filter(function (k) { return state.checkins[k]; });
+  $("totalNum").textContent = keys.length;
+
+  let streak = 0;
+  const d = new Date();
+  if (!state.checkins[localDateKey(d)]) d.setDate(d.getDate() - 1);
+  while (state.checkins[localDateKey(d)]) { streak++; d.setDate(d.getDate() - 1); }
+  $("streakNum").textContent = streak;
+
+  const now = new Date();
+  const ym = localDateKey(now).slice(0, 7);
+  $("monthNum").textContent = keys.filter(function (k) { return k.indexOf(ym) === 0; }).length;
+
+  const y = now.getFullYear(), m = now.getMonth();
+  $("calTitle").textContent = "打卡日曆 · " + y + " 年 " + (m + 1) + " 月";
+  const heads = ["日","一","二","三","四","五","六"];
+  $("calHead").innerHTML = heads.map(function (h) { return '<div class="cal-head">' + h + '</div>'; }).join("");
+  const first = new Date(y, m, 1).getDay();
+  const days = new Date(y, m + 1, 0).getDate();
+  let cells = "";
+  for (let i = 0; i < first; i++) cells += '<div class="cal-day empty"></div>';
+  for (let day = 1; day <= days; day++) {
+    const key = localDateKey(new Date(y, m, day));
+    const cls = "cal-day" + (state.checkins[key] ? " done" : "") + (key === tk ? " today" : "");
+    cells += '<div class="' + cls + '">' + day + '</div>';
+  }
+  $("calGrid").innerHTML = cells;
+}
+$("checkinBtn").addEventListener("click", function () {
+  const tk = todayKey();
+  if (state.checkins[tk]) { toast("今日已經打咗卡"); return; }
+  state.checkins[tk] = true;
+  saveState(); renderCheckin();
+  toast("打卡成功 · 功德 +1");
+});
+
+/* ===================== 收藏筆記 ===================== */
+function renderNotes() {
+  const bmKeys = Object.keys(state.bookmarks);
+  if (!bmKeys.length) {
+    $("bmList").innerHTML = '<div class="muted">仲未有收藏。去「經文閱讀」撳「收藏」就得。</div>';
+  } else {
+    $("bmList").innerHTML = bmKeys.map(function (k) {
+      const b = state.bookmarks[k];
+      return '<div class="list-item"><div><b>' + esc(b.title || k) + '</b><div class="muted">' + esc((b.text || "").slice(0, 42)) + '…</div></div>' +
+        '<div class="act-row"><button class="btn-ghost" data-goto="' + esc(k) + '">去睇</button>' +
+        '<button class="btn-danger" data-del-bm="' + esc(k) + '">刪除</button></div></div>';
+    }).join("");
+  }
+  const ntKeys = Object.keys(state.notes);
+  if (!ntKeys.length) {
+    $("noteList").innerHTML = '<div class="muted">仲未有筆記。去「經文閱讀」撳「寫筆記」就得。</div>';
+  } else {
+    $("noteList").innerHTML = ntKeys.map(function (k) {
+      return '<div class="list-item"><div><b>' + esc(k) + '</b><div class="muted">' + esc(state.notes[k]) + '</div></div>' +
+        '<div class="act-row"><button class="btn-ghost" data-goto="' + esc(k) + '">去睇</button>' +
+        '<button class="btn-danger" data-del-note="' + esc(k) + '">刪除</button></div></div>';
+    }).join("");
+  }
+}
+$("tab-notes").addEventListener("click", function (e) {
+  const t = e.target;
+  const db = t.getAttribute && t.getAttribute("data-del-bm");
+  if (db) { delete state.bookmarks[db]; saveState(); renderNotes(); renderReader(); toast("已刪除收藏"); return; }
+  const dn = t.getAttribute && t.getAttribute("data-del-note");
+  if (dn) { delete state.notes[dn]; saveState(); renderNotes(); renderReader(); toast("已刪除筆記"); return; }
+  const go = t.getAttribute && t.getAttribute("data-goto");
+  if (go) {
+    switchTab("read");
+    $("searchInput").value = "";
+    renderReader();
+    setTimeout(function () {
+      const el = document.querySelector('[data-key="' + CSS.escape(go) + '"]');
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 60);
+  }
+});
+
+/* ===================== 設置 ===================== */
+function renderSettings() {
+  $("lang1").value = state.langs[0] || "";
+  $("lang2").value = state.langs[1] || "";
+  $("lang3").value = state.langs[2] || "";
+  $("lang4").value = state.langs[3] || "";
+  $("contentTa").value = JSON.stringify(getSutras(), null, 2);
+  if (FB_USER) {
+    const img = FB_USER.photoURL ? '<img class="acct-av" src="' + esc(FB_USER.photoURL) + '" alt="">' : "";
+    $("acctBox").innerHTML = img + '<div><div class="acct-name">' + esc(FB_USER.displayName || "") + '</div>' +
+      '<div class="acct-mail">' + esc(FB_USER.email || "") + '</div></div>';
+  } else {
+    $("acctBox").innerHTML = '<div class="acct-mail">訪客模式——記錄存在本機瀏覽器。登入 Google 帳號可以分開記錄＋顯示大頭照。</div>';
+  }
+}
+$("switchAcctBtn").addEventListener("click", function () {
+  if (typeof FB_AUTH === "undefined" || !FB_AUTH) { toast("Google 登入暫時不可用"); return; }
+  var p = new firebase.auth.GoogleAuthProvider();
+  p.setCustomParameters({ prompt: "select_account" });
+  FB_AUTH.signInWithRedirect(p).catch(function () {
+    FB_AUTH.signInWithPopup(p).catch(function (e2) { toast("登入失敗：" + e2.message); });
+  });
+});
+$("signOutBtn").addEventListener("click", function () {
+  if (typeof FB_AUTH !== "undefined" && FB_AUTH && FB_USER) {
+    FB_AUTH.signOut().then(function () { backToLogin(); });
+  } else {
+    backToLogin();
+  }
+});
+$("themeBtn").addEventListener("click", toggleTheme);
+$("themeBtn2").addEventListener("click", toggleTheme);
+$("logoutBtn").addEventListener("click", function () {
+  if (typeof FB_AUTH !== "undefined" && FB_AUTH && FB_USER) {
+    FB_AUTH.signOut().then(function () { backToLogin(); });
+  } else {
+    backToLogin();
+  }
+});
+$("saveLangsBtn").addEventListener("click", function () {
+  state.langs = [$("lang1").value.trim() || "語言一", $("lang2").value.trim() || "語言二",
+                 $("lang3").value.trim() || "語言三", $("lang4").value.trim() || "語言四"];
+  saveState(); renderReader();
+  toast("語言名稱已儲存");
+});
+$("exportBtn").addEventListener("click", function () {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "foapp-backup-" + todayKey() + ".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("備份已匯出");
+});
+$("importBtn").addEventListener("click", function () { $("importFile").click(); });
+$("importFile").addEventListener("change", function (e) {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = function () {
+    try {
+      const data = JSON.parse(r.result);
+      state = Object.assign(defaultState(), data);
+      saveState(); applyTheme(); renderAll();
+      toast("備份已匯入");
+    } catch (err) { toast("檔案格式唔啱，匯入失敗"); }
+  };
+  r.readAsText(f);
+  e.target.value = "";
+});
+$("saveContentBtn").addEventListener("click", function () {
+  try {
+    const arr = JSON.parse($("contentTa").value);
+    if (!Array.isArray(arr) || !arr.length) throw new Error("bad");
+    state.customSutras = arr;
+    saveState(); renderReader();
+    toast("內容已儲存");
+  } catch (err) { toast("JSON 格式唔啱，請檢查"); }
+});
+$("resetContentBtn").addEventListener("click", function () {
+  state.customSutras = null;
+  saveState(); renderSettings(); renderReader();
+  toast("已重置為《光明真言》");
+});
+
+/* ===================== 唱誦計次＋播音 ===================== */
+// 音頻路徑（抽音頻後放喺 audio/ 資料夾）
+const P1_SRC = "audio/guangming.m4a";   // 光明真言（4697 秒 ≈ 78 分鐘）
+const P2_SRC = "audio/dainichi.m4a";    // 大日如來（1786 秒 ≈ 30 分鐘，壓縮版）
+const P1_TOTAL = 4697.37;
+const P2_TOTAL = 1785.87;
+// 每遍咒嘅估算秒數（光明真言約 21 字，唱誦節奏約 7 秒一遍；大日如來可自調）
+const P1_PERIOD = 7.0;
+const P2_PERIOD = 18.75;
+
+const p1 = { playing: false, loop: false, credited: 0, fresh: true };
+const p2 = { playing: false, loop: false, credited: 0, fresh: true };
+
+function fmtTime(s) {
+  if (!isFinite(s) || s < 0) s = 0;
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = Math.floor(s % 60);
+  const mm = String(m).padStart(2, "0"), ss = String(sec).padStart(2, "0");
+  return h > 0 ? h + ":" + mm + ":" + ss : m + ":" + ss;
+}
+
+/* ---------- Media Session（背景播放／鎖屏控制） ---------- */
+function setupMediaSession() {
+  if (!("mediaSession" in navigator)) return;
+  try {
+    navigator.mediaSession.setActionHandler("play", function () { resumeActive(); });
+    navigator.mediaSession.setActionHandler("pause", function () { pauseActive(); });
+    navigator.mediaSession.setActionHandler("previoustrack", function () { seekActive(-10); });
+    navigator.mediaSession.setActionHandler("nexttrack", function () { seekActive(10); });
+    navigator.mediaSession.setActionHandler("seekto", function (d) { seekActiveTo(d.seekTime); });
+  } catch (e) { console.warn("media session setup:", e.message); }
+}
+let activePlayer = 0; // 0=無, 1=p1, 2=p2
+function setActiveMeta(which) {
+  if (!("mediaSession" in navigator)) return;
+  const title = which === 1 ? "光明真言唱誦" : "大日如來光明真言";
+  const artist = "佛學系統";
+  try {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: title, artist: artist, album: "佛學系統"
+    });
+  } catch (e) {}
+}
+function curActiveAudio() {
+  if (activePlayer === 1) return $("p1Audio");
+  if (activePlayer === 2) return $("p2Audio");
+  return null;
+}
+function resumeActive() {
+  const a = curActiveAudio();
+  if (a && a.src && !a.paused) return;
+  if (activePlayer === 1) p1Play();
+  else if (activePlayer === 2) p2Play();
+}
+function pauseActive() {
+  if (activePlayer === 1) p1Pause();
+  else if (activePlayer === 2) p2Pause();
+}
+function seekActive(ds) {
+  const a = curActiveAudio();
+  if (a && a.src) { a.currentTime = Math.max(0, Math.min((a.duration || 0), a.currentTime + ds)); }
+}
+function seekActiveTo(t) {
+  const a = curActiveAudio();
+  if (a && a.src && typeof t === "number") { a.currentTime = Math.max(0, Math.min((a.duration || 0), t)); }
+}
+
+function p1Play() {
+  const a = $("p1Audio");
+  if (!a.src) a.src = P1_SRC;
+  a.play().then(function () {
+    p1.playing = true; activePlayer = 1; renderP1Btn(); setActiveMeta(1);
+    if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "playing";
+  }).catch(function (e) { toast("播放失敗：" + (e.message || e)); });
+}
+function p1Pause() {
+  $("p1Audio").pause(); p1.playing = false; renderP1Btn();
+  if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "paused";
+}
+function renderP1Btn() { $("p1Play").textContent = p1.playing ? "暫停" : "播放唱誦"; }
+function p2Play() {
+  const a = $("p2Audio");
+  if (!a.src) a.src = P2_SRC;
+  a.play().then(function () {
+    p2.playing = true; activePlayer = 2; renderP2Btn(); setActiveMeta(2);
+    if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "playing";
+  }).catch(function (e) { toast("播放失敗：" + (e.message || e)); });
+}
+function p2Pause() {
+  $("p2Audio").pause(); p2.playing = false; renderP2Btn();
+  if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "paused";
+}
+function renderP2Btn() { $("p2Play").textContent = p2.playing ? "暫停" : "播放唱誦"; }
+
+function resetBaseline(which) {
+  const st = which === 1 ? p1 : p2;
+  const overall = which === 1 ? ($("p1Audio").currentTime || 0) : ($("p2Audio").currentTime || 0);
+  const period = which === 1 ? P1_PERIOD : P2_PERIOD;
+  if (st.fresh || overall < 0.5) st.credited = 0;
+  else st.credited = Math.floor(overall / period);
+  st.fresh = false;
+}
+function creditRecit(which, overall, period) {
+  const st = which === 1 ? p1 : p2;
+  const completed = Math.floor(overall / period);
+  if (completed > st.credited) {
+    const delta = completed - st.credited;
+    st.credited = completed;
+    addRecitRecord(which, delta);
+  }
+}
+function addRecitRecord(which, delta) {
+  if (!state.recit) state.recit = { total: 0, days: {}, log: [] };
+  const t = todayKey();
+  state.recit.total += delta;
+  state.recit.days[t] = (state.recit.days[t] || 0) + delta;
+  state.recit.log.unshift({ ts: Date.now(), track: which, added: delta, total: state.recit.total });
+  if (state.recit.log.length > 60) state.recit.log.length = 60;
+  saveState(); renderRecit();
+}
+function renderRecit() {
+  const r = state.recit || { total: 0, days: {}, log: [] };
+  $("recitTotal").textContent = r.total;
+  $("recitToday").textContent = r.days[todayKey()] || 0;
+  if (!r.log.length) {
+    $("recitHist").innerHTML = '<div class="muted" style="padding:8px 0">暫無記錄 · 開始播音即自動記錄</div>';
+    return;
+  }
+  $("recitHist").innerHTML = r.log.slice(0, 30).map(function (e) {
+    const d = new Date(e.ts);
+    const dt = (d.getMonth() + 1) + "/" + d.getDate() + " " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    return '<div class="recit-item"><span>' + dt + ' · ' + (e.track === 1 ? "段一" : "段二") + '</span><span>+' + e.added + '（累計 ' + e.total + '）</span></div>';
+  }).join("");
+}
+function renderChant() {
+  $("manualCount").textContent = state.manualCount || 0;
+  $("p1Total").textContent = fmtTime(P1_TOTAL);
+  $("p2Total").textContent = fmtTime(P2_TOTAL);
+  $("p1Recit").textContent = "共約 " + Math.round(P1_TOTAL / P1_PERIOD) + " 遍 · 每遍約 7 秒 · 自動計次";
+  $("p2Recit").textContent = "共約 " + Math.round(P2_TOTAL / P2_PERIOD) + " 遍 · 自動計次";
+  renderRecit();
+}
+
+$("manualPlus").addEventListener("click", function () {
+  state.manualCount = (state.manualCount || 0) + 1;
+  saveState(); renderChant();
+  toast("遍數 +1");
+});
+$("manualReset").addEventListener("click", function () {
+  state.manualCount = 0; saveState(); renderChant();
+  toast("遍數已歸零");
+});
+$("recitClear").addEventListener("click", function () {
+  if (!confirm("確定清空誦經記錄？")) return;
+  state.recit = { total: 0, days: {}, log: [] };
+  p1.credited = 0; p2.credited = 0; p1.fresh = true; p2.fresh = true;
+  saveState(); renderRecit();
+  toast("記錄已清空");
+});
+$("p1Play").addEventListener("click", function () { p1.playing ? p1Pause() : p1Play(); });
+$("p1Loop").addEventListener("click", function () {
+  p1.loop = !p1.loop;
+  $("p1Loop").classList.toggle("on", p1.loop);
+  toast(p1.loop ? "段一循環播放：開" : "段一循環播放：關");
+});
+$("p2Play").addEventListener("click", function () { p2.playing ? p2Pause() : p2Play(); });
+$("p2Loop").addEventListener("click", function () {
+  p2.loop = !p2.loop;
+  $("p2Loop").classList.toggle("on", p2.loop);
+  toast(p2.loop ? "段二循環播放：開" : "段二循環播放：關");
+});
+
+const p1Audio = $("p1Audio");
+p1Audio.addEventListener("play", function () { resetBaseline(1); });
+p1Audio.addEventListener("timeupdate", function () {
+  const overall = p1Audio.currentTime || 0;
+  $("p1Bar").style.width = Math.min(100, overall / P1_TOTAL * 100) + "%";
+  $("p1Time").textContent = fmtTime(overall);
+  if (overall < (p1Audio.duration || P1_TOTAL)) {
+    try { navigator.mediaSession.setPositionState({ duration: (p1Audio.duration || P1_TOTAL), playbackRate: 1, position: overall }); } catch (e) {}
+  }
+  creditRecit(1, overall, P1_PERIOD);
+});
+p1Audio.addEventListener("ended", function () {
+  if (p1.loop) { p1.fresh = true; p1Audio.currentTime = 0; p1Play(); }
+  else { p1.playing = false; renderP1Btn(); if (activePlayer === 1) activePlayer = 0; }
+});
+const p2Audio = $("p2Audio");
+p2Audio.addEventListener("play", function () { resetBaseline(2); });
+p2Audio.addEventListener("timeupdate", function () {
+  const cur = p2Audio.currentTime || 0;
+  $("p2Bar").style.width = Math.min(100, cur / P2_TOTAL * 100) + "%";
+  $("p2Time").textContent = fmtTime(cur);
+  if (cur < (p2Audio.duration || P2_TOTAL)) {
+    try { navigator.mediaSession.setPositionState({ duration: (p2Audio.duration || P2_TOTAL), playbackRate: 1, position: cur }); } catch (e) {}
+  }
+  creditRecit(2, cur, P2_PERIOD);
+});
+p2Audio.addEventListener("ended", function () {
+  if (p2.loop) { p2.fresh = true; p2Audio.currentTime = 0; p2Play(); }
+  else { p2.playing = false; renderP2Btn(); if (activePlayer === 2) activePlayer = 0; }
+});
+
+/* ===================== 分頁切換 ===================== */
+function switchTab(name) {
+  document.querySelectorAll(".tab-btn").forEach(function (b) {
+    b.classList.toggle("active", b.getAttribute("data-tab") === name);
+  });
+  ["read","chant","checkin","notes","settings"].forEach(function (n) {
+    $("tab-" + n).classList.toggle("hidden", n !== name);
+  });
+  if (name === "chant") renderChant();
+  if (name === "checkin") renderCheckin();
+  if (name === "notes") renderNotes();
+  if (name === "settings") renderSettings();
+}
+$("tabBar").addEventListener("click", function (e) {
+  const b = e.target.closest ? e.target.closest(".tab-btn") : null;
+  if (b) switchTab(b.getAttribute("data-tab"));
+});
+
+/* ===================== 啟動 ===================== */
+function renderAll() {
+  renderReader(); renderChant(); renderCheckin(); renderNotes(); renderSettings();
+}
+applyTheme();
+setupMediaSession();
+
+/* ===================== Firebase Google 登入 ===================== */
+var FB_AUTH = null;
+(function initFirebase() {
+  try {
+    if (typeof firebase === "undefined") throw new Error("firebase sdk 未載入");
+    firebase.initializeApp({
+      apiKey: "AIzaSyCebC6uOka2Vqls6wvzoN1BvdEITGPkMLM",
+      authDomain: "buddhist-light.firebaseapp.com",
+      databaseURL: "https://buddhist-light-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "buddhist-light",
+      storageBucket: "buddhist-light.firebasestorage.app",
+      messagingSenderId: "718962172561",
+      appId: "1:718962172561:web:95b31533c6d1e791639530",
+      measurementId: "G-TSWT84FPY6"
+    });
+    FB_AUTH = firebase.auth();
+    var provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    $("googleBtn").addEventListener("click", function () {
+      $("loginErr").textContent = "";
+      FB_AUTH.signInWithRedirect(provider).catch(function (e) {
+        console.warn("redirect failed, fallback popup:", e.message);
+        FB_AUTH.signInWithPopup(provider).catch(function (e2) {
+          $("loginErr").textContent = "登入失敗：" + (e2.code || "") + " " + e2.message;
+        });
+      });
+    });
+    FB_AUTH.getRedirectResult().then(function (r) {
+      if (r && r.user) {
+        enterAs(r.user);
+        toast("登入成功：" + (r.user.displayName || r.user.email));
+      }
+    }).catch(function (e) {
+      if (e && e.code !== "auth/credential-already-in-use") {
+        console.warn("redirect result:", e.message);
+        $("loginErr").textContent = "登入失敗：" + (e.code || "") + " " + (e.message || "");
+      }
+    });
+    FB_AUTH.onAuthStateChanged(function (user) {
+      if (user) {
+        enterAs(user);
+      } else if (entered) {
+        backToLogin();
+      }
+    });
+  } catch (e) {
+    console.warn("firebase init 失敗：", e.message);
+    $("loginErr").textContent = "Google 登入暫時不可用（網絡問題），可以先用訪客模式。";
+    $("googleBtn").disabled = true;
+    $("googleBtn").style.opacity = 0.55;
+  }
+})();
+
+$("guestBtn").addEventListener("click", function () {
+  if (!entered) enterAs(null);
+});
+
+/* ===================== PWA 註冊 ===================== */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("service-worker.js").then(function (reg) {
+      console.log("Service Worker 已註冊");
+    }).catch(function (e) {
+      console.warn("Service Worker 註冊失敗：", e.message);
+    });
+  });
+}
+</script>
+</body>
+</html>
