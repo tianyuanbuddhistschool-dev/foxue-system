@@ -819,10 +819,10 @@
     if (!box) { return; }
     var t = totals();
     if (!t.total) {
-      box.textContent = '尚未有紀錄。播放 108 遍音檔會自動計次，亦可撳「+1 遍」手動記錄。';
+      box.textContent = '本頁紀錄獨立儲存（與主系統功課紀錄分開）。尚未有紀錄；播放 108 遍音檔會自動計次，亦可撳「+1 遍」手動記錄。';
       return;
     }
-    box.textContent = '最近 7 日 ' + t.week + ' 遍 · 最近 30 日 ' + t.month30 + ' 遍 · 最佳一日 ' + t.best + ' 遍' +
+    box.textContent = '本頁紀錄獨立 · 最近 7 日 ' + t.week + ' 遍 · 最近 30 日 ' + t.month30 + ' 遍 · 最佳一日 ' + t.best + ' 遍' +
       (t.bestKey ? '（' + t.bestKey + '）' : '') + ' · 連續 ' + t.streak + ' 日。';
   }
 
