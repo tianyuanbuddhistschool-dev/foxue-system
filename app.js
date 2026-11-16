@@ -2338,6 +2338,7 @@
     if (!audio) { return; }
 
     audio.addEventListener('play', function () {
+      enableBackgroundPlayback();
       updatePlayerToggle(true);
       setPlayerStatus('');
       setMediaPlaybackState('playing');
@@ -2593,6 +2594,14 @@
     setupMediaSessionHandlers();
     registerServiceWorker();
     setupInstallPrompt();
+
+    /* 由背景返回、或 bfcache 還原時，重新確認 iOS 音頻會話 */
+    if (doc) {
+      doc.addEventListener('visibilitychange', function () {
+        if (!doc.hidden) { enableBackgroundPlayback(); }
+      });
+    }
+    global.addEventListener('pageshow', enableBackgroundPlayback);
   }
 
   /* =========================================================
