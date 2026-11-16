@@ -954,6 +954,7 @@
   var lastFocused = null;
   var audioCtx = null;
   var seekDragging = false;
+  var lastPositionUpdate = 0;
   var dateTimer = null;
   var resetArmed = false;
   var resetTimer = null;
@@ -967,6 +968,7 @@
       bannerExtra: byId('data-banner-extra'),
       brandSub: byId('brand-sub'),
       todayChip: byId('today-chip'),
+      installApp: byId('install-app'),
       fontsizeToggle: byId('fontsize-toggle'),
       footVersion: byId('foot-version'),
       homeDate: byId('home-date'),
@@ -1090,6 +1092,7 @@
     bindEvents();
     renderAll();
     initPlayer();
+    setupBackgroundPlayback();
 
     var initialTab = TABS.indexOf(state.settings.lastTab) !== -1 ? state.settings.lastTab : 'home';
     goTab(initialTab, false);
@@ -2260,6 +2263,7 @@
       els.playerLabel.setAttribute('title', track.label || '');
     }
     if (els.playerMantra) { els.playerMantra.textContent = track.mantraTitle || ''; }
+    updateMediaSession(track);
     resetProgressUI();
     setPlayerStatus('');
     updatePlayerToggle(false);
@@ -2271,6 +2275,7 @@
 
   function playAudio() {
     if (!playlist.length || !els.playerAudio) { return; }
+    enableBackgroundPlayback();
     if (currentTrack < 0) { loadTrack(0, false); }
     var promise = null;
     try {
@@ -2335,9 +2340,11 @@
     audio.addEventListener('play', function () {
       updatePlayerToggle(true);
       setPlayerStatus('');
+      setMediaPlaybackState('playing');
     });
     audio.addEventListener('pause', function () {
       updatePlayerToggle(false);
+      setMediaPlaybackState('paused');
     });
     audio.addEventListener('ended', function () {
       updatePlayerToggle(false);
@@ -2363,6 +2370,11 @@
       }
       if (els.playerTime) { els.playerTime.textContent = formatTime(audio.currentTime); }
       if (els.playerDuration) { els.playerDuration.textContent = formatTime(duration); }
+      var now = Date.now();
+      if (now - lastPositionUpdate > 2000) {
+        lastPositionUpdate = now;
+        updatePositionState(audio);
+      }
     });
     audio.addEventListener('waiting', function () {
       if (!audio.paused) { setPlayerStatus('載入中…'); }
@@ -2412,6 +2424,175 @@
         seekDragging = false;
       });
     }
+  }
+
+  /* =========================================================
+     18b. 背景播放 / 媒體工作階段 / 安裝（PWA）
+     ========================================================= */
+  function enableBackgroundPlayback() {
+    /* iOS Safari 16.4+：音頻會話設為 playback，鎖屏或切到背景時
+       唔會被當成普通網頁音效而暫停。其他瀏覽器冇此 API，安全略過。 */
+    try {
+      if (global.navigator && global.navigator.audioSession) {
+        global.navigator.audioSession.type = 'playback';
+      }
+    } catch (e) { /* 舊瀏覽器忽略 */ }
+  }
+
+  function getMediaSession() {
+    try {
+      return (global.navigator && global.navigator.mediaSession) || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function setMediaPlaybackState(value) {
+    var ms = getMediaSession();
+    if (!ms) { return; }
+    try { ms.playbackState = value; } catch (e) { /* 忽略 */ }
+  }
+
+  function updateMediaSession(track) {
+    var ms = getMediaSession();
+    if (!ms || !track) { return; }
+    try {
+      if (global.MediaMetadata) {
+        ms.metadata = new global.MediaMetadata({
+          title: track.label || track.mantraTitle || '佛學系統',
+          artist: track.mantraTitle || '佛光靈氣・佛學系統',
+          album: '佛光靈氣・佛學系統',
+          artwork: [
+            { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+            { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' }
+          ]
+        });
+      }
+    } catch (e) { /* 忽略 */ }
+  }
+
+  function updatePositionState(audio) {
+    var ms = getMediaSession();
+    if (!ms || typeof ms.setPositionState !== 'function') { return; }
+    if (!audio || !isFinite(audio.duration) || audio.duration <= 0) { return; }
+    try {
+      ms.setPositionState({
+        duration: audio.duration,
+        playbackRate: audio.playbackRate || 1,
+        position: Math.min(audio.currentTime, audio.duration)
+      });
+    } catch (e) { /* 忽略 */ }
+  }
+
+  function seekAudioBy(delta) {
+    var audio = els.playerAudio;
+    if (!audio || !isFinite(audio.duration) || audio.duration <= 0) { return; }
+    var target = Math.min(audio.duration, Math.max(0, audio.currentTime + delta));
+    try { audio.currentTime = target; } catch (e) { /* 忽略 */ }
+  }
+
+  function setupMediaSessionHandlers() {
+    var ms = getMediaSession();
+    if (!ms || typeof ms.setActionHandler !== 'function') { return; }
+    var handlers = {
+      play: function () { playAudio(); },
+      pause: function () { if (els.playerAudio) { els.playerAudio.pause(); } },
+      stop: function () {
+        if (!els.playerAudio) { return; }
+        els.playerAudio.pause();
+        try { els.playerAudio.currentTime = 0; } catch (e) { /* 忽略 */ }
+      },
+      previoustrack: function () { if (playlist.length) { loadTrack(currentTrack - 1, true); } },
+      nexttrack: function () { if (playlist.length) { loadTrack(currentTrack + 1, true); } },
+      seekbackward: function (details) { seekAudioBy(-((details && details.seekOffset) || 15)); },
+      seekforward: function (details) { seekAudioBy((details && details.seekOffset) || 15); },
+      seekto: function (details) {
+        var audio = els.playerAudio;
+        if (audio && details && typeof details.seekTime === 'number') {
+          try { audio.currentTime = details.seekTime; } catch (e) { /* 忽略 */ }
+        }
+      }
+    };
+    Object.keys(handlers).forEach(function (name) {
+      try { ms.setActionHandler(name, handlers[name]); } catch (e) { /* 個別瀏覽器唔支援 */ }
+    });
+  }
+
+  function isStandalone() {
+    try {
+      return (global.matchMedia && global.matchMedia('(display-mode: standalone)').matches) ||
+        (global.navigator && global.navigator.standalone === true);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function isIOSDevice() {
+    var ua = global.navigator ? asText(global.navigator.userAgent) : '';
+    if (/iPad|iPhone|iPod/.test(ua)) { return true; }
+    return /Macintosh/.test(ua) && global.navigator && global.navigator.maxTouchPoints > 1;
+  }
+
+  function registerServiceWorker() {
+    if (!global.navigator || !global.navigator.serviceWorker) { return; }
+    var loc = global.location;
+    if (!loc) { return; }
+    /* file:// 開本機檔時冇 SW；要 http(s)（GitHub Pages 用 https） */
+    if (loc.protocol !== 'https:' && loc.hostname !== 'localhost' && loc.hostname !== '127.0.0.1') { return; }
+    try {
+      var reg = global.navigator.serviceWorker.register('sw.js', { scope: './' });
+      if (reg && typeof reg.catch === 'function') {
+        reg.catch(function () { /* 離線快取失敗不影響即時使用 */ });
+      }
+    } catch (e) { /* 忽略 */ }
+  }
+
+  function setupInstallPrompt() {
+    if (!els.installApp) { return; }
+    if (isStandalone()) { els.installApp.hidden = true; return; }
+
+    var deferred = null;
+
+    global.addEventListener('beforeinstallprompt', function (event) {
+      event.preventDefault();
+      deferred = event;
+      if (els.installApp) { els.installApp.hidden = false; }
+    });
+
+    global.addEventListener('appinstalled', function () {
+      deferred = null;
+      if (els.installApp) { els.installApp.hidden = true; }
+      showToast('已安裝「佛學系統」到主畫面。');
+    });
+
+    if (isIOSDevice()) { els.installApp.hidden = false; }
+
+    els.installApp.addEventListener('click', function () {
+      if (deferred && typeof deferred.prompt === 'function') {
+        deferred.prompt();
+        if (deferred.userChoice && typeof deferred.userChoice.then === 'function') {
+          deferred.userChoice.then(function (choice) {
+            if (choice && choice.outcome === 'accepted') {
+              showToast('已開始安裝，完成後可喺主畫面開啟。');
+            }
+            deferred = null;
+          });
+        }
+        return;
+      }
+      if (isIOSDevice()) {
+        showToast('iPhone／iPad：按「分享」→「加入主畫面」即可安裝。');
+        return;
+      }
+      showToast('呢個瀏覽器唔支援自動安裝，請用選單「安裝應用程式」或「加到主畫面」。');
+    });
+  }
+
+  function setupBackgroundPlayback() {
+    enableBackgroundPlayback();
+    setupMediaSessionHandlers();
+    registerServiceWorker();
+    setupInstallPrompt();
   }
 
   /* =========================================================

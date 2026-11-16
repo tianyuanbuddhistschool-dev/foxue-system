@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="佛光靈氣・佛學系統：離線咒音庫、七日修行次第、108 遍計數與功課紀錄。">
 <meta name="color-scheme" content="light">
+<meta name="theme-color" content="#0b1f19">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="64x64" href="icons/favicon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="佛學系統">
 <title>佛光靈氣・佛學系統</title>
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -24,6 +33,7 @@
       </div>
       <div class="masthead-tools">
         <span class="today-chip" id="today-chip">—</span>
+        <button class="ghost-btn" id="install-app" type="button" hidden title="安裝到主畫面，鎖屏都可播放">安裝</button>
         <button class="ghost-btn" id="fontsize-toggle" type="button" aria-pressed="false" title="切換大字模式（易讀）">大字</button>
       </div>
     </div>
@@ -229,8 +239,18 @@
         </section>
 
         <section class="block">
+          <h3 class="block-title">背景播放與安裝</h3>
+          <ul class="rule-list">
+            <li>Android（Chrome／Edge）：瀏覽器選單 →「安裝應用程式」或右上角「安裝」。安裝後鎖屏、切換 App 都會繼續播放，通知欄有播放控制。</li>
+            <li>iPhone／iPad（Safari）：分享 →「加入主畫面」。本版已加入 iOS 背景播放設定（audioSession，iOS 16.4+）；如鎖屏仍然停下，可先用 Safari 分頁播放。</li>
+            <li>只把網址加入書籤（捷徑）而唔安裝，瀏覽器有機會在鎖屏時暫停播放。</li>
+            <li>「安裝」會建立獨立 App 圖示，重開機後仍然存在；如圖示消失，多數係瀏覽器資料被清除或用了無痕模式，重新安裝即可。</li>
+          </ul>
+        </section>
+
+        <section class="block">
           <h3 class="block-title">離線與私隱</h3>
-          <p>本頁唔會發任何網絡請求，亦唔會載入外部字體、圖示或 CDN。功課紀錄只存於你嘅瀏覽器（localStorage），唔會上傳。</p>
+          <p>本頁唔會發任何網絡請求，亦唔會載入外部字體、圖示或 CDN。功課紀錄只存於你嘅瀏覽器（localStorage），唔會上傳。首次上網開啟後，app shell 會由 Service Worker 快取，之後離線都開到（音檔仍須上網串流）。</p>
         </section>
 
         <section class="block" id="about-references-block" hidden>
