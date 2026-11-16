@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="光明真言專修頁：CBETA 漢譯咒文、梵文羅馬轉寫、粵語／普通話／English／Tiếng Việt 四語對照、手印與日課、108 遍音檔自動計次。佛音靈氣・佛學系統。">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#0b1f19">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="64x64" href="icons/favicon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="光明真言">
+<title>光明真言・專修｜佛音靈氣・佛學系統</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="guangming.css">
+</head>
+<body>
+<a class="skip-link" href="#main">跳至主要內容</a>
+
+<div class="shell">
+
+  <header class="masthead">
+    <div class="masthead-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">佛</span>
+        <div class="brand-text">
+          <h1 class="brand-title">佛音靈氣<span class="brand-dot">・</span>佛學系統</h1>
+          <p class="brand-sub">光明真言・專修</p>
+        </div>
+      </div>
+      <div class="masthead-tools">
+        <span class="today-chip" id="today-chip">—</span>
+        <a class="ghost-btn" href="index.html">返回佛學系統</a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs gm-tabs" aria-label="光明真言專修分區">
+    <a class="tab" href="#section-text">咒文對照</a>
+    <a class="tab" href="#section-mudra">手印與日課</a>
+    <a class="tab" href="#section-practice">播放與計次</a>
+    <a class="tab" href="#section-records">功課紀錄</a>
+    <a class="tab" href="#section-source">功德與出處</a>
+  </nav>
+
+  <main class="main" id="main">
+
+    <section class="gm-hero" aria-labelledby="gm-title">
+      <p class="gm-kicker">唐密・不空大灌頂光真言</p>
+      <h2 class="gm-title" id="gm-title">光明真言</h2>
+      <p class="gm-sub" id="gm-intro">以光明遍照為德的真言。咒文、四語意譯、手印與日課集中在這一頁；播放 108 遍音檔會自動計次，紀錄只存於你嘅瀏覽器。</p>
+      <div class="gm-meta" aria-label="專修頁重點">
+        <span>108 遍・12:31 音檔</span>
+        <span>四語對照</span>
+        <span>自動計次</span>
+        <span>離線可用</span>
+      </div>
+      <div class="gm-actions">
+        <a class="btn btn-primary" href="#section-practice" id="hero-play">開始播放</a>
+        <a class="btn btn-quiet" href="#section-text">先讀咒文</a>
+      </div>
+    </section>
+
+    <div class="stat-row" id="gm-stats" aria-label="功課統計"></div>
+
+    <section class="block gm-section" id="section-text" aria-labelledby="text-title">
+      <div class="block-head">
+        <h3 class="block-title" id="text-title">咒文與四語對照</h3>
+        <button class="btn btn-quiet" id="stop-speak" type="button">停止朗讀</button>
+      </div>
+      <p class="muted">咒文保留漢譯原文，不自行改字；梵文羅馬轉寫與四語意譯並列。朗讀用裝置內建語音，粵語／越南語未必每部機都有，會自動退回系統預設聲。</p>
+      <div id="passages"></div>
+      <div class="gm-phrases">
+        <h4 class="gm-subhead">逐字對照</h4>
+        <div class="gm-table-wrap">
+          <table class="gm-table">
+            <caption class="sr-only">光明真言逐字漢譯、梵文與釋義</caption>
+            <thead>
+              <tr><th scope="col">漢譯</th><th scope="col">羅馬轉寫</th><th scope="col">釋義</th></tr>
+            </thead>
+            <tbody id="phrase-body"></tbody>
+          </table>
+        </div>
+        <p class="muted" id="phrases-note"></p>
+      </div>
+    </section>
+
+    <section class="block gm-section" id="section-mudra" aria-labelledby="mudra-title">
+      <div class="block-head">
+        <h3 class="block-title" id="mudra-title">手印與日課</h3>
+      </div>
+      <p class="muted">以下手印屬公開資料整理，只作認識與參考；正式修法的結印、觀想、次第，請依具格上師面授。未受灌頂者可先專誦咒文，不必勉強結印。</p>
+      <div class="gm-mudra-grid" id="mudras"></div>
+
+      <h4 class="gm-subhead">誦持要領</h4>
+      <ul class="gm-list" id="essentials"></ul>
+
+      <h4 class="gm-subhead">日課建議</h4>
+      <div class="gm-plan-grid" id="plans"></div>
+      <p class="muted">遍數是方便，不是比賽；質在字句分明、心不散亂。身體不適時應休息、就醫，不必勉強完成功課。</p>
+    </section>
+
+    <section class="block gm-section" id="section-practice" aria-labelledby="practice-title">
+      <div class="block-head">
+        <h3 class="block-title" id="practice-title">播放與計次</h3>
+        <span class="gm-badge" id="track-badge">108 遍</span>
+      </div>
+
+      <div class="gm-player">
+        <div class="gm-track-tabs" id="track-tabs" role="group" aria-label="選擇音檔"></div>
+
+        <div class="gm-player-grid">
+          <div class="gm-counter">
+            <div class="gm-big-count" id="today-count" aria-live="polite">0</div>
+            <div class="gm-big-label">今日遍數</div>
+            <div class="gm-target">
+              <div class="gm-target-head"><span>今日目標 108 遍</span><span id="target-text">0 / 108</span></div>
+              <div class="gm-progress" role="progressbar" aria-label="今日目標進度" aria-valuemin="0" aria-valuemax="108" aria-valuenow="0" id="target-progress">
+                <div class="gm-bar" id="target-bar"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gm-play-side">
+            <div class="gm-controls">
+              <button class="btn btn-primary gm-play" id="play-btn" type="button">播放</button>
+              <button class="btn" id="loop-btn" type="button" aria-pressed="true">循環：開</button>
+              <button class="btn" id="plus-btn" type="button">+1 遍</button>
+              <button class="btn btn-quiet" id="wake-btn" type="button" aria-pressed="false">保持螢幕</button>
+            </div>
+            <div class="gm-time-row">
+              <span id="cur-time">0:00</span>
+              <input class="gm-seek" id="seek" type="range" min="0" max="0" step="1" value="0" aria-label="播放進度">
+              <span id="dur-time">0:00</span>
+            </div>
+            <p class="gm-status" id="player-status" role="status">揀「播放」開始；循環預設開啟，播完會由頭再播。</p>
+            <p class="muted gm-auto-note">自動計次只計 108 遍音檔：按播放時長比例估算（每遍約 6.95 秒），拖動進度會重新對齊、不補計；功德開示不計次。要精準可撳「+1 遍」。</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="gm-dedication verse" id="dedication"></p>
+      <audio id="gm-audio" preload="metadata"></audio>
+    </section>
+
+    <section class="block gm-section" id="section-records" aria-labelledby="records-title">
+      <div class="block-head">
+        <h3 class="block-title" id="records-title">功課紀錄</h3>
+        <div class="gm-record-actions">
+          <button class="btn btn-quiet" id="export-btn" type="button">匯出</button>
+          <button class="btn btn-quiet" id="import-btn" type="button">匯入</button>
+          <button class="btn btn-danger" id="clear-btn" type="button">清除</button>
+          <input id="import-file" type="file" accept="application/json" hidden>
+        </div>
+      </div>
+      <p class="muted" id="records-summary">—</p>
+      <div class="gm-history" id="history" aria-label="最近 14 日功課紀錄"></div>
+      <div class="gm-note-box">
+        <label for="note-input">今日札記（只存此瀏覽器）</label>
+        <textarea id="note-input" rows="3" placeholder="例：今日誦 108 遍，心比較定；明日試金剛持。"></textarea>
+        <button class="btn btn-quiet" id="save-note" type="button">儲存札記</button>
+        <span class="muted" id="note-status" role="status"></span>
+      </div>
+    </section>
+
+    <section class="block gm-section" id="section-source" aria-labelledby="source-title">
+      <div class="block-head">
+        <h3 class="block-title" id="source-title">功德與出處</h3>
+      </div>
+
+      <h4 class="gm-subhead">經說與傳統說法</h4>
+      <ul class="gm-benefits" id="benefits"></ul>
+      <p class="muted">「經說」指經文所載；「傳統說法」屬後代應用與流通解釋，不是經文保證。本頁不宣稱治病、消災或神通，身心不適請就醫。</p>
+
+      <h4 class="gm-subhead">出處與參考</h4>
+      <ul class="gm-source-list" id="sources"></ul>
+
+      <details class="gm-details" id="preliminary"></details>
+
+      <h4 class="gm-subhead">注意</h4>
+      <ul class="gm-list gm-caution" id="cautions"></ul>
+      <p class="muted">本頁為個人修學整理，非官方教材；密法儀軌須依具格上師傳承。咒文以 CBETA 大正藏為準，坊間譯音差異已並列註明。</p>
+    </section>
+
+  </main>
+
+  <footer class="site-foot">
+    <p><span id="foot-version">佛音靈氣・佛學系統</span>・光明真言專修・個人修學整理，非官方教材。</p>
+    <p class="foot-verse">願以此功德，普及於一切；我等與眾生，皆共成佛道。</p>
+  </footer>
+</div>
+
+<div class="toast-root" id="toast-root" role="status" aria-live="polite"></div>
+
+<noscript>
+  <p class="noscript-note">本頁需要啟用 JavaScript 才能顯示咒文對照、播放器與計次。</p>
+</noscript>
+
+<script src="data.js"></script>
+<script src="guangming.js"></script>
+</body>
+</html>

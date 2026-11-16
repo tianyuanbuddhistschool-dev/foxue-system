@@ -2,7 +2,7 @@
   "id": "./",
   "name": "佛音靈氣・佛學系統",
   "short_name": "佛音靈氣",
-  "description": "佛音靈氣：離線咒音庫、七日修行次第、108 遍計數與功課紀錄。",
+  "description": "佛音靈氣：離線咒音庫、七日修行次第、光明真言專修、108 遍計數與功課紀錄。",
   "lang": "zh-Hant-HK",
   "dir": "ltr",
   "start_url": "./",
@@ -12,6 +12,17 @@
   "background_color": "#f6f0e1",
   "theme_color": "#0b1f19",
   "categories": ["education", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "光明真言・專修",
+      "short_name": "光明真言",
+      "description": "四語對照、手印與日課、108 遍自動計次",
+      "url": "./guangming.html",
+      "icons": [
+        { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    }
+  ],
   "icons": [
     {
       "src": "icons/icon-192.png",

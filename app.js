@@ -573,6 +573,7 @@
       howTo: asArray(raw.howTo).map(cleanText).filter(Boolean),
       caution: asArray(raw.caution).map(cleanText).filter(Boolean),
       audio: asArray(raw.audio).map(normalizeAudio).filter(Boolean),
+      practiceUrl: asText(raw.practiceUrl).trim(),
       tags: asArray(raw.tags).map(cleanText).filter(Boolean),
       _index: index
     };
@@ -2153,6 +2154,15 @@
       audio.appendChild(el('p', 'muted', '未配對音檔（可於 data.js 加入）。'));
     }
     els.modalBody.appendChild(audio);
+
+    if (mantra.practiceUrl) {
+      var practice = detailSection('專修頁');
+      var practiceLink = el('a', 'btn btn-primary', '開光明真言專修頁 →');
+      practiceLink.href = mantra.practiceUrl;
+      practice.appendChild(practiceLink);
+      practice.appendChild(el('p', 'muted', '四語對照、手印與日課、108 遍音檔自動計次；紀錄只存此瀏覽器。'));
+      els.modalBody.appendChild(practice);
+    }
 
     if (mantra.tags.length) {
       var tagSection = detailSection('標籤');

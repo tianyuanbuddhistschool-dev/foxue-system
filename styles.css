@@ -198,6 +198,18 @@ input,button{ font-family:inherit; }
   white-space:nowrap;
 }
 .tab:hover{ color:#fff6df; background:rgba(201,169,95,.12); }
+.tab-link{ text-decoration:none; display:inline-flex; align-items:center; }
+.tab-link::after{
+  content:"專修";
+  margin-left:.45rem;
+  padding:.02rem .34rem;
+  border:1px solid rgba(201,169,95,.55);
+  border-radius:999px;
+  font-size:.62rem;
+  letter-spacing:.08em;
+  color:var(--gold-soft);
+  line-height:1.5;
+}
 .tab.is-active{
   background:rgba(201,169,95,.18);
   border-color:rgba(201,169,95,.7);
