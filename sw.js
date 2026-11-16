@@ -6,7 +6,7 @@
    ============================================================= */
 'use strict';
 
-var CACHE = 'foxue-shell-v1.4.1-20261117';
+var CACHE = 'foxue-shell-v1.4.2-20261117';
 var SHELL = [
   './',
   './index.html',
@@ -15,6 +15,8 @@ var SHELL = [
   './guangming.js',
   './styles.css',
   './guangming.css',
+  './theme-black-gold.css',
+  './theme.js',
   './data.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
