@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="佛光靈氣・佛學系統：離線咒音庫、七日修行次第、108 遍計數與功課紀錄。">
+<meta name="color-scheme" content="light">
+<title>佛光靈氣・佛學系統</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">跳至主要內容</a>
+
+<div class="shell">
+
+  <header class="masthead">
+    <div class="masthead-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">佛</span>
+        <div class="brand-text">
+          <h1 class="brand-title">佛光靈氣<span class="brand-dot">・</span>佛學系統</h1>
+          <p class="brand-sub" id="brand-sub">顯密圓融・離線修學</p>
+        </div>
+      </div>
+      <div class="masthead-tools">
+        <span class="today-chip" id="today-chip">—</span>
+        <button class="ghost-btn" id="fontsize-toggle" type="button" aria-pressed="false" title="切換大字模式（易讀）">大字</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs" role="tablist" aria-label="主要分頁">
+    <button class="tab is-active" id="tab-home" type="button" role="tab" aria-selected="true" aria-controls="panel-home" data-tab="home">首頁</button>
+    <button class="tab" id="tab-library" type="button" role="tab" aria-selected="false" aria-controls="panel-library" data-tab="library">咒音庫</button>
+    <button class="tab" id="tab-practice" type="button" role="tab" aria-selected="false" aria-controls="panel-practice" data-tab="practice">修行次第</button>
+    <button class="tab" id="tab-records" type="button" role="tab" aria-selected="false" aria-controls="panel-records" data-tab="records">功課紀錄</button>
+    <button class="tab" id="tab-about" type="button" role="tab" aria-selected="false" aria-controls="panel-about" data-tab="about">關於</button>
+  </nav>
+
+  <div class="banner" id="data-banner" role="status" hidden>
+    <strong class="banner-title" id="data-banner-title">示範資料</strong>
+    <span class="banner-text" id="data-banner-text"></span>
+    <span class="banner-extra" id="data-banner-extra" hidden></span>
+  </div>
+
+  <main class="main" id="main">
+
+    <!-- ================= 首頁 ================= -->
+    <section class="panel is-active" id="panel-home" role="tabpanel" aria-labelledby="tab-home" tabindex="0">
+      <div class="hero">
+        <p class="hero-date" id="home-date">—</p>
+        <h2 class="hero-title" id="home-greeting">願你身心安住</h2>
+        <p class="hero-sub">以清淨身語意，開始今日的修學。功課不在多，在於相續。</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" type="button" data-goto="practice">開始今日修學</button>
+          <button class="btn" type="button" data-goto="practice" data-focus="counter-section">108 遍計數</button>
+          <button class="btn btn-quiet" type="button" data-goto="library">瀏覽咒音庫</button>
+        </div>
+      </div>
+
+      <div class="stat-row" id="home-stats"></div>
+
+      <section class="block">
+        <div class="block-head"><h3 class="block-title">今日建議次第</h3></div>
+        <div class="today-card" id="home-today"></div>
+      </section>
+
+      <section class="block">
+        <div class="block-head"><h3 class="block-title">精選咒音</h3></div>
+        <div class="mini-grid" id="home-featured"></div>
+      </section>
+
+      <section class="block notice-block">
+        <h3 class="block-title">使用提醒</h3>
+        <p>本系統所有資料存於本機，離線可用；功課進度只存於這個瀏覽器。佛教內容屬個人修學整理，非官方教材；密法須依具格上師傳承，身心不適請就醫。</p>
+      </section>
+    </section>
+
+    <!-- ================= 咒音庫 ================= -->
+    <section class="panel" id="panel-library" role="tabpanel" aria-labelledby="tab-library" tabindex="0">
+      <div class="panel-head">
+        <h2 class="panel-title">咒音庫</h2>
+        <p class="panel-sub">按類別篩選、輸入關鍵字搜尋；點開卡片可看咒文、出處、功德與音檔。</p>
+      </div>
+
+      <div class="library-tools">
+        <label class="search-wrap">
+          <span class="sr-only">搜尋咒音</span>
+          <input class="search-input" id="search-input" type="search" placeholder="搜尋咒名、別名、出處、關鍵字…" autocomplete="off" spellcheck="false">
+        </label>
+        <div class="chips" id="category-chips" role="group" aria-label="類別篩選"></div>
+      </div>
+
+      <p class="notice-inline" id="nonbuddhist-note" hidden></p>
+
+      <p class="result-count" id="library-count" role="status"></p>
+      <div class="mantra-grid" id="mantra-grid"></div>
+      <div class="empty-state" id="library-empty" hidden>
+        <p class="empty-title">搵唔到相符嘅咒音</p>
+        <p class="empty-text">試試換個關鍵字，或者揀「全部」類別。</p>
+      </div>
+    </section>
+
+    <!-- ================= 修行次第 ================= -->
+    <section class="panel" id="panel-practice" role="tabpanel" aria-labelledby="tab-practice" tabindex="0">
+      <div class="panel-head">
+        <h2 class="panel-title">修行次第</h2>
+        <p class="panel-sub">七日一循環，日日熏修。點擊每日標題可展開步驟；勾選會按日期記錄。</p>
+      </div>
+
+      <div class="today-hint" id="practice-today"></div>
+      <div class="guidelines" id="guidelines"></div>
+      <div class="week-emphasis" id="week-emphasis" hidden></div>
+
+      <div class="day-list" id="curriculum-list"></div>
+
+      <section class="counter-card" id="counter-section" aria-labelledby="counter-title">
+        <div class="counter-head">
+          <h3 class="counter-title" id="counter-title">108 遍計數</h3>
+          <p class="counter-sub">點擊大按鈕或按空白鍵計數；滿 108 遍可記錄一筆功課。計數以本日為單位，翌日自動歸零。</p>
+          <p class="counter-sub counter-data-hint" id="counter-data-hint" hidden></p>
+        </div>
+        <div class="counter-stage">
+          <button class="counter-btn" id="counter-btn" type="button" aria-describedby="counter-hint" aria-label="計數一次">
+            <svg class="ring" viewBox="0 0 220 220" aria-hidden="true" focusable="false">
+              <circle class="ring-track" cx="110" cy="110" r="96"></circle>
+              <circle class="ring-bar" id="counter-ring" cx="110" cy="110" r="96"></circle>
+            </svg>
+            <span class="counter-num" id="counter-count">0</span>
+            <span class="counter-unit">／108 遍</span>
+            <span class="counter-tap" aria-hidden="true">點擊計數</span>
+          </button>
+          <div class="counter-side">
+            <p class="counter-today">本日累計 <strong id="counter-today">0</strong> 遍</p>
+            <p class="counter-rounds" id="counter-rounds" hidden></p>
+            <div class="counter-actions">
+              <button class="btn" id="counter-reset" type="button">歸零</button>
+              <button class="btn btn-quiet" id="counter-sound" type="button" aria-pressed="true">提示音：開</button>
+            </div>
+            <p class="counter-hint" id="counter-hint">空白鍵亦可計數；完成後可記錄今日功課。</p>
+          </div>
+        </div>
+        <div class="counter-done" id="counter-done" hidden>
+          <p class="verse">願以此功德，普及於一切；我等與眾生，皆共成佛道。</p>
+          <button class="btn btn-primary" id="counter-log" type="button">記錄今日功課</button>
+          <p class="counter-done-note" id="counter-log-note" role="status"></p>
+        </div>
+      </section>
+
+      <section class="block" id="rituals-block" hidden>
+        <div class="block-head"><h3 class="block-title">儀軌流程</h3></div>
+        <div id="rituals-list"></div>
+      </section>
+    </section>
+
+    <!-- ================= 功課紀錄 ================= -->
+    <section class="panel" id="panel-records" role="tabpanel" aria-labelledby="tab-records" tabindex="0">
+      <div class="panel-head">
+        <h2 class="panel-title">功課紀錄</h2>
+        <p class="panel-sub">紀錄只存於此瀏覽器（localStorage），唔會上網。點擊日曆格可補記或取消當日紀錄。</p>
+      </div>
+
+      <div class="records-top">
+        <div class="today-status" id="record-today"></div>
+        <div class="stat-row" id="records-stats"></div>
+      </div>
+
+      <section class="block">
+        <div class="block-head">
+          <h3 class="block-title">最近 30 日</h3>
+          <div class="history-legend" aria-hidden="true">
+            <span class="legend-item"><i class="legend-dot is-done"></i>已記錄</span>
+            <span class="legend-item"><i class="legend-dot is-today"></i>今日</span>
+            <span class="legend-item"><i class="legend-dot"></i>未記錄</span>
+          </div>
+        </div>
+        <div class="history-grid" id="history-grid"></div>
+      </section>
+
+      <div class="records-actions">
+        <button class="btn" id="records-mark-today" type="button">標記今日完成</button>
+        <button class="btn btn-danger" id="records-reset" type="button">重設進度</button>
+        <p class="muted" id="records-reset-note" role="status"></p>
+      </div>
+
+      <section class="block notice-block">
+        <h3 class="block-title">迴向</h3>
+        <p class="verse">願以此功德，莊嚴佛淨土；上報四重恩，下濟三途苦。<br>若有見聞者，悉發菩提心；盡此一報身，同生極樂國。</p>
+      </section>
+    </section>
+
+    <!-- ================= 關於 ================= -->
+    <section class="panel" id="panel-about" role="tabpanel" aria-labelledby="tab-about" tabindex="0">
+      <div class="panel-head">
+        <h2 class="panel-title">關於</h2>
+        <p class="panel-sub">系統緣起、法脈、內容規矩與離線注意事項。</p>
+      </div>
+
+      <div class="about-grid">
+        <section class="block">
+          <h3 class="block-title">系統資訊</h3>
+          <dl class="meta-list" id="about-meta"></dl>
+        </section>
+
+        <section class="block">
+          <h3 class="block-title">內容規矩</h3>
+          <ul class="rule-list">
+            <li>出處要可查（經名＋卷品）；功德分「經說」與「傳統說法」，不確定標「（待考）」。</li>
+            <li>咒文照原文，不自行改字；漢譯與梵文並列，差異註明。</li>
+            <li>需灌頂的密法只講公開資訊，提醒找具格上師；不代傳法、不編儀軌。</li>
+            <li>不宣稱治病、神通、消災保證；身心不適提醒就醫。</li>
+            <li>新時代／靈性素材標「靈性（非佛教）」，與正典分開，不得混為一談。</li>
+          </ul>
+        </section>
+
+        <section class="block">
+          <h3 class="block-title">法脈</h3>
+          <p id="about-lineage">顯密圓融：以漢傳為主，兼容唐密、藏密公開部分與淨土法門。</p>
+        </section>
+
+        <section class="block">
+          <h3 class="block-title">使用建議</h3>
+          <ul class="rule-list">
+            <li>雙擊 <code>index.html</code> 即可開啟，唔需要伺服器、唔需要上網。</li>
+            <li>建議用 Chrome 或 Edge；Firefox 對 <code>file://</code> 有較嚴格限制，可能載入唔到上一層資料夾嘅音檔。</li>
+            <li>按空白鍵可計數；按 Esc 可關閉詳情視窗。右上角「大字」可放大全站字體。</li>
+            <li>如要更新資料，改 <code>data.js</code> 後重新載入頁面（Ctrl + F5 強制重新載入）。</li>
+          </ul>
+        </section>
+
+        <section class="block">
+          <h3 class="block-title">離線與私隱</h3>
+          <p>本頁唔會發任何網絡請求，亦唔會載入外部字體、圖示或 CDN。功課紀錄只存於你嘅瀏覽器（localStorage），唔會上傳。</p>
+        </section>
+
+        <section class="block" id="about-references-block" hidden>
+          <h3 class="block-title">參考資料</h3>
+          <ul class="ref-list" id="about-references"></ul>
+          <p class="muted">參考連結需要上網；唔上網亦可正常使用本系統。</p>
+        </section>
+
+        <section class="block">
+          <h3 class="block-title">聲明</h3>
+          <p id="about-disclaimer">—</p>
+        </section>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-foot">
+    <p><span id="foot-version">佛光靈氣・佛學系統</span>・個人修學整理，非官方教材。</p>
+    <p class="foot-verse">願以此功德，普及於一切；我等與眾生，皆共成佛道。</p>
+  </footer>
+</div>
+
+<div class="toast-root" id="toast-root" role="status" aria-live="polite"></div>
+
+<!-- ================= 全局播放器（切換分頁不中斷） ================= -->
+<div class="player" id="player-bar" aria-label="音頻播放器">
+  <div class="player-main">
+    <div class="player-now">
+      <span class="player-eyebrow">現正播放</span>
+      <span class="player-label" id="player-label">未選擇音檔</span>
+      <span class="player-source" id="player-mantra"></span>
+    </div>
+    <div class="player-controls">
+      <button class="pbtn" id="player-prev" type="button" aria-label="上一首">上一首</button>
+      <button class="pbtn pbtn-play" id="player-toggle" type="button" aria-label="播放">播放</button>
+      <button class="pbtn" id="player-next" type="button" aria-label="下一首">下一首</button>
+      <button class="pbtn pbtn-toggle" id="player-loop" type="button" aria-pressed="false" aria-label="單曲循環">循環</button>
+      <button class="pbtn pbtn-toggle" id="player-list-toggle" type="button" aria-expanded="false" aria-controls="playlist-drawer">清單</button>
+    </div>
+    <div class="player-progress">
+      <span class="ptime" id="player-time">0:00</span>
+      <input class="pseek" id="player-seek" type="range" min="0" max="0" step="1" value="0" aria-label="播放進度">
+      <span class="ptime" id="player-duration">0:00</span>
+    </div>
+    <p class="player-status" id="player-status" role="status"></p>
+  </div>
+
+  <audio id="player-audio" preload="metadata"></audio>
+
+  <div class="playlist-drawer" id="playlist-drawer" hidden>
+    <div class="playlist-head">
+      <h2 class="playlist-title">播放清單</h2>
+      <button class="pbtn" id="playlist-close" type="button">收起清單</button>
+    </div>
+    <ol class="playlist" id="playlist"></ol>
+    <p class="playlist-empty" id="playlist-empty" hidden>呢個資料集未有音檔。</p>
+  </div>
+</div>
+
+<!-- ================= 咒音詳情 ================= -->
+<div class="modal" id="mantra-modal" hidden>
+  <div class="modal-backdrop" data-close-modal></div>
+  <div class="modal-card" id="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button class="modal-close" id="modal-close" type="button" data-close-modal aria-label="關閉詳情">收起</button>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<noscript>
+  <p class="noscript-note">本系統需要啟用 JavaScript 才能顯示咒音庫、次第與計數器。</p>
+</noscript>
+
+<!-- 資料來源：佛學系統/data.js（window.FO_DATA）；若未提供，app.js 會顯示示範資料。 -->
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
