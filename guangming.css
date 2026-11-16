@@ -418,6 +418,21 @@
 }
 
 /* ---------------- 紀錄 ---------------- */
+.gm-sync-row{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:.5rem;
+  margin:.2rem 0 .6rem;
+  padding:.7rem .8rem;
+  background:var(--paper-2);
+  border:1px solid var(--line-soft);
+  border-radius:var(--radius-sm);
+}
+.gm-sync-row .btn{ padding:.42rem .95rem; font-size:.86rem; }
+.gm-sync-row .muted{ margin:0; font-size:.82rem; }
+.gm-sync-row .is-error{ color:var(--danger); }
+.gm-sync-row .is-live{ color:var(--ok); }
 .gm-record-actions{ display:flex; flex-wrap:wrap; gap:.4rem; }
 .gm-record-actions .btn{ padding:.36rem .9rem; font-size:.84rem; }
 .gm-history{

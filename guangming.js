@@ -8,6 +8,7 @@
   'use strict';
 
   var STORAGE_KEY = 'foguang.guangming.v1';
+  var MAIN_KEY = 'foguang.foxue.state.v1';
   var TARGET = 108;
   var FALLBACK_PER = 751 / 108; /* 12:31 ÷ 108 遍，約 6.95 秒 */
   var DATA = (window.FO_DATA && Array.isArray(window.FO_DATA.mantras)) ? window.FO_DATA : null;
@@ -833,6 +834,63 @@
     input.value = item && item.note ? item.note : '';
   }
 
+  function setSyncStatus(message, isError) {
+    var box = $('sync-status');
+    if (!box) { return; }
+    box.textContent = message || '';
+    box.classList.toggle('is-error', !!isError);
+    box.classList.toggle('is-live', !isError && !!message);
+  }
+
+  function syncToMain() {
+    var total = todayTotal();
+    var today = todayISO();
+    if (total < TARGET) {
+      setSyncStatus('今日未滿 108 遍（目前 ' + total + ' 遍）；主系統只記完成日，滿 108 遍再同步。', true);
+      toast('未滿 108 遍，未同步');
+      return;
+    }
+    var main = null;
+    try {
+      main = JSON.parse(window.localStorage.getItem(MAIN_KEY) || 'null');
+    } catch (e) {
+      main = null;
+    }
+    if (!main || typeof main !== 'object' || Array.isArray(main)) {
+      main = {
+        version: 1,
+        counter: { date: today, count: 0 },
+        records: {},
+        curriculum: {},
+        settings: { beep: true, bigText: false, lastTab: 'records', loop: false }
+      };
+    }
+    if (!main.records || typeof main.records !== 'object' || Array.isArray(main.records)) { main.records = {}; }
+    if (!main.curriculum || typeof main.curriculum !== 'object' || Array.isArray(main.curriculum)) { main.curriculum = {}; }
+    if (!main.counter || typeof main.counter !== 'object' || Array.isArray(main.counter)) { main.counter = { date: today, count: 0 }; }
+    if (!main.settings || typeof main.settings !== 'object' || Array.isArray(main.settings)) {
+      main.settings = { beep: true, bigText: false, lastTab: 'records', loop: false };
+    }
+    var prev = main.records[today];
+    var prevRounds = (prev && typeof prev === 'object' && isFinite(Number(prev.rounds))) ? Math.max(0, Math.floor(Number(prev.rounds))) : 0;
+    var rounds = Math.floor(total / TARGET);
+    main.records[today] = {
+      done: true,
+      rounds: Math.max(prevRounds, rounds),
+      ts: new Date().toISOString(),
+      source: 'guangming'
+    };
+    try {
+      window.localStorage.setItem(MAIN_KEY, JSON.stringify(main));
+    } catch (e) {
+      setSyncStatus('同步失敗：瀏覽器唔准寫入。', true);
+      toast('同步失敗：瀏覽器唔准寫入');
+      return;
+    }
+    setSyncStatus('已同步：今日 ' + total + ' 遍（' + rounds + ' 輪）→ 主系統功課紀錄。', false);
+    toast('已同步到主系統功課紀錄');
+  }
+
   function saveNote(silent) {
     var input = $('note-input');
     if (!input) { return; }
@@ -894,6 +952,8 @@
     renderNote();
     var saveBtn = $('save-note');
     if (saveBtn) { saveBtn.addEventListener('click', function () { saveNote(false); }); }
+    var syncBtn = $('sync-btn');
+    if (syncBtn) { syncBtn.addEventListener('click', syncToMain); }
     var noteInput = $('note-input');
     if (noteInput) {
       var timer = null;

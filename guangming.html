@@ -157,6 +157,12 @@
           <input id="import-file" type="file" accept="application/json" hidden>
         </div>
       </div>
+      <div class="gm-sync-row">
+        <button class="btn btn-primary" id="sync-btn" type="button">同步到主系統</button>
+        <a class="btn btn-quiet" href="index.html?tab=records">去主系統功課紀錄</a>
+        <span class="muted" id="sync-status" role="status" aria-live="polite"></span>
+      </div>
+      <p class="muted">滿 108 遍後可同步：只會更新主系統今日「已完成」與輪數，不會改動主系統其他紀錄；主系統若正開著，請重新載入一次先見到。</p>
       <p class="muted" id="records-summary">—</p>
       <div class="gm-history" id="history" aria-label="最近 14 日功課紀錄"></div>
       <div class="gm-note-box">

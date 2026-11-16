@@ -6,7 +6,7 @@
    ============================================================= */
 'use strict';
 
-var CACHE = 'foxue-shell-v1.4.0-20261117';
+var CACHE = 'foxue-shell-v1.4.1-20261117';
 var SHELL = [
   './',
   './index.html',

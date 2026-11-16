@@ -179,8 +179,8 @@
           '密法觀想若無傳承，只作公開持誦即可，勿自行編排儀軌。'
         ],
         audio: [
-          { file: '../000佛音靈氣000/1.光明真言 108遍。.MP3', label: '108 遍（12:31）' },
-          { file: '../000佛音靈氣000/01.光明真言功德.MP3', label: '功德開示（1:48）' }
+          { file: '../000佛音靈氣000/5.光明真言 108遍。.MP3', label: '108 遍（12:31）' },
+          { file: '../000佛音靈氣000/4.光明真言功德.MP3', label: '功德開示（1:48）' }
         ],
         tags: ['淨業', '光明', '日常']
       },
@@ -206,8 +206,8 @@
         ],
         caution: ['勿以數量相較；重在身語意相應。'],
         audio: [
-          { file: '../000佛音靈氣000/01.三字總持真言 唵阿吽.MP3', label: '長版持誦（30:05）' },
-          { file: '../000佛音靈氣000/0.三字總持真言功德.MP3', label: '功德開示（1:12）' }
+          { file: '../000佛音靈氣000/3.三字總持真言 唵阿吽.MP3', label: '長版持誦（30:05）' },
+          { file: '../000佛音靈氣000/2.三字總持真言功德.MP3', label: '功德開示（1:12）' }
         ],
         tags: ['總持', '前行', '日常']
       },
@@ -274,7 +274,7 @@
         howTo: ['每堂功課末後念 3 遍或 7 遍。', '念畢合掌迴向。'],
         caution: [],
         audio: [
-          { file: '../000佛音靈氣000/07.梵文補闕圓滿真言 果濱居士.MP3', label: '梵文持誦（0:54）' }
+          { file: '../000佛音靈氣000/14.梵文補闕圓滿真言 果濱居士.MP3', label: '梵文持誦（0:54）' }
         ],
         tags: ['補闕', '收尾']
       },
@@ -296,7 +296,7 @@
         caution: ['淨土法門重信願行，宜依淨土經論與善知識指導。'],
         audio: [
           { file: '../04.天元太保阿彌陀佛108次.MP3', label: '108 次（10:35）' },
-          { file: '../000佛音靈氣000/5.以此功德願證佛自性.mp3', label: '迴向偈片段（0:33）' }
+          { file: '../000佛音靈氣000/13.以此功德願證佛自性.mp3', label: '迴向偈片段（0:33）' }
         ],
         tags: ['淨土', '日常', '聖號']
       },
@@ -1096,6 +1096,23 @@
     setupBackgroundPlayback();
 
     var initialTab = TABS.indexOf(state.settings.lastTab) !== -1 ? state.settings.lastTab : 'home';
+    /* 支援 ?tab=records／#records，方便由光明真言專修頁跳去功課紀錄 */
+    var requestedTab = '';
+    try {
+      if (global.location) {
+        if (global.URLSearchParams) {
+          requestedTab = new global.URLSearchParams(global.location.search).get('tab') || '';
+        }
+        if (!requestedTab) {
+          var tabMatch = String(global.location.search || '').match(/[?&]tab=([^&]+)/);
+          if (tabMatch) { requestedTab = decodeURIComponent(tabMatch[1]); }
+        }
+        if (!requestedTab && global.location.hash) {
+          requestedTab = String(global.location.hash).replace(/^#/, '');
+        }
+      }
+    } catch (e) { requestedTab = ''; }
+    if (TABS.indexOf(requestedTab) !== -1) { initialTab = requestedTab; }
     goTab(initialTab, false);
 
     dateTimer = global.setInterval(onTick, 30000);

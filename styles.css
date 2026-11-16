@@ -861,6 +861,12 @@ input,button{ font-family:inherit; }
 /* ---------------- 功課紀錄 ---------------- */
 .records-top{ margin:0 0 .5rem; }
 .records-top .stat-row{ margin:.2rem 0 0; }
+.records-crosslink{
+  display:flex; align-items:center; gap:.7rem; flex-wrap:wrap;
+  margin:0 0 1rem;
+}
+.records-crosslink .btn{ padding:.38rem .95rem; font-size:.84rem; }
+.records-crosslink .muted{ margin:0; }
 .today-status{
   display:flex; align-items:center; gap:1rem; flex-wrap:wrap;
   background:var(--paper);
