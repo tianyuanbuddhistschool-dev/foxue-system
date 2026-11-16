@@ -1,12 +1,12 @@
 /* =============================================================
-   佛光靈氣・佛學系統 — Service Worker
+   佛音靈氣・佛學系統 — Service Worker
    - 快取 app shell（index/app/styles/data/manifest/icons），令離線都開到
    - 音檔（audio/，大檔、要用 HTTP Range）一律交返瀏覽器直接上網，唔快取
    - 換版本時改 CACHE 名，activate 會清走舊 cache
    ============================================================= */
 'use strict';
 
-var CACHE = 'foxue-shell-v1.3.0-20261116';
+var CACHE = 'foxue-shell-v1.3.1-20261116';
 var SHELL = [
   './',
   './index.html',

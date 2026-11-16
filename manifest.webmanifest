@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "佛光靈氣・佛學系統",
-  "short_name": "佛學系統",
-  "description": "離線咒音庫、七日修行次第、108 遍計數與功課紀錄。",
+  "name": "佛音靈氣・佛學系統",
+  "short_name": "佛音靈氣",
+  "description": "佛音靈氣：離線咒音庫、七日修行次第、108 遍計數與功課紀錄。",
   "lang": "zh-Hant-HK",
   "dir": "ltr",
   "start_url": "./",

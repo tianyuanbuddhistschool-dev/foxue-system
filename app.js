@@ -1,5 +1,5 @@
 /* =============================================================
-   佛光靈氣・佛學系統 — app.js
+   佛音靈氣・佛學系統 — app.js
    純離線單頁應用：咒音庫、修行次第、108 計數、功課紀錄
    - 資料來源：window.FO_DATA（data.js，以 <script> 載入）
    - 冇 data.js 時用內置示範資料 FO_DEMO，並顯示「示範資料」橫幅
@@ -146,7 +146,7 @@
      ========================================================= */
   var FO_DEMO = {
     meta: {
-      title: '佛光靈氣・佛學系統',
+      title: '佛音靈氣・佛學系統',
       version: '1.0.0-demo',
       updated: '2026-11-15',
       lineage: '顯密圓融（漢傳為主，兼容唐密、藏密公開部分與淨土）',
@@ -645,7 +645,7 @@
     var metaRaw = (source.meta && typeof source.meta === 'object') ? source.meta : {};
 
     var meta = {
-      title: asText(metaRaw.title).trim() || '佛光靈氣・佛學系統',
+      title: asText(metaRaw.title).trim() || '佛音靈氣・佛學系統',
       version: asText(metaRaw.version).trim() || '—',
       updated: asText(metaRaw.updated).trim() || '',
       lineage: asText(metaRaw.lineage).trim() || '顯密圓融（漢傳為主，兼容密咒與淨土）',
@@ -2461,8 +2461,8 @@
       if (global.MediaMetadata) {
         ms.metadata = new global.MediaMetadata({
           title: track.label || track.mantraTitle || '佛學系統',
-          artist: track.mantraTitle || '佛光靈氣・佛學系統',
-          album: '佛光靈氣・佛學系統',
+          artist: track.mantraTitle || '佛音靈氣・佛學系統',
+          album: '佛音靈氣・佛學系統',
           artwork: [
             { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
             { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' }
