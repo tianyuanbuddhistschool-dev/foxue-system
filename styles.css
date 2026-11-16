@@ -384,6 +384,8 @@ input,button{ font-family:inherit; }
   background:var(--gold);
 }
 .notice-block{ background:linear-gradient(180deg, #fbf6e8, var(--paper)); }
+.apk-block{ border-top:2px solid rgba(201,169,95,.55); }
+.apk-actions{ margin:.9rem 0 .5rem; }
 .notice-block p{ margin-bottom:0; color:var(--text-dim); font-size:.94rem; }
 
 /* 今日建議 */
