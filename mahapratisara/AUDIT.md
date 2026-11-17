@@ -61,8 +61,9 @@
 
 - 平台：GitHub Pages；repo `tianyuanbuddhistschool-dev/foxue-system`，分支 `main`。
 - 公開網址：<https://tianyuanbuddhistschool-dev.github.io/foxue-system/mahapratisara/>。
-- commit `d53a9f9`；Pages run `44084362863` success（2026-11-17T12:35:40Z）。
-- 上線實測：子站與五個程式檔 200、兩個音檔 Range 206、PWA installability 0 error、0 console error。
+- 子站 APK／native 版本：commit `3d928fa`；其後 repo HEAD `c9f04a1`（同時包含光明真言 v2.3.0 四語工作）。
+- Pages build：最新 HEAD 建置 **success**（2026-11-17T12:57:18Z）。
+- 上線實測：子站與五個程式檔 200、兩個音檔 Range 206、APK 200（`application/vnd.android.package-archive`，43,263 bytes）、PWA installability 0 error、0 console error。
 
 ## 五、未完成／待真機
 
