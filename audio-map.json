@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-17T06:11:14.079Z",
-  "count": 31,
-  "totalBytes": 510409569,
+  "generatedAt": "2026-11-17T12:28:35.530Z",
+  "count": 33,
+  "totalBytes": 556238229,
   "files": [
     {
       "from": "../000佛音靈氣000/3.三字總持真言 唵阿吽.MP3",
@@ -152,6 +152,16 @@
       "from": "../並非絕對的真實.MP3",
       "to": "audio/並非絕對的真實.MP3",
       "bytes": 637104
+    },
+    {
+      "from": "../000佛音靈氣000/7.大隨求陀羅尼心咒 108遍 共三次.MP3",
+      "to": "mahapratisara/audio/mahapratisara-108x3.mp3",
+      "bytes": 41891558
+    },
+    {
+      "from": "../000佛音靈氣000/6.大隨求陀羅尼 心咒功德.MP3",
+      "to": "mahapratisara/audio/mahapratisara-gongde.mp3",
+      "bytes": 3937102
     },
     {
       "from": "../000佛音靈氣000/1.MP3",
