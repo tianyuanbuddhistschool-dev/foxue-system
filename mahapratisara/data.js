@@ -9,7 +9,7 @@
 window.MP_DATA = {
   meta: {
     id: 'mahapratisara',
-    version: '1.0.0',
+    version: '1.0.1',
     updated: '2026-11-17',
     lineage: {
       yue: '唐密・漢傳',

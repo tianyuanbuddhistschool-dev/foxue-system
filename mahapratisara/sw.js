@@ -4,7 +4,7 @@
    - 音檔：完全不攔截，保留 HTTP Range 206
    - Firebase／Google CDN：不攔截
 */
-const CACHE = 'mahapratisara-v1.0.7';
+const CACHE = 'mahapratisara-v1.0.9';
 const SHELL = [
   './',
   './index.html',

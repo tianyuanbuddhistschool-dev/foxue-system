@@ -10,7 +10,12 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="大隨求陀羅尼">
-<title>大隨求陀羅尼 v1.0.0</title>
+<title>大隨求陀羅尼 v1.0.1</title>
+<style>
+  /* 首屏防止白色閃屏：CSS 未載入前都保持黑金底。 */
+  html, body { background: #050505; color: #f3e9cf; }
+  html[data-theme="light"], html[data-theme="light"] body { background: #f7f1e3; color: #2d2414; }
+</style>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
@@ -32,7 +37,7 @@
         </svg>
       </span>
       <div class="brand-text">
-        <h1 class="brand-title"><span id="site-title">大隨求陀羅尼</span> <span class="ver-pill" id="version-pill">v1.0.0</span></h1>
+        <h1 class="brand-title"><span id="site-title">大隨求陀羅尼</span> <span class="ver-pill" id="version-pill">v1.0.1</span></h1>
         <p class="brand-sub" id="brand-sub">唐密・漢傳・隨求即得</p>
       </div>
     </div>
@@ -202,9 +207,9 @@
   </main>
 
   <footer class="site-foot">
-    <p class="version-line" id="footer-version">大隨求陀羅尼 v1.0.0</p>
+    <p class="version-line" id="footer-version">大隨求陀羅尼 v1.0.1</p>
     <p class="apk-row">
-      <a class="btn btn-primary" href="apk/mahapratisara.apk" download>下載 Android App（v1.0.0）</a>
+      <a class="btn btn-primary" href="apk/mahapratisara.apk" download>下載 Android App（v1.0.1）</a>
       <button class="btn btn-quiet" id="install-btn-2" type="button">加到主屏幕</button>
       <span class="muted">APK 用原生 MediaPlayer，聲音唔經 WebView。</span>
     </p>
@@ -220,9 +225,9 @@
 <script src="data.js" defer></script>
 <script src="native-audio.js" defer></script>
 <script src="app.js" defer></script>
-<!-- Firebase 只係登入同步嘅可選加強；唔會阻塞頁面、咒文或播放。 -->
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js" async></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js" async></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js" async></script>
+<!-- Firebase 只係登入同步嘅可選加強；用 defer 保持載入順序，但 app.js 已經先畫好頁面。 -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js" defer></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-# 大隨求陀羅尼・子站（v1.0.0）
+# 大隨求陀羅尼・子站（v1.0.1）
 
 **公開位置**：<https://tianyuanbuddhistschool-dev.github.io/foxue-system/mahapratisara/>
 
@@ -26,7 +26,7 @@
 | `data.js` | 唯一內容來源 `window.MP_DATA`（四語、咒文、功德、出處、音檔） |
 | `app.js` | 語言、播放、計數、紀錄、Google 登入、PWA、無障礙 |
 | `native-audio.js` | Android `NativePlayer` 轉接器；有原生 bridge 時聲音交 MediaPlayer，否則用 `<audio>` |
-| `apk/mahapratisara.apk` | Android App（package `hk.chunkin.tianyuan.mahapratisara`，v1.0.0，已簽名） |
+| `apk/mahapratisara.apk` | Android App（package `hk.chunkin.tianyuan.mahapratisara`，v1.0.1，已簽名） |
 | `styles.css` | 黑金／淺色、響應式、減少動態效果 |
 | `manifest.webmanifest` | PWA 安裝、捷徑、icons |
 | `sw.js` | App shell；程式碼 network-first、音檔 bypass（保留 Range 206） |
@@ -49,8 +49,10 @@ node serve.mjs 8125 "G:\0佛光靈氣0\佛學系統\上線\site"
 ## Android APK
 
 - 下載：`apk/mahapratisara.apk`（部署後：`https://tianyuanbuddhistschool-dev.github.io/foxue-system/mahapratisara/apk/mahapratisara.apk`）
-- package：`hk.chunkin.tianyuan.mahapratisara`；versionName `1.0.0`；versionCode `1`；minSdk 23／target 36。
+- package：`hk.chunkin.tianyuan.mahapratisara`；versionName `1.0.1`；versionCode `2`；minSdk 23／target 36。
+- 大小：45,120 bytes；SHA-256：`8EABFADF7D57EE2CD0667C984AF0FDA642037C6E4EFAD0F67BDD998935830CD2`。
 - 簽名：`tianyuan.keystore`（alias `tianyuan`）；APK Signature Scheme v1／v2 驗證通過。
+- 黑金首屏：原生 loading／error overlay，網絡失敗都唔會顯示白色 WebView 錯誤頁；有「重試」掣。
 - 原生 `PlaybackService`：foreground service、partial wake lock、audio focus、MediaSession、通知欄控制、10 秒 watchdog。
 - WebView 載入 `https://tianyuanbuddhistschool-dev.github.io/foxue-system/mahapratisara/`；`native-audio.js` 偵測到 `NativePlayer` 就將播放交原生 MediaPlayer，聲音不經 WebView。
 - 可與光明真言／佛學系統 APK 並存。

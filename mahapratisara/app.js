@@ -1437,6 +1437,12 @@
 
   function boot() {
     cacheEls();
+    /* APK 專用：?theme=dark 強制黑金首屏，避免任何舊淺色設定造成白屏。 */
+    try {
+      if (global.URLSearchParams && new global.URLSearchParams(global.location.search).get('theme') === 'dark') {
+        state.theme = 'dark';
+      }
+    } catch (e) {}
     L = DATA.i18n[state.lang] || DATA.i18n.yue;
     applyTheme();
     initPlayer();

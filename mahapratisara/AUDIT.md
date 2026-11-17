@@ -1,4 +1,4 @@
-# 大隨求陀羅尼・代碼審核與修復紀錄（v1.0.0）
+# 大隨求陀羅尼・代碼審核與修復紀錄（v1.0.1）
 
 審核日期：2026-11-17  
 審核範圍：原單頁 App（`index.html` 內嵌 CSS／JavaScript）→ 重構為 `index.html`＋`app.js`＋`data.js`＋`styles.css`＋PWA。  
@@ -29,12 +29,13 @@
 | 內容 | 《佛心經》心中心咒與大隨求心咒混為一談 | 法門混淆 | 分成附錄，明言同系統但經本／用字／傳承不同，正式修法須依師 |
 | 安全 | 直接 `innerHTML` 插入大量字串 | XSS 風險（雖然資料自控） | 渲染改用 `textContent`／`createElement` |
 | Android | 原碼冇 APK；WebView 聲音會經 WebView，背景易被殺 | 未建原生殼 | 建 `native-mahapratisara`：WebView＋MediaPlayer foreground service；`native-audio.js` 自動切換原生播放 |
+| 首屏 | APK 首次載入／網絡失敗時見白色 WebView 預設錯誤頁 | 冇原生 loading／error UI | 加黑金 loading overlay＋黑金錯誤頁＋「重試」；Web 加 inline critical CSS 防白閃；APK URL 加 `?theme=dark` 強制黑金 |
 | Android | 服務通知／MediaSession 中文字亂碼 | 舊檔編碼損壞 | 重寫 `MainActivity.java`／`PlaybackService.java`，通知、標題、按鈕全部用正常繁體中文 |
 | Android | 原生暫停後 UI 仍顯示「未開始」 | `native-audio.js` pause 未更新 currentTime | 修正 shim：pause／ended 同步 currentTime／duration |
 
 ## 二、修復後驗收（本機 headless Chrome）
 
-- 版本：`<title>`、頂部 pill、頁尾版本均為 `v1.0.0`。
+- 版本：`<title>`、頂部 pill、頁尾版本均為 `v1.0.1`。
 - 四語：4 個語言掣；粵／普／EN／VI 切換正常；EN／VI 的 hero、功德、注意、實修、FAQ、頁尾 0 條 CJK；無 `undefined`；無空區塊。
 - 播放：主音檔 `duration=2611.617938`、`readyState=4`；播放 1.9 秒後 `paused=false`；`audio.loop=false`。
 - 循環：全部 → 單曲 → 不循環 → 全部；三段標籤同步。
@@ -51,9 +52,10 @@
 ## 三、Android APK
 
 - 專案：`C:\Users\cheun\Projects\_android\native-mahapratisara`。
-- package `hk.chunkin.tianyuan.mahapratisara`；versionName `1.0.0`；versionCode `1`；minSdk 23／target 36。
+- package `hk.chunkin.tianyuan.mahapratisara`；versionName `1.0.1`；versionCode `2`；minSdk 23／target 36。
 - 簽名：`tianyuan.keystore`（alias `tianyuan`）；`apksigner verify` v1／v2 通過。
-- APK：`apk/mahapratisara.apk`（43,263 bytes；SHA-256 `2EAE5180…DDD4E8`）。
+- APK：`apk/mahapratisara.apk`（45,120 bytes；SHA-256 `8EABFADF…35830CD2`）。
+- 黑金首屏：原生 loading／error overlay；網絡失敗有「重試」；APK URL `?theme=dark`。
 - 原生 service：foreground mediaPlayback、partial wake lock、audio focus、MediaSession、通知欄、10 秒 watchdog。
 - WebView 載入子站；`native-audio.js` 將播放交原生 MediaPlayer，聲音不經 WebView。
 
