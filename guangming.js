@@ -195,7 +195,7 @@
   }
 
   /* ---------------- Google 登入／Firestore 同步 ---------------- */
-  function setSyncStatus(message) {
+  function setAuthStatus(message) {
     var el = $('gm-sync-status');
     if (el) { el.textContent = message || ''; }
   }
@@ -224,7 +224,7 @@
   }
   function pull() {
     if (!db || !currentUser) { return Promise.resolve(); }
-    setSyncStatus('讀取雲端紀錄中…');
+    setAuthStatus('讀取雲端紀錄中…');
     return db.collection('users').doc(currentUser.uid).get().then(function (doc) {
       if (doc.exists) {
         var changed = mergeRemoteDays((doc.data() || {}).guangmingCounts);
@@ -236,21 +236,21 @@
           renderNote();
         }
       }
-      setSyncStatus('已同步：' + totals().total + ' 遍');
+      setAuthStatus('已同步：' + totals().total + ' 遍');
     }).catch(function (e) {
-      setSyncStatus('讀取失敗：' + ((e && e.code) || '未知'));
+      setAuthStatus('讀取失敗：' + ((e && e.code) || '未知'));
     });
   }
   function push() {
     if (!db || !currentUser) { return Promise.resolve(); }
-    setSyncStatus('上載中…');
+    setAuthStatus('上載中…');
     return db.collection('users').doc(currentUser.uid).set({
       guangmingCounts: state.days,
       guangmingUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true }).then(function () {
-      setSyncStatus('已同步：' + totals().total + ' 遍');
+      setAuthStatus('已同步：' + totals().total + ' 遍');
     }).catch(function (e) {
-      setSyncStatus('上載失敗：' + ((e && e.code) || '未知'));
+      setAuthStatus('上載失敗：' + ((e && e.code) || '未知'));
     });
   }
   function googleProvider() {
@@ -258,43 +258,68 @@
     provider.setCustomParameters({ prompt: 'select_account' });
     return provider;
   }
+  function googleRedirect() {
+    if (!auth) {
+      setAuthStatus('Firebase 未載入，請檢查網絡。');
+      return;
+    }
+    setAuthStatus('正在跳轉 Google 登入…');
+    var provider = googleProvider();
+    auth.signInWithRedirect(provider).catch(function (e) {
+      var code = (e && e.code) || '';
+      setAuthStatus(code === 'auth/unauthorized-domain'
+        ? '登入失敗：auth/unauthorized-domain（Firebase 授權網域未包含本站）'
+        : '跳轉登入失敗：' + (code || '未知'));
+    });
+  }
   function googleSignIn() {
     if (!auth) {
-      setSyncStatus('Firebase 未載入，請檢查網絡。');
+      setAuthStatus('Firebase 未載入，請檢查網絡。');
       return;
     }
     if (googleBusy) { return; }
     googleBusy = true;
+    setAuthStatus('正在開啟 Google 登入彈窗…');
+    var redirectBtn = $('gm-google-redirect');
+    if (redirectBtn) { redirectBtn.hidden = false; }
+    var popupTimer = setTimeout(function () {
+      googleBusy = false;
+      setAuthStatus('如果冇見到 Google 彈窗：請允許本站彈出視窗，或按「彈窗冇反應？改用跳轉登入」。');
+    }, 2600);
     var provider = googleProvider();
     auth.signInWithPopup(provider).then(function () {
+      clearTimeout(popupTimer);
       googleBusy = false;
     }).catch(function (e) {
+      clearTimeout(popupTimer);
       googleBusy = false;
       var code = (e && e.code) || '';
       if (code === 'auth/popup-blocked') {
+        setAuthStatus('彈窗被瀏覽器擋住，正在改用跳轉登入…');
         auth.signInWithRedirect(provider);
         return;
       }
       if (code === 'auth/unauthorized-domain') {
-        setSyncStatus('登入失敗：auth/unauthorized-domain（Firebase 授權網域未包含本站）');
+        setAuthStatus('登入失敗：auth/unauthorized-domain（Firebase 授權網域未包含本站）');
         return;
       }
       if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
-        setSyncStatus('登入已取消。');
+        setAuthStatus('登入已取消。');
         return;
       }
-      setSyncStatus('登入失敗：' + (code || '未知'));
+      setAuthStatus('登入失敗：' + (code || '未知'));
     });
   }
   function initAuth() {
     var loginBtn = $('gm-google-login');
+    var redirectBtn = $('gm-google-redirect');
     var switchBtn = $('gm-google-switch');
     var logoutBtn = $('gm-google-logout');
     var avatar = $('gm-avatar');
     var userEl = $('gm-sync-user');
     if (!auth) {
       if (loginBtn) { loginBtn.disabled = true; }
-      setSyncStatus('Firebase 未載入，請檢查網絡。');
+      setAuthStatus('Firebase 未載入，請檢查網絡。');
       return;
     }
     auth.getRedirectResult().catch(function () {});
@@ -302,6 +327,7 @@
       currentUser = user || null;
       if (user) {
         if (loginBtn) { loginBtn.hidden = true; }
+        if (redirectBtn) { redirectBtn.hidden = true; }
         if (switchBtn) { switchBtn.hidden = false; }
         if (logoutBtn) { logoutBtn.hidden = false; }
         if (avatar) {
@@ -312,14 +338,16 @@
         pull().then(push);
       } else {
         if (loginBtn) { loginBtn.hidden = false; }
+        if (redirectBtn) { redirectBtn.hidden = true; }
         if (switchBtn) { switchBtn.hidden = true; }
         if (logoutBtn) { logoutBtn.hidden = true; }
         if (avatar) { avatar.hidden = true; avatar.removeAttribute('src'); }
         if (userEl) { userEl.textContent = '未登入'; }
-        setSyncStatus('未登入：紀錄只存本機。');
+        if (!googleBusy) { setAuthStatus('未登入：紀錄只存本機。'); }
       }
     });
     if (loginBtn) { loginBtn.addEventListener('click', googleSignIn); }
+    if (redirectBtn) { redirectBtn.addEventListener('click', googleRedirect); }
     if (switchBtn) { switchBtn.addEventListener('click', googleSignIn); }
     if (logoutBtn) {
       logoutBtn.addEventListener('click', function () {
@@ -1205,11 +1233,11 @@
     }
     var foot = $('foot-version');
     if (foot) {
-      foot.textContent = '光明真言系統 v2.2.0';
+      foot.textContent = '光明真言系統 v2.2.1';
     }
     var brandVersion = $('brand-version');
     if (brandVersion) {
-      brandVersion.textContent = 'v2.2.0';
+      brandVersion.textContent = 'v2.2.1';
     }
     var intro = $('gm-intro');
     if (intro && practice && practice.intro) { intro.textContent = practice.intro; }
