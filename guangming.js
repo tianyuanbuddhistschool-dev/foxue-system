@@ -64,6 +64,8 @@
     var node = document.createElement('div');
     node.className = 'toast';
     node.textContent = message;
+    node.setAttribute('data-no-i18n', '');
+    node.textContent = trText(message);
     root.appendChild(node);
     while (root.children.length > 3) { root.removeChild(root.firstChild); }
     setTimeout(function () {
@@ -143,6 +145,154 @@
   var pushTimer = null;
   var googleBusy = false;
   var storageBroken = false;
+
+  /* ---------------- 四語介面 ---------------- */
+  var LANG_KEY = 'guangming.lang';
+  var LANG_TARGET = { yue: 'yue', cmn: 'zh', en: 'en', vi: 'vi' };
+  var LANG_HTML = { yue: 'zh-Hant-HK', cmn: 'zh-Hans-CN', en: 'en', vi: 'vi' };
+  var lang = 'yue';
+  var lastStatus = { message: '', kind: '' };
+  try {
+    var savedLang = window.localStorage.getItem(LANG_KEY);
+    if (savedLang && LANG_TARGET[savedLang]) { lang = savedLang; }
+  } catch (e) { /* ignore */ }
+
+  var ZH_TO_TRAD = {};
+  var EN_TO_TRAD = {};
+  var VI_TO_TRAD = {};
+  if (window.GM_STRINGS) {
+    Object.keys(window.GM_STRINGS).forEach(function (key) {
+      var entry = window.GM_STRINGS[key];
+      if (entry && entry.zh) { ZH_TO_TRAD[entry.zh] = key; }
+      if (entry && entry.en) { EN_TO_TRAD[entry.en] = key; }
+      if (entry && entry.vi) { VI_TO_TRAD[entry.vi] = key; }
+    });
+  }
+
+  function trText(source) {
+    if (!source) { return source; }
+    var text = source;
+    var entry = window.GM_STRINGS && window.GM_STRINGS[text];
+    if (!entry && ZH_TO_TRAD[text]) {
+      text = ZH_TO_TRAD[text];
+      entry = window.GM_STRINGS[text];
+    }
+    if (!entry && EN_TO_TRAD[text]) {
+      text = EN_TO_TRAD[text];
+      entry = window.GM_STRINGS[text];
+    }
+    if (!entry && VI_TO_TRAD[text]) {
+      text = VI_TO_TRAD[text];
+      entry = window.GM_STRINGS[text];
+    }
+    if (!entry) { return text; }
+    if (lang === 'yue') { return text; }
+    return entry[LANG_TARGET[lang]] || text;
+  }
+
+  function shouldSkipNode(node) {
+    var parent = node.parentElement;
+    if (!parent) { return true; }
+    if (parent.closest('script,style,noscript')) { return true; }
+    if (parent.closest('.gm-han,.gm-roman,.gm-variant,[lang="sa-Latn"],[data-no-i18n],td[lang="zh-Hant"],.gm-dh')) { return true; }
+    return false;
+  }
+
+  function translateTextNode(node) {
+    if (node.__gmSource == null) { node.__gmSource = node.nodeValue; }
+    var source = node.__gmSource;
+    var trimmed = String(source).trim();
+    if (!trimmed) { return; }
+    var replacement = trText(trimmed);
+    if (replacement === trimmed) { return; }
+    node.nodeValue = String(source).replace(trimmed, replacement);
+  }
+
+  function translateAttributes(root) {
+    var nodes = root.querySelectorAll('[title],[placeholder],[aria-label]');
+    for (var i = 0; i < nodes.length; i++) {
+      var el = nodes[i];
+      ['title', 'placeholder', 'aria-label'].forEach(function (attr) {
+        var value = el.getAttribute(attr);
+        if (!value) { return; }
+        if (!el.__gmAttr) { el.__gmAttr = {}; }
+        if (el.__gmAttr[attr] == null) { el.__gmAttr[attr] = value; }
+        var source = el.__gmAttr[attr];
+        var replacement = trText(source);
+        if (replacement !== source) { el.setAttribute(attr, replacement); }
+        else if (lang === 'yue') { el.setAttribute(attr, source); }
+      });
+    }
+  }
+
+  function applyLanguage() {
+    document.documentElement.lang = LANG_HTML[lang] || 'zh-Hant-HK';
+    var target = LANG_TARGET[lang] || 'yue';
+    var cells = document.querySelectorAll('.gm-lang[data-lang]');
+    for (var i = 0; i < cells.length; i++) {
+      cells[i].hidden = cells[i].getAttribute('data-lang') !== target;
+    }
+    var hideChinese = (lang === 'en' || lang === 'vi');
+    var originals = document.querySelectorAll('.gm-han,.gm-variant,.gm-phrases,.gm-dh');
+    for (var h = 0; h < originals.length; h++) { originals[h].hidden = hideChinese; }
+    if (document.body) {
+      var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+      var node;
+      while ((node = walker.nextNode())) {
+        if (!shouldSkipNode(node)) { translateTextNode(node); }
+      }
+      translateAttributes(document.body);
+    }
+    var buttons = document.querySelectorAll('[data-gmlang]');
+    for (var j = 0; j < buttons.length; j++) {
+      buttons[j].classList.toggle('on', buttons[j].getAttribute('data-gmlang') === lang);
+    }
+    var title = $('gm-title');
+    if (title) {
+      title.setAttribute('data-no-i18n', '');
+      title.textContent = lang === 'yue' ? '光明真言' : (lang === 'cmn' ? '光明真言' : (lang === 'en' ? 'Mantra of Light' : 'Chân ngôn Quang Minh'));
+    }
+    var foot = $('foot-version');
+    if (foot) {
+      var version = '2.3.0';
+      foot.setAttribute('data-no-i18n', '');
+      foot.textContent = lang === 'yue' ? '光明真言系統 v' + version
+        : (lang === 'cmn' ? '光明真言系统 v' + version
+        : (lang === 'en' ? 'Mantra of Light System v' + version
+        : 'Hệ thống Chân ngôn Quang Minh v' + version));
+    }
+    if (lastStatus.message) {
+      var statusEl = $('player-status');
+      if (statusEl) {
+        statusEl.setAttribute('data-no-i18n', '');
+        statusEl.textContent = trText(lastStatus.message);
+        statusEl.classList.toggle('is-error', lastStatus.kind === 'error');
+        statusEl.classList.toggle('is-live', lastStatus.kind === 'live');
+      }
+    }
+    setPlayButton();
+    syncLoopButton();
+    try { window.localStorage.setItem(LANG_KEY, lang); } catch (e) { /* ignore */ }
+    updateTodayChip();
+  }
+
+  function setLanguage(next) {
+    if (!LANG_TARGET[next]) { return; }
+    lang = next;
+    applyLanguage();
+  }
+
+  function updateTodayChip() {
+    var chip = $('today-chip');
+    if (!chip) { return; }
+    var now = new Date();
+    try {
+      var locale = lang === 'yue' ? 'zh-HK' : (lang === 'cmn' ? 'zh-CN' : (lang === 'en' ? 'en-US' : 'vi-VN'));
+      chip.textContent = new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }).format(now);
+    } catch (e) {
+      chip.textContent = now.getFullYear() + '-' + pad2(now.getMonth() + 1) + '-' + pad2(now.getDate());
+    }
+  }
   function saveState() {
     state.updated = new Date().toISOString();
     try {
@@ -388,6 +538,7 @@
     if (targetText) { targetText.textContent = today + ' / ' + TARGET; }
     if (bar) { bar.style.width = Math.min(100, today / TARGET * 100) + '%'; }
     if (progress) { progress.setAttribute('aria-valuenow', String(Math.min(today, TARGET))); }
+    applyLanguage();
   }
 
   function renderPassages() {
@@ -408,9 +559,9 @@
       LANGS.forEach(function (lang) {
         var value = passage[lang.id] || '';
         if (!value) { return; }
-        html += '<div class="gm-lang"><div class="gm-lang-head"><span class="gm-lang-name">' + esc(lang.label) + '</span>' +
+        html += '<div class="gm-lang" data-lang="' + esc(lang.id) + '"><div class="gm-lang-head"><span class="gm-lang-name">' + esc(lang.label) + '</span>' +
           '<button class="gm-tts" type="button" data-tts="' + index + '" data-lang="' + esc(lang.id) + '" aria-pressed="false">朗讀</button></div>' +
-          '<p lang="' + esc(lang.tts || '') + '">' + esc(value) + '</p></div>';
+          '<p lang="' + esc(lang.tts || '') + '" data-no-i18n>' + esc(value) + '</p></div>';
       });
       html += '</div></article>';
     });
@@ -596,13 +747,22 @@
     if (!audio || !loopBtn) { return; }
     var mode = state.settings.loopMode || 'all';
     audio.loop = mode === 'one';
-    loopBtn.textContent = mode === 'all' ? '全輯循環' : (mode === 'one' ? '單曲循環' : '不循環');
+    loopBtn.setAttribute('data-no-i18n', '');
+    loopBtn.textContent = trText(mode === 'all' ? '全輯循環' : (mode === 'one' ? '單曲循環' : '不循環'));
     loopBtn.setAttribute('aria-pressed', mode === 'off' ? 'false' : 'true');
+  }
+
+  function setPlayButton() {
+    if (!playBtn) { return; }
+    playBtn.setAttribute('data-no-i18n', '');
+    playBtn.textContent = trText(audio && !audio.paused ? '暫停' : '播放');
   }
 
   function setStatus(message, kind) {
     if (!statusEl) { return; }
-    statusEl.textContent = message || '';
+    lastStatus = { message: message || '', kind: kind || '' };
+    statusEl.setAttribute('data-no-i18n', '');
+    statusEl.textContent = trText(message || '');
     statusEl.classList.toggle('is-error', kind === 'error');
     statusEl.classList.toggle('is-live', kind === 'live');
   }
@@ -782,14 +942,14 @@
     audio.addEventListener('play', function () {
       syncBaseline();
       enableAudioSession();
-      if (playBtn) { playBtn.textContent = '暫停'; }
+      setPlayButton();
       setStatus('播放中：' + (currentTrack() ? currentTrack().label : ''), 'live');
       updateMediaSession();
     });
 
     audio.addEventListener('pause', function (event) {
       if (event && event.user) { userWantsPlay = false; }
-      if (playBtn) { playBtn.textContent = '播放'; }
+      setPlayButton();
       if (!audio.ended) { setStatus('已暫停；再撳「播放」可繼續。'); }
       updateMediaSession();
     });
@@ -851,7 +1011,7 @@
         }
       } else if (mode === 'off') {
         userWantsPlay = false;
-        if (playBtn) { playBtn.textContent = '播放'; }
+        setPlayButton();
         setStatus('已播完；不循環，唔會自動續播。');
       }
     });
@@ -1021,6 +1181,7 @@
         '<div class="gm-day-bar" style="height:' + height + 'px"></div>' +
         '<span class="gm-day-label">' + esc(label) + '</span></div>';
     }).join('');
+    applyLanguage();
   }
 
   function renderRecordsSummary() {
@@ -1033,6 +1194,7 @@
     }
     box.textContent = '本頁紀錄獨立 · 最近 7 日 ' + t.week + ' 遍 · 最近 30 日 ' + t.month30 + ' 遍 · 最佳一日 ' + t.best + ' 遍' +
       (t.bestKey ? '（' + t.bestKey + '）' : '') + ' · 連續 ' + t.streak + ' 日。';
+    applyLanguage();
   }
 
   function renderNote() {
@@ -1040,6 +1202,7 @@
     if (!input) { return; }
     var item = state.days[todayISO()];
     input.value = item && item.note ? item.note : '';
+    applyLanguage();
   }
 
   function setSyncStatus(message, isError) {
@@ -1226,18 +1389,14 @@
 
   /* ---------------- 啟動 ---------------- */
   function initChrome() {
-    var now = new Date();
-    var chip = $('today-chip');
-    if (chip) {
-      chip.textContent = now.getFullYear() + ' 年 ' + (now.getMonth() + 1) + ' 月 ' + now.getDate() + ' 日・星期' + weekdayCN(now);
-    }
+    updateTodayChip();
     var foot = $('foot-version');
     if (foot) {
-      foot.textContent = '光明真言系統 v2.2.1';
+      foot.textContent = '光明真言系統 v2.3.0';
     }
     var brandVersion = $('brand-version');
     if (brandVersion) {
-      brandVersion.textContent = 'v2.2.1';
+      brandVersion.textContent = 'v2.3.0';
     }
     var intro = $('gm-intro');
     if (intro && practice && practice.intro) { intro.textContent = practice.intro; }
@@ -1246,6 +1405,12 @@
   function init() {
     initChrome();
     initAuth();
+    var langButtons = document.querySelectorAll('[data-gmlang]');
+    for (var li = 0; li < langButtons.length; li++) {
+      langButtons[li].addEventListener('click', function () {
+        setLanguage(this.getAttribute('data-gmlang'));
+      });
+    }
     if (!DATA || !mantra || !practice) {
       var box = $('passages');
       if (box) {
@@ -1275,6 +1440,7 @@
         if (audio && audio.paused) { playAudio(); }
       });
     }
+    applyLanguage();
   }
 
   init();

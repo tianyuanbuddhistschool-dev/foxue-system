@@ -6,7 +6,7 @@
    ============================================================= */
 'use strict';
 
-var CACHE = 'guangming-shell-v2.2.1-20261117';
+var CACHE = 'guangming-shell-v2.3.0-20261117';
 var SHELL = [
   './',
   './index.html',
@@ -14,6 +14,7 @@ var SHELL = [
   './library.html',
   './app.js',
   './guangming.js',
+  './guangming-i18n.js',
   './firebase-config.js',
   './native-audio.js',
   './styles.css',
