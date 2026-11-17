@@ -169,25 +169,22 @@
     });
   }
 
+  function resolveSource(text) {
+    if (!text) { return null; }
+    if (window.GM_STRINGS && window.GM_STRINGS[text]) { return text; }
+    if (ZH_TO_TRAD[text]) { return ZH_TO_TRAD[text]; }
+    if (EN_TO_TRAD[text]) { return EN_TO_TRAD[text]; }
+    if (VI_TO_TRAD[text]) { return VI_TO_TRAD[text]; }
+    return null;
+  }
+
   function trText(source) {
     if (!source) { return source; }
-    var text = source;
-    var entry = window.GM_STRINGS && window.GM_STRINGS[text];
-    if (!entry && ZH_TO_TRAD[text]) {
-      text = ZH_TO_TRAD[text];
-      entry = window.GM_STRINGS[text];
-    }
-    if (!entry && EN_TO_TRAD[text]) {
-      text = EN_TO_TRAD[text];
-      entry = window.GM_STRINGS[text];
-    }
-    if (!entry && VI_TO_TRAD[text]) {
-      text = VI_TO_TRAD[text];
-      entry = window.GM_STRINGS[text];
-    }
-    if (!entry) { return text; }
-    if (lang === 'yue') { return text; }
-    return entry[LANG_TARGET[lang]] || text;
+    var key = resolveSource(source);
+    if (!key) { return source; }
+    if (lang === 'yue') { return key; }
+    var entry = window.GM_STRINGS[key];
+    return (entry && entry[LANG_TARGET[lang]]) || key;
   }
 
   function shouldSkipNode(node) {
@@ -199,13 +196,23 @@
   }
 
   function translateTextNode(node) {
-    if (node.__gmSource == null) { node.__gmSource = node.nodeValue; }
-    var source = node.__gmSource;
-    var trimmed = String(source).trim();
+    var current = String(node.nodeValue || '');
+    var trimmed = current.trim();
     if (!trimmed) { return; }
-    var replacement = trText(trimmed);
+    var key = resolveSource(trimmed);
+    if (!key && node.__gmSource) {
+      var original = String(node.__gmSource).trim();
+      if (resolveSource(original)) {
+        key = resolveSource(original);
+        trimmed = String(node.__gmSource).trim();
+        current = String(node.__gmSource);
+      }
+    }
+    if (!key) { return; }
+    if (node.__gmSource == null) { node.__gmSource = current; }
+    var replacement = lang === 'yue' ? key : ((window.GM_STRINGS[key] && window.GM_STRINGS[key][LANG_TARGET[lang]]) || key);
     if (replacement === trimmed) { return; }
-    node.nodeValue = String(source).replace(trimmed, replacement);
+    node.nodeValue = current.replace(trimmed, replacement);
   }
 
   function translateAttributes(root) {
@@ -219,8 +226,7 @@
         if (el.__gmAttr[attr] == null) { el.__gmAttr[attr] = value; }
         var source = el.__gmAttr[attr];
         var replacement = trText(source);
-        if (replacement !== source) { el.setAttribute(attr, replacement); }
-        else if (lang === 'yue') { el.setAttribute(attr, source); }
+        if (replacement !== value) { el.setAttribute(attr, replacement); }
       });
     }
   }
@@ -244,8 +250,17 @@
       translateAttributes(document.body);
     }
     var buttons = document.querySelectorAll('[data-gmlang]');
+    var langLabels = {
+      yue: { yue: '粵', cmn: '普', en: '英', vi: '越' },
+      cmn: { yue: '粤', cmn: '普', en: '英', vi: '越' },
+      en: { yue: 'YUE', cmn: 'CMN', en: 'EN', vi: 'VI' },
+      vi: { yue: 'Quảng', cmn: 'Phổ', en: 'Anh', vi: 'Việt' }
+    };
     for (var j = 0; j < buttons.length; j++) {
-      buttons[j].classList.toggle('on', buttons[j].getAttribute('data-gmlang') === lang);
+      var code = buttons[j].getAttribute('data-gmlang');
+      buttons[j].setAttribute('data-no-i18n', '');
+      buttons[j].textContent = (langLabels[lang] && langLabels[lang][code]) || code.toUpperCase();
+      buttons[j].classList.toggle('on', code === lang);
     }
     var title = $('gm-title');
     if (title) {
@@ -254,7 +269,7 @@
     }
     var foot = $('foot-version');
     if (foot) {
-      var version = '2.3.0';
+      var version = '2.3.1';
       foot.setAttribute('data-no-i18n', '');
       foot.textContent = lang === 'yue' ? '光明真言系統 v' + version
         : (lang === 'cmn' ? '光明真言系统 v' + version
@@ -1392,11 +1407,11 @@
     updateTodayChip();
     var foot = $('foot-version');
     if (foot) {
-      foot.textContent = '光明真言系統 v2.3.0';
+      foot.textContent = '光明真言系統 v2.3.1';
     }
     var brandVersion = $('brand-version');
     if (brandVersion) {
-      brandVersion.textContent = 'v2.3.0';
+      brandVersion.textContent = 'v2.3.1';
     }
     var intro = $('gm-intro');
     if (intro && practice && practice.intro) { intro.textContent = practice.intro; }
