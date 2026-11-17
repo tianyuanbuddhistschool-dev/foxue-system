@@ -5,18 +5,18 @@
    ============================================================= */
 html[data-theme="black-gold"]{
   color-scheme: dark;
-  --ink:#060606;
-  --ink-2:#0e0e0e;
+  --ink:#050505;
+  --ink-2:#0b0b0b;
   --ink-3:#1a1710;
   --ink-4:#2a2418;
-  --cream:#f3e3b8;
+  --cream:#f3e9cf;
   --cream-2:#e0cf9f;
-  --paper:#121212;
-  --paper-2:#1a1a1a;
+  --paper:#101010;
+  --paper-2:#181818;
   --gold:#d4af37;
   --gold-strong:#e2c05a;
   --gold-soft:#f0dca0;
-  --text:#eadcb8;
+  --text:#f3e9cf;
   --text-dim:#cbb98d;
   --text-faint:#a99a78;
   --line:rgba(212,175,55,.26);
@@ -32,7 +32,7 @@ html[data-theme="black-gold"] body{
   background:
     radial-gradient(1100px 620px at 85% -10%, rgba(212,175,55,.10), transparent 62%),
     radial-gradient(900px 520px at -10% 30%, rgba(212,175,55,.04), transparent 60%),
-    #080808;
+    #050505;
   color:var(--text);
 }
 
@@ -50,6 +50,11 @@ html[data-theme="black-gold"] .masthead{
   box-shadow:0 2px 22px rgba(0,0,0,.55);
 }
 html[data-theme="black-gold"] .brand-title{ color:#fbf3df; }
+html[data-theme="black-gold"] .ver-pill{
+  color:var(--gold-soft);
+  border-color:rgba(212,175,55,.55);
+  background:rgba(212,175,55,.10);
+}
 html[data-theme="black-gold"] .brand-sub{ color:rgba(240,220,160,.72); }
 html[data-theme="black-gold"] .tabs{
   background:linear-gradient(180deg, rgba(4,4,4,.99), rgba(9,9,9,.98));

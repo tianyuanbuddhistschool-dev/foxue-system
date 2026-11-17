@@ -408,6 +408,7 @@
   var wakeLock = null;
   var wakeOn = false;
   var pendingPlay = false;
+  var userWantsPlay = false;
 
   function syncLoopButton() {
     if (!audio || !loopBtn) { return; }
@@ -546,12 +547,14 @@
     updateMediaSession();
     setStatus('已選擇：' + (track.label || '音檔') + '；撳「播放」開始。');
     pendingPlay = !!autoplay;
+    if (!autoplay) { userWantsPlay = false; }
     if (autoplay) { playAudio(); }
   }
 
   function playAudio() {
     if (!audio || !currentTrack()) { return; }
     if (!audio.src) { loadTrack(trackIndex, false); }
+    userWantsPlay = true;
     enableAudioSession();
     var promise = audio.play();
     if (promise && promise.then) {
@@ -657,6 +660,7 @@
         autoCredit(now);
       }
       if (!audio.loop) {
+        userWantsPlay = false;
         if (playBtn) { playBtn.textContent = '播放'; }
         setStatus('已播完；循環關閉，唔會自動續播。');
       }
@@ -668,7 +672,12 @@
 
     if (playBtn) {
       playBtn.addEventListener('click', function () {
-        if (audio.paused) { playAudio(); } else { audio.pause(); }
+        if (audio.paused) {
+          playAudio();
+        } else {
+          userWantsPlay = false;
+          audio.pause();
+        }
       });
     }
 
@@ -738,11 +747,19 @@
     }, 5000);
   }
 
+  function exposeNativeHooks() {
+    if (!window) { return; }
+    window.__foxueIsPlayingWanted = function () { return !!userWantsPlay; };
+    window.__foxueResumeAudio = function () {
+      if (userWantsPlay && audio && audio.paused) { playAudio(); }
+    };
+  }
+
   function setupMediaSession() {
     if (!('mediaSession' in navigator)) { return; }
     try {
       navigator.mediaSession.setActionHandler('play', function () { playAudio(); });
-      navigator.mediaSession.setActionHandler('pause', function () { if (audio) { audio.pause(); } });
+      navigator.mediaSession.setActionHandler('pause', function () { userWantsPlay = false; if (audio) { audio.pause(); } });
       navigator.mediaSession.setActionHandler('seekbackward', function () {
         if (audio) { audio.currentTime = Math.max(0, (audio.currentTime || 0) - 15); }
       });
@@ -1027,6 +1044,10 @@
     if (foot) {
       foot.textContent = '佛音靈氣・佛學系統' + (DATA && DATA.meta && DATA.meta.version ? ' v' + DATA.meta.version : '');
     }
+    var brandVersion = $('brand-version');
+    if (brandVersion && DATA && DATA.meta && DATA.meta.version) {
+      brandVersion.textContent = 'v' + DATA.meta.version;
+    }
     var intro = $('gm-intro');
     if (intro && practice && practice.intro) { intro.textContent = practice.intro; }
   }
@@ -1054,6 +1075,7 @@
     renderStats();
     setupSpeech();
     setupPlayer();
+    exposeNativeHooks();
     setupRecords();
     var heroPlay = $('hero-play');
     if (heroPlay) {

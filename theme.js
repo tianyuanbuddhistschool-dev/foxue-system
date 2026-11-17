@@ -15,7 +15,7 @@
   }
   function syncMetaColor() {
     var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) { meta.setAttribute('content', isDark() ? '#080808' : '#f6f0e1'); }
+    if (meta) { meta.setAttribute('content', isDark() ? '#050505' : '#f6f0e1'); }
   }
   syncMetaColor();
   function paintButton(button) {

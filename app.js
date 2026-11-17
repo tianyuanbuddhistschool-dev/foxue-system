@@ -948,6 +948,7 @@
   var IS_DEMO = false;
   var playlist = [];
   var currentTrack = -1;
+  var userWantsPlay = false;
   var els = {};
   var openDays = {};
   var currentTab = 'home';
@@ -968,6 +969,7 @@
       bannerText: byId('data-banner-text'),
       bannerExtra: byId('data-banner-extra'),
       brandSub: byId('brand-sub'),
+      brandVersion: byId('brand-version'),
       todayChip: byId('today-chip'),
       installApp: byId('install-app'),
       fontsizeToggle: byId('fontsize-toggle'),
@@ -1067,6 +1069,7 @@
     var resolved = resolveData();
     DATA = resolved.data;
     IS_DEMO = resolved.isDemo;
+    if (els.brandVersion) { els.brandVersion.textContent = 'v' + DATA.meta.version; }
 
     state = normalizeState(storeRead());
     pruneOldCurriculum();
@@ -1094,6 +1097,7 @@
     renderAll();
     initPlayer();
     setupBackgroundPlayback();
+    exposeNativeHooks();
 
     var initialTab = TABS.indexOf(state.settings.lastTab) !== -1 ? state.settings.lastTab : 'home';
     /* 支援 ?tab=records／#records，方便由光明真言專修頁跳去功課紀錄 */
@@ -1129,6 +1133,14 @@
         playlist.length + ' 個音檔；' +
         (IS_DEMO ? '示範資料' : 'data.js'));
     }
+  }
+
+  function exposeNativeHooks() {
+    if (!global) { return; }
+    global.__foxueIsPlayingWanted = function () { return !!userWantsPlay; };
+    global.__foxueResumeAudio = function () {
+      if (userWantsPlay && els.playerAudio && els.playerAudio.paused) { playAudio(); }
+    };
   }
 
   function showBanner(title, text) {
@@ -2302,6 +2314,7 @@
 
   function playAudio() {
     if (!playlist.length || !els.playerAudio) { return; }
+    userWantsPlay = true;
     enableBackgroundPlayback();
     if (currentTrack < 0) { loadTrack(0, false); }
     var promise = null;
@@ -2379,6 +2392,7 @@
       if (playlist.length && currentTrack < playlist.length - 1) {
         loadTrack(currentTrack + 1, true);
       } else {
+        userWantsPlay = false;
         setPlayerStatus('播放清單已完結。');
       }
     });
@@ -2417,7 +2431,12 @@
 
     if (els.playerToggle) {
       els.playerToggle.addEventListener('click', function () {
-        if (audio.paused) { playAudio(); } else { audio.pause(); }
+        if (audio.paused) {
+          playAudio();
+        } else {
+          userWantsPlay = false;
+          audio.pause();
+        }
       });
     }
     if (els.playerPrev) {
@@ -2524,8 +2543,9 @@
     if (!ms || typeof ms.setActionHandler !== 'function') { return; }
     var handlers = {
       play: function () { playAudio(); },
-      pause: function () { if (els.playerAudio) { els.playerAudio.pause(); } },
+      pause: function () { userWantsPlay = false; if (els.playerAudio) { els.playerAudio.pause(); } },
       stop: function () {
+        userWantsPlay = false;
         if (!els.playerAudio) { return; }
         els.playerAudio.pause();
         try { els.playerAudio.currentTime = 0; } catch (e) { /* 忽略 */ }
