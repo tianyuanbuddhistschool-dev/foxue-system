@@ -28,6 +28,9 @@
 | 內容 | 咒文只有通行版，經本與音檔差異未標 | 未考據 | 並列 CBETA T20 no. 1154 經本、通行持誦版、梵文轉寫；標「待考」 |
 | 內容 | 《佛心經》心中心咒與大隨求心咒混為一談 | 法門混淆 | 分成附錄，明言同系統但經本／用字／傳承不同，正式修法須依師 |
 | 安全 | 直接 `innerHTML` 插入大量字串 | XSS 風險（雖然資料自控） | 渲染改用 `textContent`／`createElement` |
+| Android | 原碼冇 APK；WebView 聲音會經 WebView，背景易被殺 | 未建原生殼 | 建 `native-mahapratisara`：WebView＋MediaPlayer foreground service；`native-audio.js` 自動切換原生播放 |
+| Android | 服務通知／MediaSession 中文字亂碼 | 舊檔編碼損壞 | 重寫 `MainActivity.java`／`PlaybackService.java`，通知、標題、按鈕全部用正常繁體中文 |
+| Android | 原生暫停後 UI 仍顯示「未開始」 | `native-audio.js` pause 未更新 currentTime | 修正 shim：pause／ended 同步 currentTime／duration |
 
 ## 二、修復後驗收（本機 headless Chrome）
 
@@ -42,16 +45,26 @@
 - 離線：封鎖 `gstatic.com` 後頁面仍完整渲染、登入自動停用、本機播放與計數照用。
 - `file://`：音檔可載入並播放（`duration=2611.617938`）。
 - DOM：0 個重複 ID。
+- Native bridge mock：`NativeAudio.available()` 觸發；`setLoop(false)`、`load`、`play`、`pause`、`seek` 呼叫正確；原生播放時 DOM `<audio>` 保持 paused，0 console error。
+- Native 自動計次：模擬完整 43:31 播放後，`auto=324`、完成 1 輪；0 console error。
 
-## 三、部署
+## 三、Android APK
+
+- 專案：`C:\Users\cheun\Projects\_android\native-mahapratisara`。
+- package `hk.chunkin.tianyuan.mahapratisara`；versionName `1.0.0`；versionCode `1`；minSdk 23／target 36。
+- 簽名：`tianyuan.keystore`（alias `tianyuan`）；`apksigner verify` v1／v2 通過。
+- APK：`apk/mahapratisara.apk`（43,263 bytes；SHA-256 `2EAE5180…DDD4E8`）。
+- 原生 service：foreground mediaPlayback、partial wake lock、audio focus、MediaSession、通知欄、10 秒 watchdog。
+- WebView 載入子站；`native-audio.js` 將播放交原生 MediaPlayer，聲音不經 WebView。
+
+## 四、部署
 
 - 平台：GitHub Pages；repo `tianyuanbuddhistschool-dev/foxue-system`，分支 `main`。
 - 公開網址：<https://tianyuanbuddhistschool-dev.github.io/foxue-system/mahapratisara/>。
 - commit `d53a9f9`；Pages run `44084362863` success（2026-11-17T12:35:40Z）。
 - 上線實測：子站與五個程式檔 200、兩個音檔 Range 206、PWA installability 0 error、0 console error。
 
-## 四、未完成／待真機
+## 五、未完成／待真機
 
-- Google 真實登入與 Firestore 寫入：headless 沒有 Google session，需真人撳一次；程式已用 `foyin-lingqi-app` 與 `users/{uid}` 規則。
-- Android APK：本版只做 PWA，未重新打包 APK；如要 APK，需另建原生殼（聲音不經 WebView）。
-- 30 分鐘鎖屏長播：未在真機驗收；Web 版已加 MediaSession、Wake Lock、6 秒 watchdog，但 OEM 省電仍可能凍結 WebView。
+- Google 真實登入與 Firestore 寫入：headless 沒有 Google session，需真人撳一次；程式已用 `foyin-lingqi-app` 與 `users/{uid}` 規則。Android WebView 內 Google 登入可能受 embedded WebView 限制。
+- 30 分鐘鎖屏長播：未在真機驗收；APK 已用原生 MediaPlayer＋foreground service＋wake lock＋watchdog，仍需真機確認 OEM 省電行為。

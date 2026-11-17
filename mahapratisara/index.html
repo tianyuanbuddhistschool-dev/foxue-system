@@ -39,6 +39,7 @@
     <div class="header-tools">
       <div class="lang-switch" id="lang-switch" role="group" aria-label="語言"></div>
       <button class="ghost-btn" id="theme-toggle" type="button" aria-pressed="true">主題：黑金</button>
+      <a class="ghost-btn" href="apk/mahapratisara.apk" download>Android App</a>
       <button class="ghost-btn hidden" id="install-btn" type="button">加到主屏幕</button>
     </div>
   </header>
@@ -203,8 +204,9 @@
   <footer class="site-foot">
     <p class="version-line" id="footer-version">大隨求陀羅尼 v1.0.0</p>
     <p class="apk-row">
+      <a class="btn btn-primary" href="apk/mahapratisara.apk" download>下載 Android App（v1.0.0）</a>
       <button class="btn btn-quiet" id="install-btn-2" type="button">加到主屏幕</button>
-      <span class="muted">網頁版；暫未提供 Android APK。</span>
+      <span class="muted">APK 用原生 MediaPlayer，聲音唔經 WebView。</span>
     </p>
     <p id="footer-sources"></p>
     <p id="footer-disclaimer"></p>
@@ -216,6 +218,7 @@
 <noscript><p class="noscript">本頁需要 JavaScript 才能顯示咒文、播放音檔與計數。</p></noscript>
 
 <script src="data.js" defer></script>
+<script src="native-audio.js" defer></script>
 <script src="app.js" defer></script>
 <!-- Firebase 只係登入同步嘅可選加強；唔會阻塞頁面、咒文或播放。 -->
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js" async></script>

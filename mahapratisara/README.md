@@ -2,6 +2,13 @@
 
 **公開位置**：<https://tianyuanbuddhistschool-dev.github.io/foxue-system/mahapratisara/>
 
+## 工作規則（使用者指示 2026-11-17）
+
+1. **全自動執行至完成**：每個任務要一路做到真正完成，唔可以完成一個步驟就停低等指示。
+2. 只有「需要真人 Google 帳戶／實機／法律授權」呢類的確無法代做嘅步驟，才可以標記為待真人；其餘可自動化嘅工作要繼續做埋。
+3. 每次完成或更新，最後一步必定部署 GitHub Pages `main`，唔可以叫使用者自己上線。
+4. 所有改動記入 `CHANGELOG.md`／`AUDIT.md`；唔刪使用者原始音檔。
+
 ## 定位
 
 - 單一法門專修頁：大隨求陀羅尼心咒（CBETA T20 no. 1154 為主）。
@@ -18,6 +25,8 @@
 | `index.html` | 頁面骨架、版本 pill、頁尾版本、PWA 連結 |
 | `data.js` | 唯一內容來源 `window.MP_DATA`（四語、咒文、功德、出處、音檔） |
 | `app.js` | 語言、播放、計數、紀錄、Google 登入、PWA、無障礙 |
+| `native-audio.js` | Android `NativePlayer` 轉接器；有原生 bridge 時聲音交 MediaPlayer，否則用 `<audio>` |
+| `apk/mahapratisara.apk` | Android App（package `hk.chunkin.tianyuan.mahapratisara`，v1.0.0，已簽名） |
 | `styles.css` | 黑金／淺色、響應式、減少動態效果 |
 | `manifest.webmanifest` | PWA 安裝、捷徑、icons |
 | `sw.js` | App shell；程式碼 network-first、音檔 bypass（保留 Range 206） |
@@ -37,9 +46,18 @@ node serve.mjs 8125 "G:\0佛光靈氣0\佛學系統\上線\site"
 # 開 http://localhost:8125/mahapratisara/
 ```
 
+## Android APK
+
+- 下載：`apk/mahapratisara.apk`（部署後：`https://tianyuanbuddhistschool-dev.github.io/foxue-system/mahapratisara/apk/mahapratisara.apk`）
+- package：`hk.chunkin.tianyuan.mahapratisara`；versionName `1.0.0`；versionCode `1`；minSdk 23／target 36。
+- 簽名：`tianyuan.keystore`（alias `tianyuan`）；APK Signature Scheme v1／v2 驗證通過。
+- 原生 `PlaybackService`：foreground service、partial wake lock、audio focus、MediaSession、通知欄控制、10 秒 watchdog。
+- WebView 載入 `https://tianyuanbuddhistschool-dev.github.io/foxue-system/mahapratisara/`；`native-audio.js` 偵測到 `NativePlayer` 就將播放交原生 MediaPlayer，聲音不經 WebView。
+- 可與光明真言／佛學系統 APK 並存。
+
 ## 已知限制
 
-- Google 真實登入／Firestore 寫入未在 headless 完成（需要真人揀帳號）；程式已按現有 `foyin-lingqi-app` 專案與 `users/{uid}` 規則實作。
-- 未提供 Android APK；可用瀏覽器「加到主屏幕」。
+- Google 真實登入／Firestore 寫入未在 headless 完成（需要真人揀帳號）；程式已按現有 `foyin-lingqi-app` 專案與 `users/{uid}` 規則實作。Android WebView 內 Google 登入可能受 Google 對 embedded WebView 的限制；如要穩定登入，建議用瀏覽器版或另接 Custom Tabs。
+- APK 未在真機做 30 分鐘鎖屏驗收；已用 native bridge mock 驗證 load／play／pause／seek／自動計次。
 - 音檔是長版 43:31.6，首次載入建議 Wi-Fi；Service Worker 不攔截音檔，拖進度保留 HTTP Range。
 - 咒文有罕用字（例如 `𤙖𤙖`），顯示與否取決於系統字型；不影響資料。

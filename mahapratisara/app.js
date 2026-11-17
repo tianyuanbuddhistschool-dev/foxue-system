@@ -829,9 +829,8 @@
     lastTime = 0;
 
     if (state.settings.loopMode === 'one') {
-      completedGuard = false;
-      try { audio.currentTime = 0; } catch (e) {}
-      playAudio();
+      /* 重新 load 一次，原生 MediaPlayer 同瀏覽器都由頭播，避免 ended 狀態卡住。 */
+      selectTrack(currentTrackIndex, true);
       return;
     }
     if (state.settings.loopMode === 'all') {
@@ -1328,10 +1327,15 @@
   }
 
   function initPlayer() {
-    audio = byId('audio');
+    /* Android APK：NativePlayer 存在時用原生 MediaPlayer（聲音唔經 WebView）；瀏覽器用 <audio>。 */
+    audio = (global.NativeAudio && global.NativeAudio.available())
+      ? global.NativeAudio.create('mp-audio')
+      : byId('audio');
     if (!audio) { return; }
     audio.loop = false;
-    audio.preload = 'metadata';
+    if ('preload' in audio || !(global.NativeAudio && global.NativeAudio.available())) {
+      audio.preload = 'metadata';
+    }
 
     var initialId = state.settings.trackId;
     currentTrackIndex = 0;
@@ -1349,7 +1353,9 @@
       setStatus(L.player.statusPlaying);
       if (state.settings.wake) { requestWake(); }
     });
-    audio.addEventListener('pause', function () {
+    audio.addEventListener('pause', function (event) {
+      /* 原生通知欄／耳機掣暫停會帶 user=true；唔好被 watchdog 自動續播。 */
+      if (event && event.user) { wantsPlay = false; }
       renderPlayerText();
       releaseWake();
     });
@@ -1434,6 +1440,10 @@
     L = DATA.i18n[state.lang] || DATA.i18n.yue;
     applyTheme();
     initPlayer();
+    global.__foxueIsPlayingWanted = function () { return !!wantsPlay; };
+    global.__foxueResumeAudio = function () {
+      if (wantsPlay && audio && audio.paused && !audio.ended) { playAudio(); }
+    };
     initAuth();
     bindGlobal();
     renderAll();
