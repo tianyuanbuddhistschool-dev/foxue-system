@@ -1045,11 +1045,11 @@
     }
     var foot = $('foot-version');
     if (foot) {
-      foot.textContent = '佛音靈氣・佛學系統' + (DATA && DATA.meta && DATA.meta.version ? ' v' + DATA.meta.version : '');
+      foot.textContent = '光明真言系統 v2.1.0';
     }
     var brandVersion = $('brand-version');
-    if (brandVersion && DATA && DATA.meta && DATA.meta.version) {
-      brandVersion.textContent = 'v' + DATA.meta.version;
+    if (brandVersion) {
+      brandVersion.textContent = 'v2.1.0';
     }
     var intro = $('gm-intro');
     if (intro && practice && practice.intro) { intro.textContent = practice.intro; }

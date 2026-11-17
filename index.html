@@ -4,148 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#050505">
-<meta name="description" content="佛音靈氣・佛學系統：15 首佛音唱誦、四語對照、Google 登入同步、全輯／單曲／不循環、鎖屏原生播放。">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/png" sizes="64x64" href="icons/favicon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="佛音靈氣">
-<title>佛音靈氣・佛學系統 v2.0.0</title>
-<link rel="stylesheet" href="fy-styles.css">
+<meta http-equiv="refresh" content="0; url=guangming.html">
+<title>光明真言系統</title>
 <style>
-  .brand h1{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
-  .ver-pill{
-    display:inline-flex;align-items:center;
-    font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;
-    font-size:.62rem;font-weight:500;letter-spacing:.08em;
-    color:var(--gold-lt);border:1px solid var(--line);
-    border-radius:999px;padding:.08rem .48rem;line-height:1.5;
-    background:rgba(212,175,55,.10);white-space:nowrap;
-  }
-  .quick-nav{
-    max-width:780px;margin:.55rem auto 0;padding:0 1.15rem;
-    display:flex;gap:.45rem;flex-wrap:wrap;
-  }
-  .quick-nav a{
-    color:var(--dim);text-decoration:none;font-size:.78rem;
-    border:1px solid var(--line-soft);border-radius:999px;
-    padding:.28rem .7rem;background:rgba(255,255,255,.02);
-  }
-  .quick-nav a:hover{color:var(--gold-lt);border-color:var(--line)}
-  .controls #tts{font-size:.78rem}
-  .sync-row #google-switch{font-size:.72rem}
-  footer .ver-line{color:var(--dim);font-size:.76rem;margin:.3rem 0 0}
-  footer .apk-row a{color:var(--gold-lt)}
-  footer .apk-row a + a{margin-left:.8rem}
-  footer .library-link{font-size:.76rem;margin:.4rem 0 0}
-  footer .library-link a{color:var(--dim)}
+  html,body{height:100%;margin:0;background:#050505;color:#f3e9cf;font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif}
+  body{display:grid;place-items:center;text-align:center;padding:2rem}
+  .mark{width:5rem;height:5rem;border:2px solid #d4af37;border-radius:50%;display:grid;place-items:center;margin:0 auto 1rem;color:#f0d77a;font-size:2.4rem;font-family:serif;box-shadow:0 0 30px rgba(212,175,55,.25)}
+  h1{font-size:1.4rem;letter-spacing:.12em;color:#f0d77a;margin:0 0 .5rem}
+  p{color:#a99e83;font-size:.85rem;line-height:1.8;margin:.3rem 0}
+  a{color:#d4af37}
 </style>
 </head>
 <body>
-
-<header class="top">
-  <div class="top-row">
-    <div class="brand">
-      <span class="mark" aria-hidden="true">佛</span>
-      <div>
-        <h1>佛音靈氣 <span class="ver-pill" id="brand-version">v2.0.0</span></h1>
-        <p id="brand-sub">佛音唱誦・佛學修持</p>
-      </div>
-    </div>
-    <div class="top-tools">
-      <div class="lang-switch" role="group" aria-label="語言 / Language">
-        <button type="button" data-lang="yue" class="on">粵</button>
-        <button type="button" data-lang="cmn">普</button>
-        <button type="button" data-lang="en">EN</button>
-        <button type="button" data-lang="vi">VI</button>
-      </div>
-      <button id="theme-toggle" type="button" class="theme-btn" aria-label="切換淺色／深色">淺色</button>
-    </div>
-  </div>
-  <p class="top-note" id="top-note">15 首・單一完整音檔・鎖屏原生循環・四語</p>
-</header>
-
-<nav class="quick-nav" aria-label="系統連結">
-  <a href="library.html" id="nav-library">咒音庫・次第</a>
-  <a href="guangming.html" id="nav-guangming">光明真言專修</a>
-  <a href="apk/foxue-system.apk" id="nav-apk" download>Android App</a>
-</nav>
-
-<section class="sync" aria-label="Google 登入同步">
-  <p class="sync-row">
-    <img id="user-avatar" class="avatar" alt="" hidden referrerpolicy="no-referrer">
-    <button id="google-login" type="button">用 Google 登入同步</button>
-    <button id="google-switch" type="button" hidden>切換帳號</button>
-    <button id="google-logout" type="button" hidden>登出</button>
-    <span id="sync-user">未登入</span>
-  </p>
-  <p id="sync-status" class="sync-status" role="status">未登入：唸誦次數只存本機。</p>
-</section>
-
-<main>
-
-  <section class="player" aria-label="播放器">
-    <div class="now">
-      <p class="eyebrow" id="eyebrow">現正播放</p>
-      <h2 id="now-title">未選擇</h2>
-      <p id="now-sub" class="now-sub"></p>
-    </div>
-
-    <div class="time-row">
-      <span id="cur">0:00</span>
-      <input id="seek" type="range" min="0" max="0" step="1" value="0" aria-label="播放進度">
-      <span id="dur">0:00</span>
-    </div>
-
-    <div class="controls">
-      <button id="prev" type="button" class="small" aria-label="上一首">◀</button>
-      <button id="play" type="button" class="play">播放</button>
-      <button id="next" type="button" class="small" aria-label="下一首">▶</button>
-      <button id="plus" type="button" class="ghost">+1 次</button>
-      <button id="loop" type="button" class="ghost" aria-pressed="true">全輯循環</button>
-      <button id="tts" type="button" class="ghost">朗讀</button>
-    </div>
-
-    <p id="status" class="status" role="status"></p>
-    <audio id="audio" preload="metadata"></audio>
-  </section>
-
-  <section class="list-section" aria-labelledby="list-title">
-    <div class="section-head">
-      <h2 id="list-title">曲目</h2>
-      <span id="list-count">15 首</span>
-    </div>
-    <p class="total-row"><span id="total-label">總計</span>：<strong id="total-count">0</strong> <span id="times-label">次</span></p>
-    <div id="list" class="list"></div>
-  </section>
-
-  <section class="text-section" id="text-panel" aria-live="polite">
-    <p class="empty">揀一首曲目開始。</p>
-  </section>
-
-</main>
-
-<footer>
-  <p id="footer-text">佛音靈氣・佛學系統 · 內容僅供學修參考 · 原音檔完整保留</p>
-  <p class="ver-line" id="footer-version">佛音靈氣・佛學系統 v2.0.0</p>
-  <p class="apk-row">
-    <a href="apk/foxue-system.apk" download>佛學系統 Android APK</a>
-    <a href="apk/guangming.apk" download>光明真言 Android APK</a>
-  </p>
-  <p class="library-link"><a href="library.html">進階咒音庫・七日次第・功課紀錄</a></p>
-  <p class="verse" id="footer-verse">願以此功德，普及於一切；我等與眾生，皆共成佛道。</p>
-</footer>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="fy-data.js"></script>
-<script src="fy-i18n.js"></script>
-<script src="native-audio.js"></script>
-<script src="fy-app.js"></script>
+  <main>
+    <div class="mark" aria-hidden="true">光</div>
+    <h1>光明真言系統</h1>
+    <p>正在進入光明真言專修頁…</p>
+    <p><a href="guangming.html">按此進入</a></p>
+  </main>
+  <script>location.replace('guangming.html' + location.search + location.hash);</script>
 </body>
 </html>
