@@ -43,7 +43,14 @@
 - `file://`：音檔可載入並播放（`duration=2611.617938`）。
 - DOM：0 個重複 ID。
 
-## 三、未完成／待真機
+## 三、部署
+
+- 平台：GitHub Pages；repo `tianyuanbuddhistschool-dev/foxue-system`，分支 `main`。
+- 公開網址：<https://tianyuanbuddhistschool-dev.github.io/foxue-system/mahapratisara/>。
+- commit `d53a9f9`；Pages run `44084362863` success（2026-11-17T12:35:40Z）。
+- 上線實測：子站與五個程式檔 200、兩個音檔 Range 206、PWA installability 0 error、0 console error。
+
+## 四、未完成／待真機
 
 - Google 真實登入與 Firestore 寫入：headless 沒有 Google session，需真人撳一次；程式已用 `foyin-lingqi-app` 與 `users/{uid}` 規則。
 - Android APK：本版只做 PWA，未重新打包 APK；如要 APK，需另建原生殼（聲音不經 WebView）。

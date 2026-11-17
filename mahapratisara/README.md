@@ -1,6 +1,6 @@
 # 大隨求陀羅尼・子站（v1.0.0）
 
-**公開位置（部署後）**：`https://tianyuanbuddhistschool-dev.github.io/foxue-system/mahapratisara/`
+**公開位置**：<https://tianyuanbuddhistschool-dev.github.io/foxue-system/mahapratisara/>
 
 ## 定位
 
