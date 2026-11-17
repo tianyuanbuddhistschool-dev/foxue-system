@@ -1065,6 +1065,10 @@
   function init() {
     if (!doc) { return; }
     cacheEls();
+    /* Android 原生 APK：用 MediaPlayer service，聲音唔經 WebView */
+    if (global.NativeAudio && global.NativeAudio.available()) {
+      els.playerAudio = global.NativeAudio.create('player-audio');
+    }
 
     var resolved = resolveData();
     DATA = resolved.data;
@@ -2383,7 +2387,8 @@
       setPlayerStatus('');
       setMediaPlaybackState('playing');
     });
-    audio.addEventListener('pause', function () {
+    audio.addEventListener('pause', function (event) {
+      if (event && event.user) { userWantsPlay = false; }
       updatePlayerToggle(false);
       setMediaPlaybackState('paused');
     });

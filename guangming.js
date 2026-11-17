@@ -382,7 +382,9 @@
   }
 
   /* ---------------- 播放與自動計次 ---------------- */
-  var audio = $('gm-audio');
+  var audio = (window.NativeAudio && window.NativeAudio.available())
+    ? window.NativeAudio.create('gm-audio')
+    : $('gm-audio');
   var playBtn = $('play-btn');
   var loopBtn = $('loop-btn');
   var plusBtn = $('plus-btn');
@@ -603,7 +605,8 @@
       updateMediaSession();
     });
 
-    audio.addEventListener('pause', function () {
+    audio.addEventListener('pause', function (event) {
+      if (event && event.user) { userWantsPlay = false; }
       if (playBtn) { playBtn.textContent = '播放'; }
       if (!audio.ended) { setStatus('已暫停；再撳「播放」可繼續。'); }
       updateMediaSession();
