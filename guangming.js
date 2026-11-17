@@ -95,7 +95,7 @@
     return {
       version: 1,
       days: {},
-      settings: { loop: true, track: 0 },
+      settings: { loop: true, loopMode: 'all', track: 0 },
       updated: ''
     };
   }
@@ -117,6 +117,12 @@
     }
     if (raw.settings && typeof raw.settings === 'object') {
       safe.settings.loop = raw.settings.loop !== false;
+      var mode = raw.settings.loopMode;
+      if (mode === 'all' || mode === 'one' || mode === 'off') {
+        safe.settings.loopMode = mode;
+      } else {
+        safe.settings.loopMode = safe.settings.loop ? 'all' : 'off';
+      }
       safe.settings.track = Number(raw.settings.track) === 1 ? 1 : 0;
     }
     safe.updated = typeof raw.updated === 'string' ? raw.updated : '';
@@ -131,6 +137,11 @@
     }
   }
   var state = loadState();
+  var auth = window.FY_AUTH || null;
+  var db = window.FY_DB || null;
+  var currentUser = null;
+  var pushTimer = null;
+  var googleBusy = false;
   var storageBroken = false;
   function saveState() {
     state.updated = new Date().toISOString();
@@ -142,6 +153,7 @@
         toast('此瀏覽器唔准儲存紀錄（可能係私隱模式），今次紀錄重新整理後會消失。');
       }
     }
+    schedulePush();
   }
   function dayData(key) {
     var k = key || todayISO();
@@ -180,6 +192,146 @@
       cursor.setDate(cursor.getDate() - 1);
     }
     return { total: total, today: today, week: week, month: month, month30: month30, streak: streak, best: best, bestKey: bestKey, days: keys.length };
+  }
+
+  /* ---------------- Google 登入／Firestore 同步 ---------------- */
+  function setSyncStatus(message) {
+    var el = $('gm-sync-status');
+    if (el) { el.textContent = message || ''; }
+  }
+  function schedulePush() {
+    if (!db || !currentUser) { return; }
+    if (pushTimer) { clearTimeout(pushTimer); }
+    pushTimer = setTimeout(push, 1500);
+  }
+  function mergeRemoteDays(remote) {
+    if (!remote || typeof remote !== 'object') { return false; }
+    var changed = false;
+    Object.keys(remote).forEach(function (key) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) { return; }
+      var item = remote[key];
+      if (!item || typeof item !== 'object') { return; }
+      var local = state.days[key] || { auto: 0, manual: 0, note: '' };
+      var auto = Math.max(Number(local.auto) || 0, Number(item.auto) || 0);
+      var manual = Math.max(Number(local.manual) || 0, Number(item.manual) || 0);
+      var note = local.note || (typeof item.note === 'string' ? item.note.slice(0, 4000) : '');
+      if (auto !== (Number(local.auto) || 0) || manual !== (Number(local.manual) || 0) || note !== (local.note || '')) {
+        state.days[key] = { auto: auto, manual: manual, note: note };
+        changed = true;
+      }
+    });
+    return changed;
+  }
+  function pull() {
+    if (!db || !currentUser) { return Promise.resolve(); }
+    setSyncStatus('讀取雲端紀錄中…');
+    return db.collection('users').doc(currentUser.uid).get().then(function (doc) {
+      if (doc.exists) {
+        var changed = mergeRemoteDays((doc.data() || {}).guangmingCounts);
+        if (changed) {
+          saveState();
+          renderStats();
+          renderHistory();
+          renderRecordsSummary();
+          renderNote();
+        }
+      }
+      setSyncStatus('已同步：' + totals().total + ' 遍');
+    }).catch(function (e) {
+      setSyncStatus('讀取失敗：' + ((e && e.code) || '未知'));
+    });
+  }
+  function push() {
+    if (!db || !currentUser) { return Promise.resolve(); }
+    setSyncStatus('上載中…');
+    return db.collection('users').doc(currentUser.uid).set({
+      guangmingCounts: state.days,
+      guangmingUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true }).then(function () {
+      setSyncStatus('已同步：' + totals().total + ' 遍');
+    }).catch(function (e) {
+      setSyncStatus('上載失敗：' + ((e && e.code) || '未知'));
+    });
+  }
+  function googleProvider() {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    return provider;
+  }
+  function googleSignIn() {
+    if (!auth) {
+      setSyncStatus('Firebase 未載入，請檢查網絡。');
+      return;
+    }
+    if (googleBusy) { return; }
+    googleBusy = true;
+    var provider = googleProvider();
+    auth.signInWithPopup(provider).then(function () {
+      googleBusy = false;
+    }).catch(function (e) {
+      googleBusy = false;
+      var code = (e && e.code) || '';
+      if (code === 'auth/popup-blocked') {
+        auth.signInWithRedirect(provider);
+        return;
+      }
+      if (code === 'auth/unauthorized-domain') {
+        setSyncStatus('登入失敗：auth/unauthorized-domain（Firebase 授權網域未包含本站）');
+        return;
+      }
+      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        setSyncStatus('登入已取消。');
+        return;
+      }
+      setSyncStatus('登入失敗：' + (code || '未知'));
+    });
+  }
+  function initAuth() {
+    var loginBtn = $('gm-google-login');
+    var switchBtn = $('gm-google-switch');
+    var logoutBtn = $('gm-google-logout');
+    var avatar = $('gm-avatar');
+    var userEl = $('gm-sync-user');
+    if (!auth) {
+      if (loginBtn) { loginBtn.disabled = true; }
+      setSyncStatus('Firebase 未載入，請檢查網絡。');
+      return;
+    }
+    auth.getRedirectResult().catch(function () {});
+    auth.onAuthStateChanged(function (user) {
+      currentUser = user || null;
+      if (user) {
+        if (loginBtn) { loginBtn.hidden = true; }
+        if (switchBtn) { switchBtn.hidden = false; }
+        if (logoutBtn) { logoutBtn.hidden = false; }
+        if (avatar) {
+          if (user.photoURL) { avatar.src = user.photoURL; avatar.hidden = false; }
+          else { avatar.hidden = true; avatar.removeAttribute('src'); }
+        }
+        if (userEl) { userEl.textContent = user.displayName || '已登入'; }
+        pull().then(push);
+      } else {
+        if (loginBtn) { loginBtn.hidden = false; }
+        if (switchBtn) { switchBtn.hidden = true; }
+        if (logoutBtn) { logoutBtn.hidden = true; }
+        if (avatar) { avatar.hidden = true; avatar.removeAttribute('src'); }
+        if (userEl) { userEl.textContent = '未登入'; }
+        setSyncStatus('未登入：紀錄只存本機。');
+      }
+    });
+    if (loginBtn) { loginBtn.addEventListener('click', googleSignIn); }
+    if (switchBtn) { switchBtn.addEventListener('click', googleSignIn); }
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', function () {
+        if (auth) { auth.signOut(); }
+      });
+    }
+    if (avatar) {
+      avatar.addEventListener('error', function () { avatar.hidden = true; });
+    }
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden && currentUser) { pull(); }
+    });
   }
 
   /* ---------------- 共用渲染 ---------------- */
@@ -414,9 +566,10 @@
 
   function syncLoopButton() {
     if (!audio || !loopBtn) { return; }
-    audio.loop = !!state.settings.loop;
-    loopBtn.textContent = state.settings.loop ? '循環：開' : '循環：關';
-    loopBtn.setAttribute('aria-pressed', state.settings.loop ? 'true' : 'false');
+    var mode = state.settings.loopMode || 'all';
+    audio.loop = mode === 'one';
+    loopBtn.textContent = mode === 'all' ? '全輯循環' : (mode === 'one' ? '單曲循環' : '不循環');
+    loopBtn.setAttribute('aria-pressed', mode === 'off' ? 'false' : 'true');
   }
 
   function setStatus(message, kind) {
@@ -544,6 +697,7 @@
     per = FALLBACK_PER;
     try { audio.pause(); } catch (e) { /* ignore */ }
     audio.src = trackUrl(track.file);
+    audio.loop = (state.settings.loopMode === 'one');
     audio.load();
     updateTrackUI();
     updateMediaSession();
@@ -662,10 +816,15 @@
         var now = audio.currentTime || 0;
         autoCredit(now);
       }
-      if (!audio.loop) {
+      var mode = state.settings.loopMode || 'all';
+      if (mode === 'all') {
+        if (tracks.length) {
+          loadTrack((trackIndex + 1) % tracks.length, true);
+        }
+      } else if (mode === 'off') {
         userWantsPlay = false;
         if (playBtn) { playBtn.textContent = '播放'; }
-        setStatus('已播完；循環關閉，唔會自動續播。');
+        setStatus('已播完；不循環，唔會自動續播。');
       }
     });
 
@@ -686,13 +845,14 @@
 
     if (loopBtn) {
       loopBtn.addEventListener('click', function () {
-        var on = !state.settings.loop;
-        state.settings.loop = on;
-        audio.loop = on;
+        var modes = ['all', 'one', 'off'];
+        var current = modes.indexOf(state.settings.loopMode);
+        var next = modes[(current < 0 ? 0 : current + 1) % modes.length];
+        state.settings.loopMode = next;
+        state.settings.loop = next !== 'off';
         saveState();
-        loopBtn.textContent = on ? '循環：開' : '循環：關';
-        loopBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
-        toast(on ? '循環播放：開' : '循環播放：關');
+        syncLoopButton();
+        toast(next === 'all' ? '全輯循環' : (next === 'one' ? '單曲循環' : '不循環'));
       });
     }
 
@@ -1045,11 +1205,11 @@
     }
     var foot = $('foot-version');
     if (foot) {
-      foot.textContent = '光明真言系統 v2.1.0';
+      foot.textContent = '光明真言系統 v2.2.0';
     }
     var brandVersion = $('brand-version');
     if (brandVersion) {
-      brandVersion.textContent = 'v2.1.0';
+      brandVersion.textContent = 'v2.2.0';
     }
     var intro = $('gm-intro');
     if (intro && practice && practice.intro) { intro.textContent = practice.intro; }
@@ -1057,6 +1217,7 @@
 
   function init() {
     initChrome();
+    initAuth();
     if (!DATA || !mantra || !practice) {
       var box = $('passages');
       if (box) {

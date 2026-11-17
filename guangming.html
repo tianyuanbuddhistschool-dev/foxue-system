@@ -19,6 +19,13 @@
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="guangming.css">
 <link rel="stylesheet" href="theme-black-gold.css">
+<style>
+  .gm-auth{max-width:1100px;margin:.4rem auto 0;padding:0 1.15rem}
+  .gm-auth-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
+  .gm-auth-row .btn{font-size:.76rem;padding:.38rem .8rem}
+  .gm-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #d4af37;box-shadow:0 0 0 3px rgba(212,175,55,.12),0 0 14px rgba(212,175,55,.32)}
+  .gm-auth-status{font-size:.72rem;color:rgba(212,175,55,.75);margin:.15rem 0 0}
+</style>
 </head>
 <body>
 <a class="skip-link" href="#main">跳至主要內容</a>
@@ -30,7 +37,7 @@
       <div class="brand">
         <span class="brand-mark" aria-hidden="true">佛</span>
         <div class="brand-text">
-          <h1 class="brand-title">光明真言<span class="brand-dot">・</span>專修系統 <span class="ver-pill" id="brand-version">v2.1.0</span></h1>
+          <h1 class="brand-title">光明真言<span class="brand-dot">・</span>專修系統 <span class="ver-pill" id="brand-version">v2.2.0</span></h1>
           <p class="brand-sub">四語・108 遍・原生播放</p>
         </div>
       </div>
@@ -41,6 +48,17 @@
       </div>
     </div>
   </header>
+
+  <section class="gm-auth" aria-label="Google 登入同步">
+    <div class="gm-auth-row">
+      <img id="gm-avatar" class="gm-avatar" alt="" hidden referrerpolicy="no-referrer">
+      <button class="btn btn-primary" id="gm-google-login" type="button">用 Google 登入同步</button>
+      <button class="btn btn-quiet" id="gm-google-switch" type="button" hidden>切換帳號</button>
+      <button class="btn btn-quiet" id="gm-google-logout" type="button" hidden>登出</button>
+      <span class="muted" id="gm-sync-user">未登入</span>
+    </div>
+    <p class="gm-auth-status" id="gm-sync-status" role="status">未登入：紀錄只存本機。</p>
+  </section>
 
   <nav class="tabs gm-tabs" aria-label="光明真言專修分區">
     <a class="tab" href="#section-text">咒文對照</a>
@@ -143,7 +161,7 @@
           <div class="gm-play-side">
             <div class="gm-controls">
               <button class="btn btn-primary gm-play" id="play-btn" type="button">播放</button>
-              <button class="btn" id="loop-btn" type="button" aria-pressed="true">循環：開</button>
+              <button class="btn" id="loop-btn" type="button" aria-pressed="true">全輯循環</button>
               <button class="btn" id="plus-btn" type="button">+1 遍</button>
               <button class="btn btn-quiet" id="wake-btn" type="button" aria-pressed="false">保持螢幕</button>
             </div>
@@ -222,6 +240,10 @@
   <p class="noscript-note">本頁需要啟用 JavaScript 才能顯示咒文對照、播放器與計次。</p>
 </noscript>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
 <script src="data.js"></script>
 <script src="native-audio.js"></script>
 <script src="guangming.js"></script>
