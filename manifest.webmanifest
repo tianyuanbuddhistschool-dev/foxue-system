@@ -2,7 +2,7 @@
   "id": "./",
   "name": "佛音靈氣・佛學系統",
   "short_name": "佛音靈氣",
-  "description": "佛音靈氣：離線咒音庫、七日修行次第、光明真言專修、108 遍計數與功課紀錄。",
+  "description": "佛音靈氣・佛學系統：15 首佛音、四語、Google 登入同步、全輯／單曲／不循環、光明真言專修。",
   "lang": "zh-Hant-HK",
   "dir": "ltr",
   "start_url": "./",
@@ -13,6 +13,15 @@
   "theme_color": "#050505",
   "categories": ["education", "lifestyle"],
   "shortcuts": [
+    {
+      "name": "咒音庫・次第",
+      "short_name": "咒音庫",
+      "description": "23 法門、七日次第、108 計數、功課紀錄",
+      "url": "./library.html",
+      "icons": [
+        { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    },
     {
       "name": "光明真言・專修",
       "short_name": "光明真言",

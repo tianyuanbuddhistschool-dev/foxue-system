@@ -6,19 +6,25 @@
    ============================================================= */
 'use strict';
 
-var CACHE = 'foxue-shell-v1.8.0-20261117';
+var CACHE = 'foxue-shell-v2.0.0-20261117';
 var SHELL = [
   './',
   './index.html',
+  './library.html',
   './guangming.html',
   './app.js',
   './guangming.js',
+  './fy-app.js',
+  './fy-i18n.js',
+  './fy-styles.css',
+  './firebase-config.js',
   './native-audio.js',
   './styles.css',
   './guangming.css',
   './theme-black-gold.css',
   './theme.js',
   './data.js',
+  './fy-data.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png'
