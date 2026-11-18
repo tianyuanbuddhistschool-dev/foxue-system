@@ -15,10 +15,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="光明真言">
 <title>光明真言系統｜佛音靈氣標準</title>
-<script src="theme.js?v=2.3.4"></script>
-<link rel="stylesheet" href="styles.css?v=2.3.4">
-<link rel="stylesheet" href="guangming.css?v=2.3.4">
-<link rel="stylesheet" href="theme-black-gold.css?v=2.3.4">
+<script src="theme.js?v=2.4.0"></script>
+<link rel="stylesheet" href="styles.css?v=2.4.0">
+<link rel="stylesheet" href="guangming.css?v=2.4.0">
+<link rel="stylesheet" href="theme-black-gold.css?v=2.4.0">
 <style>
   .gm-auth{max-width:1100px;margin:.4rem auto 0;padding:0 1.15rem}
   .gm-auth-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
@@ -28,6 +28,13 @@
   .gm-lang-switch{display:flex;gap:.18rem;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.30);border-radius:999px;padding:.16rem}
   .gm-lang-switch button{background:transparent;border:0;color:var(--muted);font-size:.72rem;padding:.3rem .55rem;border-radius:999px}
   .gm-lang-switch button.on{background:#d4af37;color:#1a1405;font-weight:700}
+  /* 技術診斷只喺粵語介面顯示，避免 EN／VI／普 出現中文殘留（四語規格：EN/VI 可見中文 0 條）。 */
+  html[lang="en"] #gm-prefetch, html[lang="vi"] #gm-prefetch,
+  html[lang="en"] #gm-bgdiag, html[lang="vi"] #gm-bgdiag,
+  html[lang="en"] #gm-bg-note, html[lang="vi"] #gm-bg-note,
+  html[lang="en"] #gm-auth-domain, html[lang="vi"] #gm-auth-domain,
+  html[lang="zh-Hans-CN"] #gm-prefetch, html[lang="zh-Hans-CN"] #gm-bgdiag,
+  html[lang="zh-Hans-CN"] #gm-bg-note, html[lang="zh-Hans-CN"] #gm-auth-domain{display:none!important}
 </style>
 </head>
 <body>
@@ -40,7 +47,7 @@
       <div class="brand">
         <span class="brand-mark" aria-hidden="true">佛</span>
         <div class="brand-text">
-          <h1 class="brand-title">光明真言<span class="brand-dot">・</span>專修系統 <span class="ver-pill" id="brand-version">v2.3.4</span></h1>
+          <h1 class="brand-title">光明真言<span class="brand-dot">・</span>專修系統 <span class="ver-pill" id="brand-version">v2.4.0</span></h1>
           <p class="brand-sub">四語・108 遍・原生播放</p>
         </div>
       </div>
@@ -69,6 +76,7 @@
       <span class="muted" id="gm-sync-user">未登入</span>
     </div>
     <p class="gm-auth-status" id="gm-sync-status" role="status">未登入：紀錄只存本機。</p>
+    <p class="gm-auth-status" id="gm-auth-domain" style="opacity:.75">登入網域檢查：—</p>
   </section>
 
   <nav class="tabs gm-tabs" aria-label="光明真言專修分區">
@@ -181,8 +189,11 @@
               <input class="gm-seek" id="seek" type="range" min="0" max="0" step="1" value="0" aria-label="播放進度">
               <span id="dur-time">0:00</span>
             </div>
-            <p class="gm-status" id="player-status" role="status">揀「播放」開始；循環預設開啟，播完會由頭再播。</p>
+            <p class="gm-status" id="player-status" role="status">揀「播放」開始；循環預設單曲，鎖屏都會繼續。</p>
+            <p class="muted gm-auto-note" id="gm-prefetch">本機預載：準備中…</p>
+            <p class="muted gm-auto-note" id="gm-bgdiag">背景自癒：檢查中…</p>
             <p class="muted gm-auto-note">自動計次只計 108 遍音檔：按播放時長比例估算（每遍約 6.95 秒），拖動進度會重新對齊、不補計；功德開示不計次。要精準可撳「+1 遍」。</p>
+            <p class="muted gm-auto-note" id="gm-bg-note">鎖屏貼士：預設「單曲循環」用瀏覽器原生 loop，唔靠 JS，最穩；「全輯循環」換段要靠 JS，手機省電模式可能停喺段落尾。要 100% 鎖屏穩定可用 APK（MediaPlayer 前台服務）。</p>
           </div>
         </div>
       </div>
@@ -254,10 +265,10 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js?v=2.3.4"></script>
-<script src="data.js?v=2.3.4"></script>
-<script src="guangming-i18n.js?v=2.3.4"></script>
-<script src="native-audio.js?v=2.3.4"></script>
-<script src="guangming.js?v=2.3.4"></script>
+<script src="firebase-config.js?v=2.4.0"></script>
+<script src="data.js?v=2.4.0"></script>
+<script src="guangming-i18n.js?v=2.4.0"></script>
+<script src="native-audio.js?v=2.4.0"></script>
+<script src="guangming.js?v=2.4.0"></script>
 </body>
 </html>

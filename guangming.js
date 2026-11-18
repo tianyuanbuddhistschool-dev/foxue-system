@@ -97,7 +97,11 @@
     return {
       version: 1,
       days: {},
-      settings: { loop: true, loopMode: 'all', track: 0 },
+      /* 2026-11-18 v2.4.0：預設改「單曲循環」。
+         全輯循環要靠 JS 嘅 ended 事件換段；手機熄屏後 JS 會被系統凍結，
+         12:31 播完就停（用家回報嘅「熄屏後背景播音停止」根因之一）。
+         單曲循環用瀏覽器原生 loop，唔靠 JS，鎖屏照轉。 */
+      settings: { loop: true, loopMode: 'one', track: 0, bgFix: 2 },
       updated: ''
     };
   }
@@ -126,6 +130,15 @@
         safe.settings.loopMode = safe.settings.loop ? 'all' : 'off';
       }
       safe.settings.track = Number(raw.settings.track) === 1 ? 1 : 0;
+      /* 一次性由「全輯」遷去「單曲」：舊存檔嘅全輯模式喺鎖屏時會停。
+         用家之後仍可自己撳返全輯，唔會再被強制改。 */
+      if (Number(raw.settings.bgFix) !== 2) {
+        if (safe.settings.loopMode === 'all') {
+          safe.settings.loopMode = 'one';
+          safe.settings.bgMigrated = true;
+        }
+        safe.settings.bgFix = 2;
+      }
     }
     safe.updated = typeof raw.updated === 'string' ? raw.updated : '';
     return safe;
@@ -233,6 +246,10 @@
 
   function applyLanguage() {
     document.documentElement.lang = LANG_HTML[lang] || 'zh-Hant-HK';
+    document.title = lang === 'cmn' ? '光明真言系统｜佛音灵气标准'
+      : (lang === 'en' ? 'Mantra of Light System | Foyin Lingqi Standard'
+      : (lang === 'vi' ? 'Hệ thống Chân ngôn Quang Minh | Tiêu chuẩn Phật Âm Linh Khí'
+      : '光明真言系統｜佛音靈氣標準'));
     var target = LANG_TARGET[lang] || 'yue';
     var cells = document.querySelectorAll('.gm-lang[data-lang]');
     for (var i = 0; i < cells.length; i++) {
@@ -268,7 +285,7 @@
     }
     var foot = $('foot-version');
     if (foot) {
-      var version = '2.3.4';
+      var version = '2.4.0';
       foot.setAttribute('data-no-i18n', '');
       foot.textContent = lang === 'yue' ? '光明真言系統 v' + version
         : (lang === 'cmn' ? '光明真言系统 v' + version
@@ -294,6 +311,9 @@
     if (!LANG_TARGET[next]) { return; }
     lang = next;
     applyLanguage();
+    /* 統計卡／紀錄摘要係即時組合字串，要跟語言重建。 */
+    renderStats();
+    renderRecordsSummary();
   }
 
   function updateTodayChip() {
@@ -359,9 +379,47 @@
   }
 
   /* ---------------- Google 登入／Firestore 同步 ---------------- */
+  /* 登入／同步狀態係即時寫入，唔會經 applyLanguage 嘅文字掃描；
+     所以要喺寫入一刻自己翻譯，否則 EN／VI 會殘留中文。 */
+  function localizeStatus(message) {
+    message = message || '';
+    if (!message || lang === 'yue') { return message; }
+    var m;
+    if ((m = /^已同步：(\d+) 遍$/.exec(message))) {
+      if (lang === 'cmn') { return '已同步：' + m[1] + ' 遍'; }
+      if (lang === 'en') { return 'Synced: ' + m[1] + ' times'; }
+      return 'Đã đồng bộ: ' + m[1] + ' lần';
+    }
+    if ((m = /^讀取失敗：(.+)$/.exec(message))) {
+      if (lang === 'cmn') { return '读取失败：' + m[1]; }
+      if (lang === 'en') { return 'Load failed: ' + m[1]; }
+      return 'Tải thất bại: ' + m[1];
+    }
+    if ((m = /^上載失敗：(.+)$/.exec(message))) {
+      if (lang === 'cmn') { return '上传失败：' + m[1]; }
+      if (lang === 'en') { return 'Upload failed: ' + m[1]; }
+      return 'Tải lên thất bại: ' + m[1];
+    }
+    if ((m = /^已登入：(.+)。紀錄會分開儲存。$/.exec(message))) {
+      if (lang === 'cmn') { return '已登录：' + m[1] + '。记录会分开保存。'; }
+      if (lang === 'en') { return 'Signed in: ' + m[1] + '. Records are kept separately.'; }
+      return 'Đã đăng nhập: ' + m[1] + '. Ghi chép được lưu riêng.';
+    }
+    if (message === '讀取雲端紀錄中…') {
+      if (lang === 'cmn') { return '读取云端记录中…'; }
+      if (lang === 'en') { return 'Loading cloud records…'; }
+      return 'Đang tải ghi chép trên đám mây…';
+    }
+    if (message === '上載中…') {
+      if (lang === 'cmn') { return '上传中…'; }
+      if (lang === 'en') { return 'Uploading…'; }
+      return 'Đang tải lên…';
+    }
+    return trText(message);
+  }
   function setAuthStatus(message) {
     var el = $('gm-sync-status');
-    if (el) { el.textContent = message || ''; }
+    if (el) { el.textContent = localizeStatus(message); }
   }
   function schedulePush() {
     if (!db || !currentUser) { return; }
@@ -422,6 +480,36 @@
     provider.setCustomParameters({ prompt: 'select_account' });
     return provider;
   }
+  function authErrorText(code, prefix) {
+    code = code || '';
+    var host = location.hostname;
+    if (code === 'auth/unauthorized-domain') {
+      if (lang === 'cmn') { return '登录失败：域名 ' + host + ' 未加入 Firebase 授权域名（Firebase Console → Authentication → Settings → Authorized domains）。可先用本机记录或 APK。'; }
+      if (lang === 'en') { return 'Sign-in failed: domain ' + host + ' is not in Firebase Authorized domains. Use local records or the APK meanwhile.'; }
+      if (lang === 'vi') { return 'Đăng nhập thất bại: tên miền ' + host + ' chưa được thêm vào Firebase Authorized domains. Tạm dùng ghi chép cục bộ hoặc APK.'; }
+      return '登入失敗：網域 ' + host + ' 未加入 Firebase 授權網域（Firebase Console → Authentication → Settings → Authorized domains）。可先用下方「+1 遍」及本機紀錄，或改用 APK。';
+    }
+    if (code === 'auth/operation-not-supported-in-this-environment' || code === 'auth/web-storage-unsupported') {
+      if (lang === 'cmn') { return '登录失败：此浏览器（或 App 内建浏览器）封锁了 Google 登录。请用 Chrome／Safari 直接打开本页。'; }
+      if (lang === 'en') { return 'Sign-in failed: this browser (or in-app browser) blocks Google sign-in. Open this page directly in Chrome or Safari.'; }
+      if (lang === 'vi') { return 'Đăng nhập thất bại: trình duyệt này (hoặc trình duyệt trong ứng dụng) chặn đăng nhập Google. Hãy mở trang trực tiếp bằng Chrome hoặc Safari.'; }
+      return '登入失敗：呢個瀏覽器（或 App 內建瀏覽器）封鎖咗 Google 登入。請用 Chrome／Safari 直接開本頁，唔好喺 WhatsApp／Facebook／微信入面開。';
+    }
+    if (code === 'auth/network-request-failed') {
+      if (lang === 'cmn') { return '登录失败：连不到 Google（网络或 VPN 问题）。请检查网络后再试。'; }
+      if (lang === 'en') { return 'Sign-in failed: cannot reach Google (network or VPN issue). Check your connection and try again.'; }
+      if (lang === 'vi') { return 'Đăng nhập thất bại: không kết nối được Google (mạng hoặc VPN). Hãy kiểm tra kết nối rồi thử lại.'; }
+      return '登入失敗：連唔到 Google（網絡或 VPN 問題）。請檢查網絡後再試。';
+    }
+    if (code === 'auth/too-many-requests') {
+      if (lang === 'cmn') { return '登录失败：尝试次数太多，请稍后再试。'; }
+      if (lang === 'en') { return 'Sign-in failed: too many attempts. Please wait and try again.'; }
+      if (lang === 'vi') { return 'Đăng nhập thất bại: quá nhiều lần thử. Vui lòng đợi rồi thử lại.'; }
+      return '登入失敗：嘗試次數太多，請等一陣再試。';
+    }
+    var base = prefix || (lang === 'en' ? 'Sign-in failed: ' : (lang === 'vi' ? 'Đăng nhập thất bại: ' : (lang === 'cmn' ? '登录失败：' : '登入失敗：')));
+    return base + (code || (lang === 'en' ? 'unknown' : (lang === 'vi' ? 'không rõ' : (lang === 'cmn' ? '未知' : '未知'))));
+  }
   function googleRedirect() {
     if (!auth) {
       setAuthStatus('Firebase 未載入，請檢查網絡。');
@@ -430,10 +518,7 @@
     setAuthStatus('正在跳轉 Google 登入…');
     var provider = googleProvider();
     auth.signInWithRedirect(provider).catch(function (e) {
-      var code = (e && e.code) || '';
-      setAuthStatus(code === 'auth/unauthorized-domain'
-        ? '登入失敗：auth/unauthorized-domain（Firebase 授權網域未包含本站）'
-        : '跳轉登入失敗：' + (code || '未知'));
+      setAuthStatus(authErrorText((e && e.code) || '', '跳轉登入失敗：'));
     });
   }
   function googleSignIn() {
@@ -464,14 +549,18 @@
         return;
       }
       if (code === 'auth/unauthorized-domain') {
-        setAuthStatus('登入失敗：auth/unauthorized-domain（Firebase 授權網域未包含本站）');
+        setAuthStatus(authErrorText(code));
         return;
       }
       if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
         setAuthStatus('登入已取消。');
         return;
       }
-      setAuthStatus('登入失敗：' + (code || '未知'));
+      if (code === 'auth/operation-not-supported-in-this-environment' || code === 'auth/web-storage-unsupported' || code === 'auth/network-request-failed') {
+        setAuthStatus(authErrorText(code));
+        return;
+      }
+      setAuthStatus('登入失敗：' + (code || '未知') + '。可先用本機紀錄，或下載 APK 使用。');
     });
   }
   function initAuth() {
@@ -483,10 +572,23 @@
     var userEl = $('gm-sync-user');
     if (!auth) {
       if (loginBtn) { loginBtn.disabled = true; }
-      setAuthStatus('Firebase 未載入，請檢查網絡。');
+      setAuthStatus('Firebase 未載入（SDK 被阻擋或離線）。本機紀錄、播放、計次全部照用；登入只影響跨裝置同步。');
       return;
     }
-    auth.getRedirectResult().catch(function () {});
+    try { auth.useDeviceLanguage(); } catch (e) { /* ignore */ }
+    /* 明確用 LOCAL persistence：手機瀏覽器／PWA 重開都保住登入，
+       唔會每次返嚟都要重新彈 Google。 */
+    if (auth.setPersistence && firebase.auth.Auth && firebase.auth.Auth.Persistence) {
+      auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function () { /* ignore */ });
+    }
+    checkAuthDomain();
+    auth.getRedirectResult().then(function (result) {
+      if (result && result.user) {
+        setAuthStatus('已由跳轉登入：' + (result.user.displayName || '已登入'));
+      }
+    }).catch(function (e) {
+      setAuthStatus(authErrorText((e && e.code) || '', '跳轉登入失敗：'));
+    });
     auth.onAuthStateChanged(function (user) {
       currentUser = user || null;
       if (user) {
@@ -498,7 +600,7 @@
           if (user.photoURL) { avatar.src = user.photoURL; avatar.hidden = false; }
           else { avatar.hidden = true; avatar.removeAttribute('src'); }
         }
-        if (userEl) { userEl.textContent = user.displayName || '已登入'; }
+        if (userEl) { userEl.textContent = user.displayName || trText('已登入'); }
         pull().then(push);
       } else {
         if (loginBtn) { loginBtn.hidden = false; }
@@ -506,7 +608,7 @@
         if (switchBtn) { switchBtn.hidden = true; }
         if (logoutBtn) { logoutBtn.hidden = true; }
         if (avatar) { avatar.hidden = true; avatar.removeAttribute('src'); }
-        if (userEl) { userEl.textContent = '未登入'; }
+        if (userEl) { userEl.textContent = trText('未登入'); }
         if (!googleBusy) { setAuthStatus('未登入：紀錄只存本機。'); }
       }
     });
@@ -526,6 +628,34 @@
     });
   }
 
+  /* 登入網域自檢（2026-11-18 v2.4.0）
+     用 Firebase createAuthUri 檢查目前網域有冇加入 Authorized domains。
+     有啲「登入唔成功」其實係喺 file://、內建瀏覽器、或未授權網域發生，
+     事先講清楚，唔好再令用家以為個掣壞。 */
+  function checkAuthDomain() {
+    var el = $('gm-auth-domain');
+    if (!el) { return; }
+    var cfg = window.FY_FIREBASE;
+    if (!cfg || !cfg.apiKey) { el.textContent = '登入網域檢查：未讀到 firebase-config.js。'; return; }
+    if (location.protocol === 'file:') {
+      el.textContent = '登入網域檢查：本機檔案模式（file://）唔支援 Google 登入；請用上線網址或 APK。';
+      return;
+    }
+    el.textContent = '登入網域檢查：檢查中…';
+    var body = JSON.stringify({ providerId: 'google.com', continueUri: location.origin + '/' });
+    fetch('https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri?key=' + encodeURIComponent(cfg.apiKey), {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body
+    }).then(function (res) { return res.json(); }).then(function (json) {
+      if (json && json.authUri) {
+        el.textContent = '登入網域檢查：正常（' + location.hostname + ' 已授權）';
+      } else {
+        el.textContent = '登入網域檢查：未授權（' + location.hostname + '）。管理員可到 Firebase Console → Authentication → Settings → Authorized domains 加入。';
+      }
+    }).catch(function () {
+      el.textContent = '登入網域檢查：連唔到 Firebase（離線或網絡封鎖）；本機紀錄照用。';
+    });
+  }
+
   /* ---------------- 共用渲染 ---------------- */
   var LANGS = (practice && practice.languages && practice.languages.length) ? practice.languages : [
     { id: 'yue', label: '粵語', tts: 'yue-Hant-HK' },
@@ -534,13 +664,20 @@
     { id: 'vi', label: 'Tiếng Việt', tts: 'vi-VN' }
   ];
 
+  function statDaysNote(n) {
+    n = Math.max(0, Math.floor(Number(n) || 0));
+    if (lang === 'cmn') { return n + ' 日有记录'; }
+    if (lang === 'en') { return n + (n === 1 ? ' day' : ' days') + ' recorded'; }
+    if (lang === 'vi') { return n + ' ngày có ghi'; }
+    return n + ' 日有紀錄';
+  }
   function renderStats() {
     var box = $('gm-stats');
     if (!box) { return; }
     var t = totals();
     box.innerHTML =
       '<div class="stat-card"><span class="stat-label">今日遍數</span><span class="stat-value">' + t.today + '</span><span class="stat-note">自動＋手動</span></div>' +
-      '<div class="stat-card"><span class="stat-label">累計遍數</span><span class="stat-value">' + t.total + '</span><span class="stat-note">' + t.days + ' 日有紀錄</span></div>' +
+      '<div class="stat-card"><span class="stat-label">累計遍數</span><span class="stat-value">' + t.total + '</span><span class="stat-note">' + statDaysNote(t.days) + '</span></div>' +
       '<div class="stat-card"><span class="stat-label">連續日數</span><span class="stat-value">' + t.streak + '</span><span class="stat-note">日</span></div>' +
       '<div class="stat-card"><span class="stat-label">最近 7 日</span><span class="stat-value">' + t.week + '</span><span class="stat-note">遍</span></div>';
     var today = t.today;
@@ -810,9 +947,164 @@
   var pendingPlay = false;
   var userWantsPlay = false;
 
+  /* ===== 2026-11-18 v2.4.0：鎖屏背景播放加固 =====
+     根因（兩層）：
+     ① 舊預設「全輯循環」用 JS ended 事件換段；手機熄屏後 JS 被凍結，
+        12:31 播完冇人換段 → 停。已改預設「單曲循環」用原生 loop。
+     ② 舊版靠網絡串流 12 MB 音檔；手機入 Doze／訊號弱時會斷供。
+        新增 Blob 預載：成個檔落本機後再播，斷網、鎖屏都唔受影響。
+     另加看門狗 + pause 自癒 + MediaSession positionState（見下面）。 */
+  var nativePlayer = !!(window.NativeAudio && window.NativeAudio.available && window.NativeAudio.available());
+  var blobCache = {};       /* file -> blob URL */
+  var blobPending = {};     /* file -> true */
+  var blobProgress = {};    /* file -> 0..100 */
+  var blobFailed = {};      /* file -> message */
+  var lastResumeAttempt = 0;
+  var BG_KEY = 'foguang.gm.bgdiag.v1';
+  var bgDiag = { sysPause: 0, rescue: 0, last: 0 };
+  try {
+    var savedBg = JSON.parse(window.localStorage.getItem(BG_KEY) || 'null');
+    if (savedBg && typeof savedBg === 'object') {
+      bgDiag.sysPause = Math.max(0, Number(savedBg.sysPause) || 0);
+      bgDiag.rescue = Math.max(0, Number(savedBg.rescue) || 0);
+      bgDiag.last = Math.max(0, Number(savedBg.last) || 0);
+    }
+  } catch (e) { /* ignore */ }
+
+  function bumpBg(kind) {
+    bgDiag[kind] = (bgDiag[kind] || 0) + 1;
+    bgDiag.last = Date.now();
+    try { window.localStorage.setItem(BG_KEY, JSON.stringify(bgDiag)); } catch (e) { /* ignore */ }
+    updateBgDiag();
+  }
+  function updateBgDiag() {
+    var el = $('gm-bgdiag');
+    if (!el) { return; }
+    var src = (audio && /^blob:/.test(String(audio.src || ''))) ? '本機檔' : (nativePlayer ? '原生播放' : '網絡串流');
+    el.textContent = '背景自癒：救回 ' + bgDiag.rescue + ' 次 · 系統暫停 ' + bgDiag.sysPause + ' 次 · 音源：' + src;
+  }
+  function updatePrefetchLine() {
+    var el = $('gm-prefetch');
+    if (!el) { return; }
+    if (nativePlayer) { el.textContent = '本機預載：APK 原生播放器，由 MediaPlayer 直接讀檔，唔需要網頁預載。'; return; }
+    if (!tracks.length) { el.textContent = '本機預載：未配對音檔。'; return; }
+    var parts = [];
+    tracks.forEach(function (track, index) {
+      var key = track.file;
+      var label = index === 0 ? '108 遍' : '功德';
+      if (blobCache[key]) { parts.push(label + '：已存本機'); }
+      else if (blobPending[key]) { parts.push(label + '：' + (blobProgress[key] || 0) + '%'); }
+      else if (blobFailed[key]) { parts.push(label + '：' + blobFailed[key]); }
+      else { parts.push(label + '：未預載'); }
+    });
+    el.textContent = '本機預載（' + parts.join(' · ') + '）';
+  }
+  function prefetchTrack(index, manual) {
+    if (nativePlayer || !tracks[index]) { updatePrefetchLine(); return; }
+    if (location.protocol === 'file:') { updatePrefetchLine(); return; }
+    var track = tracks[index];
+    var key = track.file;
+    if (!key || blobCache[key] || blobPending[key] || blobFailed[key]) { updatePrefetchLine(); return; }
+    if (!manual && navigator.connection && (navigator.connection.saveData || /(^|-)2g$/.test(navigator.connection.effectiveType || ''))) {
+      blobFailed[key] = '省數據模式略過';
+      updatePrefetchLine();
+      return;
+    }
+    var url = trackUrl(key);
+    if (!url) { return; }
+    blobPending[key] = true;
+    blobProgress[key] = 0;
+    updatePrefetchLine();
+    fetch(url, { cache: 'force-cache' }).then(function (res) {
+      if (!res.ok) { throw new Error('HTTP ' + res.status); }
+      var total = Number(res.headers.get('content-length')) || 0;
+      if (!res.body || !res.body.getReader) {
+        return res.arrayBuffer().then(function (buf) { return { buffer: buf, size: buf.byteLength, total: total }; });
+      }
+      var reader = res.body.getReader();
+      var chunks = [];
+      var got = 0;
+      function pump() {
+        return reader.read().then(function (chunk) {
+          if (chunk.done) {
+            var out = new Uint8Array(got);
+            var off = 0;
+            chunks.forEach(function (c) { out.set(c, off); off += c.length; });
+            return { buffer: out.buffer, size: got, total: total };
+          }
+          chunks.push(chunk.value);
+          got += chunk.value.length;
+          if (total) {
+            blobProgress[key] = Math.min(99, Math.round(got / total * 100));
+            updatePrefetchLine();
+          }
+          return pump();
+        });
+      }
+      return pump();
+    }).then(function (data) {
+      var blob = new Blob([data.buffer], { type: 'audio/mpeg' });
+      blobCache[key] = URL.createObjectURL(blob);
+      blobPending[key] = false;
+      blobProgress[key] = 100;
+      updatePrefetchLine();
+      /* 如果而家呢一段係暫停狀態，直接換本機檔，保留播放位置。
+         播放中就唔打斷，等用家撳暫停或者下次再播先用。 */
+      if (index === trackIndex && audio && audio.paused && !userWantsPlay) {
+        var pos = audio.currentTime || 0;
+        audio.src = blobCache[key];
+        audio.load();
+        try {
+          audio.addEventListener('loadedmetadata', function once() {
+            audio.removeEventListener('loadedmetadata', once);
+            try { audio.currentTime = pos; } catch (e) { /* ignore */ }
+          });
+        } catch (e) { /* ignore */ }
+      }
+      updateBgDiag();
+    }).catch(function (error) {
+      blobPending[key] = false;
+      blobFailed[key] = '預載失敗（' + ((error && error.message) || '網絡') + '）';
+      updatePrefetchLine();
+    });
+  }
+  function maybeSwapToBlob() {
+    if (nativePlayer || !audio || !audio.paused || userWantsPlay) { return; }
+    var track = currentTrack();
+    if (!track) { return; }
+    var key = track.file;
+    if (!blobCache[key] || audio.src === blobCache[key]) { return; }
+    var pos = audio.currentTime || 0;
+    audio.src = blobCache[key];
+    audio.load();
+    try {
+      audio.addEventListener('loadedmetadata', function once() {
+        audio.removeEventListener('loadedmetadata', once);
+        try { audio.currentTime = pos; } catch (e) { /* ignore */ }
+        syncBaseline();
+      });
+    } catch (e) { /* ignore */ }
+    toast('已改用本機音檔（離線可播）');
+  }
+  function resumePlayback(reason) {
+    if (!audio || !userWantsPlay || audio.ended) { return; }
+    if (!audio.paused) { return; }
+    var now = Date.now();
+    if (now - lastResumeAttempt < 2500) { return; }
+    lastResumeAttempt = now;
+    var promise;
+    try { promise = audio.play(); } catch (e) { return; }
+    if (promise && promise.then) {
+      promise.then(function () {
+        bumpBg('rescue');
+        setStatus('播放中：' + (currentTrack() ? currentTrack().label : ''), 'live');
+      }).catch(function () { /* 等下一次 watchdog／返前景再試 */ });
+    }
+  }
+
   function syncLoopButton() {
     if (!audio || !loopBtn) { return; }
-    var mode = state.settings.loopMode || 'all';
+    var mode = state.settings.loopMode || 'one';
     audio.loop = mode === 'one';
     loopBtn.setAttribute('data-no-i18n', '');
     loopBtn.textContent = trText(mode === 'all' ? '全輯循環' : (mode === 'one' ? '單曲循環' : '不循環'));
@@ -951,12 +1243,13 @@
     duration = 0;
     per = FALLBACK_PER;
     try { audio.pause(); } catch (e) { /* ignore */ }
-    audio.src = trackUrl(track.file);
+    audio.src = blobCache[track.file] || trackUrl(track.file);
     audio.loop = (state.settings.loopMode === 'one');
     audio.load();
     updateTrackUI();
     updateMediaSession();
     setStatus('已選擇：' + (track.label || '音檔') + '；撳「播放」開始。');
+    prefetchTrack(index, false);
     pendingPlay = !!autoplay;
     if (!autoplay) { userWantsPlay = false; }
     if (autoplay) { playAudio(); }
@@ -1012,13 +1305,22 @@
       setPlayButton();
       setStatus('播放中：' + (currentTrack() ? currentTrack().label : ''), 'live');
       updateMediaSession();
+      updateBgDiag();
     });
 
     audio.addEventListener('pause', function (event) {
       if (event && event.user) { userWantsPlay = false; }
       setPlayButton();
-      if (!audio.ended) { setStatus('已暫停；再撳「播放」可繼續。'); }
       updateMediaSession();
+      if (userWantsPlay && !audio.ended) {
+        /* 系統／省電策略主動 pause：唔等 watchdog，即刻排隊救返。 */
+        bumpBg('sysPause');
+        setStatus('背景播放被系統暫停，正在自動恢復…');
+        setTimeout(function () { resumePlayback('pause'); }, 700);
+      } else if (!audio.ended) {
+        setStatus('已暫停；再撳「播放」可繼續。');
+        maybeSwapToBlob();
+      }
     });
 
     audio.addEventListener('timeupdate', function () {
@@ -1071,7 +1373,7 @@
         var now = audio.currentTime || 0;
         autoCredit(now);
       }
-      var mode = state.settings.loopMode || 'all';
+      var mode = state.settings.loopMode || 'one';
       if (mode === 'all') {
         if (tracks.length) {
           loadTrack((trackIndex + 1) % tracks.length, true);
@@ -1152,6 +1454,12 @@
     }
 
     setupMediaSession();
+    updateBgDiag();
+    updatePrefetchLine();
+    /* 兩段都預載：108 遍 12 MB、功德 1.8 MB。第一次上網落完之後，
+       鎖屏、斷網、入 Doze 都照播。 */
+    prefetchTrack(0, false);
+    prefetchTrack(1, false);
     setInterval(function () {
       if (!('mediaSession' in navigator) || !navigator.mediaSession.setPositionState) { return; }
       if (!duration || !isFinite(duration)) { return; }
@@ -1163,14 +1471,17 @@
         });
       } catch (e) { /* ignore */ }
     }, 5000);
+    /* 看門狗：標記「想播」但實際停咗，每 4 秒救一次。 */
+    setInterval(function () {
+      if (userWantsPlay && audio && audio.paused && !audio.ended) { resumePlayback('watchdog'); }
+    }, 4000);
   }
 
   function exposeNativeHooks() {
     if (!window) { return; }
     window.__foxueIsPlayingWanted = function () { return !!userWantsPlay; };
-    window.__foxueResumeAudio = function () {
-      if (userWantsPlay && audio && audio.paused) { playAudio(); }
-    };
+    window.__foxueResumeAudio = function () { resumePlayback('native-hook'); };
+    window.__foxueBgDiag = function () { return { sysPause: bgDiag.sysPause, rescue: bgDiag.rescue, last: bgDiag.last }; };
   }
 
   function setupMediaSession() {
@@ -1224,6 +1535,11 @@
   }
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible' && wakeOn && !wakeLock) { setWake(true); }
+    /* 返前景即查：系統 pause 咗就救返，順便更新診斷。 */
+    if (document.visibilityState === 'visible' && userWantsPlay && audio && audio.paused && !audio.ended) {
+      resumePlayback('visible');
+    }
+    updateBgDiag();
   });
 
   /* ---------------- 功課紀錄 ---------------- */
@@ -1257,10 +1573,22 @@
     var t = totals();
     if (!t.total) {
       box.textContent = '本頁紀錄獨立儲存（與主系統功課紀錄分開）。尚未有紀錄；播放 108 遍音檔會自動計次，亦可撳「+1 遍」手動記錄。';
+      applyLanguage();
       return;
     }
-    box.textContent = '本頁紀錄獨立 · 最近 7 日 ' + t.week + ' 遍 · 最近 30 日 ' + t.month30 + ' 遍 · 最佳一日 ' + t.best + ' 遍' +
-      (t.bestKey ? '（' + t.bestKey + '）' : '') + ' · 連續 ' + t.streak + ' 日。';
+    var best = t.bestKey ? '（' + t.bestKey + '）' : '';
+    if (lang === 'cmn') {
+      box.textContent = '本页记录独立 · 最近 7 日 ' + t.week + ' 遍 · 最近 30 日 ' + t.month30 + ' 遍 · 最佳一日 ' + t.best + ' 遍' + best + ' · 连续 ' + t.streak + ' 日。';
+    } else if (lang === 'en') {
+      box.textContent = 'Records on this page are separate · Last 7 days: ' + t.week + ' · Last 30 days: ' + t.month30 +
+        ' · Best day: ' + t.best + (t.bestKey ? ' (' + t.bestKey + ')' : '') + ' · Streak: ' + t.streak + ' days.';
+    } else if (lang === 'vi') {
+      box.textContent = 'Ghi chép trên trang này riêng biệt · 7 ngày qua: ' + t.week + ' · 30 ngày qua: ' + t.month30 +
+        ' · Ngày tốt nhất: ' + t.best + (t.bestKey ? ' (' + t.bestKey + ')' : '') + ' · Chuỗi: ' + t.streak + ' ngày.';
+    } else {
+      box.textContent = '本頁紀錄獨立 · 最近 7 日 ' + t.week + ' 遍 · 最近 30 日 ' + t.month30 + ' 遍 · 最佳一日 ' + t.best + ' 遍' +
+        best + ' · 連續 ' + t.streak + ' 日。';
+    }
     applyLanguage();
   }
 
@@ -1275,7 +1603,7 @@
   function setSyncStatus(message, isError) {
     var box = $('sync-status');
     if (!box) { return; }
-    box.textContent = message || '';
+    box.textContent = localizeStatus(message);
     box.classList.toggle('is-error', !!isError);
     box.classList.toggle('is-live', !isError && !!message);
   }
@@ -1459,14 +1787,20 @@
     updateTodayChip();
     var foot = $('foot-version');
     if (foot) {
-      foot.textContent = '光明真言系統 v2.3.4';
+      foot.textContent = '光明真言系統 v2.4.0';
     }
     var brandVersion = $('brand-version');
     if (brandVersion) {
-      brandVersion.textContent = 'v2.3.4';
+      brandVersion.textContent = 'v2.4.0';
     }
     var intro = $('gm-intro');
     if (intro && practice && practice.intro) { intro.textContent = practice.intro; }
+    /* 舊存檔由全輯遷去單曲，講一聲，等用家知道可以自己改返。 */
+    if (state.settings && state.settings.bgMigrated) {
+      setTimeout(function () {
+        toast('為咗鎖屏穩定，循環已改為「單曲」；想全輯可撳循環掣切換。');
+      }, 1600);
+    }
   }
 
   function init() {
@@ -1508,6 +1842,12 @@
       });
     }
     applyLanguage();
+    /* theme.js 喺 DOMContentLoaded 才畫主題掣文字；再掃一次，確保 EN／VI 唔會殘留「主題：黑金」。 */
+    setTimeout(applyLanguage, 80);
+    var themeBtn = $('theme-toggle');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', function () { setTimeout(applyLanguage, 0); });
+    }
   }
 
   init();

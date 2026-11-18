@@ -197,8 +197,8 @@ window.GM_STRINGS = {
   },
   "主題：黑金": {
     "zh": "主题：黑金",
-    "en": "Theme: black gold",
-    "vi": "Chủ đề: vàng đen"
+    "en": "Theme: Black-gold",
+    "vi": "Chủ đề: Đen-vàng"
   },
   "二、正咒": {
     "zh": "二、正咒",
@@ -342,8 +342,8 @@ window.GM_STRINGS = {
   },
   "切換淺色主題": {
     "zh": "切换浅色主题",
-    "en": "Switch light theme",
-    "vi": "Chuyển đổi chủ đề Quang Minh"
+    "en": "Switch to light theme",
+    "vi": "Chuyển sang chủ đề sáng"
   },
   "功德與出處": {
     "zh": "功德与出处",
@@ -617,7 +617,7 @@ window.GM_STRINGS = {
   },
   "未登入": {
     "zh": "未登录",
-    "en": "Not logged in",
+    "en": "Not signed in",
     "vi": "Chưa đăng nhập"
   },
   "未登入：紀錄只存本機。": {
@@ -937,8 +937,8 @@ window.GM_STRINGS = {
   },
   "已暫停；再撳「播放」可繼續。": {
     "zh": "已暂停；再按「播放」可继续。",
-    "en": "Paused; press Play to continue.",
-    "vi": "Đã tạm dừng; nhấn Phát để tiếp tục."
+    "en": "Paused. Tap Play to continue.",
+    "vi": "Đã tạm dừng. Nhấn Phát để tiếp tục."
   },
   "已播完；不循環，唔會自動續播。": {
     "zh": "已播完；不循环，不会自动续播。",
@@ -974,5 +974,65 @@ window.GM_STRINGS = {
     "zh": "下载光明真言 App（v1.1.0）",
     "en": "Download Mantra of Light App (v1.1.0)",
     "vi": "Tải ứng dụng Chân ngôn Quang Minh (v1.1.0)"
+  },
+  "為咗鎖屏穩定，循環已改為「單曲」；想全輯可撳循環掣切換。": {
+    "zh": "为了锁屏稳定，循环已改为「单曲」；想全辑可按循环键切换。",
+    "en": "For reliable screen-off playback, loop mode is now Single. Tap the loop button to switch back to Album.",
+    "vi": "Để phát ổn định khi tắt màn hình, chế độ lặp đã chuyển sang Một bài. Nhấn nút lặp để đổi lại Toàn bộ."
+  },
+  "背景播放被系統暫停，正在自動恢復…": {
+    "zh": "背景播放被系统暂停，正在自动恢复…",
+    "en": "Background playback was paused by the system; resuming automatically…",
+    "vi": "Phát nền bị hệ thống tạm dừng; đang tự động phát lại…"
+  },
+  "已自動恢復播放": {
+    "zh": "已自动恢复播放",
+    "en": "Playback resumed automatically",
+    "vi": "Đã tự động phát lại"
+  },
+  "正在開啟 Google 登入彈窗…": {
+    "zh": "正在打开 Google 登录弹窗…",
+    "en": "Opening the Google sign-in popup…",
+    "vi": "Đang mở cửa sổ đăng nhập Google…"
+  },
+  "如果冇見到 Google 彈窗：請允許本站彈出視窗，或按「彈窗冇反應？改用跳轉登入」。": {
+    "zh": "如果没看到 Google 弹窗：请允许本站弹出窗口，或按「弹窗没反应？改用跳转登录」。",
+    "en": "If no Google popup appears, allow popups for this site, or tap the redirect sign-in button.",
+    "vi": "Nếu không thấy cửa sổ Google, hãy cho phép cửa sổ bật lên cho trang này, hoặc nhấn nút đăng nhập chuyển hướng."
+  },
+  "彈窗被瀏覽器擋住，正在改用跳轉登入…": {
+    "zh": "弹窗被浏览器挡住，正在改用跳转登录…",
+    "en": "Popup blocked by the browser; switching to redirect sign-in…",
+    "vi": "Cửa sổ bị trình duyệt chặn; đang chuyển sang đăng nhập chuyển hướng…"
+  },
+  "正在跳轉 Google 登入…": {
+    "zh": "正在跳转 Google 登录…",
+    "en": "Redirecting to Google sign-in…",
+    "vi": "Đang chuyển hướng đến đăng nhập Google…"
+  },
+  "登入已取消。": {
+    "zh": "登录已取消。",
+    "en": "Sign-in cancelled.",
+    "vi": "Đã hủy đăng nhập."
+  },
+  "Firebase 未載入，請檢查網絡。": {
+    "zh": "Firebase 未加载，请检查网络。",
+    "en": "Firebase not loaded. Please check your connection.",
+    "vi": "Firebase chưa tải. Vui lòng kiểm tra kết nối."
+  },
+  "主題：淺色": {
+    "zh": "主题：浅色",
+    "en": "Theme: Light",
+    "vi": "Chủ đề: Sáng"
+  },
+  "切換黑金主題": {
+    "zh": "切换黑金主题",
+    "en": "Switch to black-gold theme",
+    "vi": "Chuyển sang chủ đề đen-vàng"
+  },
+  "已登入": {
+    "zh": "已登录",
+    "en": "Signed in",
+    "vi": "Đã đăng nhập"
   }
 };
