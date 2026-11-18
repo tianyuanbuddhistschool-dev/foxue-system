@@ -930,8 +930,8 @@
     if (!silent) { toast(value ? '逐段筆記已儲存' : '逐段筆記已清除'); }
     var status = document.querySelector('[data-pnote-status="' + id + '"]');
     if (status) {
-      var tm = new Date().toLocaleTimeString(checkinLocale(), { hour: '2-digit', minute: '2-digit' });
-      status.textContent = (lang === 'cmn' ? '已保存 ' : (lang === 'en' ? 'Saved ' : (lang === 'vi' ? 'Đã lưu ' : '已儲存 '))) + tm;
+      /* 只顯示數字時間：語言中立，切換語言唔會殘留中文。 */
+      status.textContent = new Date().toLocaleTimeString(checkinLocale(), { hour: '2-digit', minute: '2-digit' });
     }
   }
   function setupPassageNotes() {
@@ -1951,8 +1951,7 @@
     if (!silent) { toast(value ? '札記已儲存' : '札記已清空'); }
     var status = $('note-status');
     if (status) {
-      var tm = new Date().toLocaleTimeString(checkinLocale(), { hour: '2-digit', minute: '2-digit' });
-      status.textContent = (lang === 'cmn' ? '已保存 ' : (lang === 'en' ? 'Saved ' : (lang === 'vi' ? 'Đã lưu ' : '已儲存 '))) + tm;
+      status.textContent = new Date().toLocaleTimeString(checkinLocale(), { hour: '2-digit', minute: '2-digit' });
     }
     renderNoteHistory();
   }
