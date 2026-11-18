@@ -6,7 +6,7 @@
    ============================================================= */
 'use strict';
 
-var CACHE = 'guangming-shell-v2.4.1-20261118';
+var CACHE = 'guangming-shell-v2.4.2-20261118';
 var SHELL = [
   './',
   './index.html',

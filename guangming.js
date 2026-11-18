@@ -98,7 +98,7 @@
       version: 1,
       days: {},
       passageNotes: {},
-      /* 2026-11-18 v2.4.1：預設改「單曲循環」。
+      /* 2026-11-18 v2.4.2：預設改「單曲循環」。
          全輯循環要靠 JS 嘅 ended 事件換段；手機熄屏後 JS 會被系統凍結，
          12:31 播完就停（用家回報嘅「熄屏後背景播音停止」根因之一）。
          單曲循環用瀏覽器原生 loop，唔靠 JS，鎖屏照轉。 */
@@ -296,7 +296,7 @@
     }
     var foot = $('foot-version');
     if (foot) {
-      var version = '2.4.1';
+      var version = '2.4.2';
       foot.setAttribute('data-no-i18n', '');
       foot.textContent = lang === 'yue' ? '光明真言系統 v' + version
         : (lang === 'cmn' ? '光明真言系统 v' + version
@@ -674,7 +674,7 @@
     });
   }
 
-  /* 登入網域自檢（2026-11-18 v2.4.1）
+  /* 登入網域自檢（2026-11-18 v2.4.2）
      用 Firebase createAuthUri 檢查目前網域有冇加入 Authorized domains。
      有啲「登入唔成功」其實係喺 file://、內建瀏覽器、或未授權網域發生，
      事先講清楚，唔好再令用家以為個掣壞。 */
@@ -739,7 +739,7 @@
     applyLanguage();
   }
 
-  /* ---------------- 修行打卡（2026-11-18 v2.4.1） ---------------- */
+  /* ---------------- 修行打卡（2026-11-18 v2.4.2） ---------------- */
   function checkinLocale() {
     return lang === 'cmn' ? 'zh-CN' : (lang === 'en' ? 'en-US' : (lang === 'vi' ? 'vi-VN' : 'zh-HK'));
   }
@@ -1208,7 +1208,7 @@
   var pendingPlay = false;
   var userWantsPlay = false;
 
-  /* ===== 2026-11-18 v2.4.1：鎖屏背景播放加固 =====
+  /* ===== 2026-11-18 v2.4.2：鎖屏背景播放加固 =====
      根因（兩層）：
      ① 舊預設「全輯循環」用 JS ended 事件換段；手機熄屏後 JS 被凍結，
         12:31 播完冇人換段 → 停。已改預設「單曲循環」用原生 loop。
@@ -2074,11 +2074,11 @@
     updateTodayChip();
     var foot = $('foot-version');
     if (foot) {
-      foot.textContent = '光明真言系統 v2.4.1';
+      foot.textContent = '光明真言系統 v2.4.2';
     }
     var brandVersion = $('brand-version');
     if (brandVersion) {
-      brandVersion.textContent = 'v2.4.1';
+      brandVersion.textContent = 'v2.4.2';
     }
     var intro = $('gm-intro');
     if (intro && practice && practice.intro) { intro.textContent = practice.intro; }
