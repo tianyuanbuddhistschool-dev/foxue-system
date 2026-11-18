@@ -1,64 +1,43 @@
 {
   "id": "./",
-  "name": "光明真言系統",
+  "name": "光明真言",
   "short_name": "光明真言",
-  "description": "光明真言系統：四語（粵／普／EN／VI）、108 遍自動計次、Google 登入同步、全輯／單曲／不循環、原生播放。",
+  "description": "光明真言（不空大灌頂光真言）獨立課誦：四語咒文、108 遍自動計次、修行打卡、每日札記與逐段筆記。",
   "lang": "zh-Hant-HK",
   "dir": "ltr",
   "start_url": "./guangming.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#050505",
-  "theme_color": "#050505",
+  "background_color": "#0a0907",
+  "theme_color": "#0a0907",
   "categories": ["education", "lifestyle"],
   "shortcuts": [
     {
-      "name": "咒音庫・次第",
-      "short_name": "咒音庫",
-      "description": "23 法門、七日次第、108 計數、功課紀錄",
-      "url": "./library.html",
-      "icons": [
-        { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }
-      ]
-    },
-    {
-      "name": "光明真言・專修",
-      "short_name": "光明真言",
-      "description": "四語對照、手印與日課、108 遍自動計次",
-      "url": "./guangming.html",
-      "icons": [
-        { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }
-      ]
-    },
-    {
-      "name": "光明真言・課誦",
+      "name": "課誦",
       "short_name": "課誦",
-      "description": "大計次、播放、修行打卡、每日札記",
-      "url": "./guangming-practice.html",
-      "icons": [
-        { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }
-      ]
+      "description": "大計次、播放、今日進度",
+      "url": "./guangming.html?tab=practice",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "經文",
+      "short_name": "經文",
+      "description": "光明真言咒文、四語、逐段筆記",
+      "url": "./guangming.html?tab=text",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "打卡",
+      "short_name": "打卡",
+      "description": "修行打卡與日曆",
+      "url": "./guangming.html?tab=checkin",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ],
   "icons": [
-    {
-      "src": "icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icons/icon-maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

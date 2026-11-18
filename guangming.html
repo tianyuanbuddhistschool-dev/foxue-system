@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh-Hant-HK" data-theme="black-gold">
+<html lang="zh-Hant-HK" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="光明真言專修頁：CBETA 漢譯咒文、梵文羅馬轉寫、粵語／普通話／English／Tiếng Việt 四語對照、手印與日課、108 遍音檔自動計次。佛音靈氣・佛學系統。">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>光明真言｜不空大灌頂光真言</title>
+<meta name="description" content="光明真言（不空大灌頂光真言）獨立課誦系統：咒文四語、108 遍自動計次、修行打卡、每日札記與逐段筆記。只此一咒。">
 <meta name="color-scheme" content="dark light">
-<meta name="theme-color" content="#050505">
+<meta name="theme-color" content="#0a0907" id="themeMeta">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
@@ -14,326 +15,1351 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="光明真言">
-<title>光明真言系統｜佛音靈氣標準</title>
-<script src="theme.js?v=2.4.3"></script>
-<link rel="stylesheet" href="styles.css?v=2.4.3">
-<link rel="stylesheet" href="guangming.css?v=2.4.3">
-<link rel="stylesheet" href="theme-black-gold.css?v=2.4.3">
 <style>
-  .gm-auth{max-width:1100px;margin:.4rem auto 0;padding:0 1.15rem}
-  .gm-auth-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
-  .gm-auth-row .btn{font-size:.76rem;padding:.38rem .8rem}
-  .gm-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #d4af37;box-shadow:0 0 0 3px rgba(212,175,55,.12),0 0 14px rgba(212,175,55,.32)}
-  .gm-auth-status{font-size:.72rem;color:rgba(212,175,55,.75);margin:.15rem 0 0}
-  .gm-lang-switch{display:flex;gap:.18rem;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.30);border-radius:999px;padding:.16rem}
-  .gm-lang-switch button{background:transparent;border:0;color:var(--muted);font-size:.72rem;padding:.3rem .55rem;border-radius:999px}
-  .gm-lang-switch button.on{background:#d4af37;color:#1a1405;font-weight:700}
-  /* 技術診斷只喺粵語介面顯示，避免 EN／VI／普 出現中文殘留（四語規格：EN/VI 可見中文 0 條）。 */
-  html[lang="en"] #gm-prefetch, html[lang="vi"] #gm-prefetch,
-  html[lang="en"] #gm-bgdiag, html[lang="vi"] #gm-bgdiag,
-  html[lang="en"] #gm-bg-note, html[lang="vi"] #gm-bg-note,
-  html[lang="en"] #gm-auth-domain, html[lang="vi"] #gm-auth-domain,
-  html[lang="zh-Hans-CN"] #gm-prefetch, html[lang="zh-Hans-CN"] #gm-bgdiag,
-  html[lang="zh-Hans-CN"] #gm-bg-note, html[lang="zh-Hans-CN"] #gm-auth-domain{display:none!important}
-
-  /* 修行打卡（v2.4.3） */
-  .gm-checkin-actions{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin:1rem 0}
-  .gm-calendar{margin-top:1rem;border:1px solid rgba(212,175,55,.20);border-radius:14px;padding:.9rem;background:rgba(255,255,255,.02)}
-  .gm-cal-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.6rem}
-  .gm-cal-title{font-weight:700;color:#f0d77a}
-  .gm-cal-nav{padding:.22rem .7rem;font-size:1.15rem;line-height:1.2}
-  .gm-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-  .gm-cal-w{text-align:center;font-size:.68rem;opacity:.6;padding:.2rem 0}
-  .gm-cal-day{aspect-ratio:1/1.05;border:1px solid transparent;border-radius:8px;background:rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.8rem;position:relative;min-width:0;color:inherit}
-  .gm-cal-day.is-checked{border-color:rgba(212,175,55,.65);background:rgba(212,175,55,.14);color:#f0d77a;font-weight:700}
-  .gm-cal-day.is-today{box-shadow:inset 0 0 0 1px #4ade80}
-  .gm-cal-day.is-empty{background:transparent;border-color:transparent}
-  .gm-cal-day.is-future{opacity:.35}
-  .gm-cal-count{font-size:.62rem;color:#d4af37;line-height:1}
-  .gm-note-row{display:flex;gap:.6rem;border-top:1px solid rgba(255,255,255,.08);padding:.55rem 0;font-size:.8rem}
-  .gm-note-row:first-child{border-top:0}
-  .gm-note-date{color:#d4af37;white-space:nowrap;font-variant-numeric:tabular-nums}
-  .gm-note-row p{margin:0;opacity:.85;overflow-wrap:anywhere}
-  .gm-pnote{margin-top:.7rem}
-  .gm-pnote-edit{margin-top:.55rem;border:1px solid rgba(212,175,55,.22);border-radius:10px;padding:.6rem;background:rgba(255,255,255,.02)}
-  .gm-pnote-edit textarea{width:100%;min-height:70px;background:rgba(0,0,0,.25);color:inherit;border:1px solid rgba(212,175,55,.25);border-radius:8px;padding:.55rem;font:inherit;font-size:.85rem;resize:vertical}
-  .gm-pnote-edit .gm-pnote-actions{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;margin-top:.4rem}
-  .gm-pnote-status{font-size:.7rem;opacity:.7}
-
-  /* 課誦模式：收起長文，只留計次、播放、打卡、紀錄 */
-  .practice-only{display:none!important}
-  body.practice-mode #android-app, body.practice-mode #section-text, body.practice-mode #section-mudra,
-  body.practice-mode #section-source, body.practice-mode .gm-hero{display:none!important}
-  body.practice-mode .gm-tabs a[href="#section-text"], body.practice-mode .gm-tabs a[href="#section-mudra"],
-  body.practice-mode .gm-tabs a[href="#section-source"]{display:none!important}
-  body.practice-mode .practice-only{display:inline-flex!important}
-  body.practice-mode #section-practice .gm-big-count{font-size:4.6rem;line-height:1.05}
-  body.practice-mode #section-practice{margin-top:.4rem}
+:root{
+  --bg:#0a0907; --bg2:#100e0a; --card:#14110b; --card2:#1b1710; --raise:#211c13;
+  --text:#f2e9d6; --muted:#a89a80; --faint:#7c705c;
+  --gold:#c9a227; --gold2:#e7c860; --gold-ink:#1a1405; --gold-soft:rgba(201,162,39,.13);
+  --jade:#76b48e; --jade-soft:rgba(118,180,142,.12);
+  --danger:#d98080; --line:rgba(201,162,39,.18); --line2:rgba(201,162,39,.32);
+  --shadow:0 22px 60px rgba(0,0,0,.48); --r:22px;
+}
+[data-theme="light"]{
+  --bg:#f6f0e2; --bg2:#fbf6ea; --card:#fffdf7; --card2:#f6efdf; --raise:#efe6d2;
+  --text:#221c11; --muted:#6e6250; --faint:#93866f;
+  --gold:#8b6a10; --gold2:#6b5109; --gold-ink:#fffdf7; --gold-soft:rgba(139,106,16,.10);
+  --jade:#2f7a51; --jade-soft:rgba(47,122,81,.10);
+  --danger:#a63d32; --line:rgba(139,106,16,.18); --line2:rgba(139,106,16,.34);
+  --shadow:0 20px 50px rgba(80,60,20,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:
+    radial-gradient(900px 520px at 50% -12%, rgba(201,162,39,.16), transparent 64%),
+    radial-gradient(700px 460px at 105% 110%, rgba(118,180,142,.06), transparent 60%),
+    var(--bg);
+  color:var(--text);
+  font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC",-apple-system,"Segoe UI",sans-serif;
+  line-height:1.7; -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+[data-theme="light"] body{background:
+  radial-gradient(900px 520px at 50% -12%, rgba(139,106,16,.12), transparent 64%),
+  radial-gradient(700px 460px at 105% 110%, rgba(47,122,81,.05), transparent 60%),
+  var(--bg)}
+button,input,textarea{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer;border-radius:999px}
+input,textarea{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:11px 13px;color:var(--text);font-size:14px}
+textarea{resize:vertical;min-height:88px}
+a{color:var(--gold2);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--gold2);outline-offset:3px}
+.hidden{display:none!important}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.skip{position:fixed;left:12px;top:-70px;z-index:999;background:var(--gold);color:var(--gold-ink);padding:8px 14px;border-radius:0 0 10px 10px;font-weight:700}
+.skip:focus{top:0}
+.app{max-width:780px;margin:0 auto;padding:0 14px calc(96px + env(safe-area-inset-bottom))}
+.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 2px 10px;background:var(--bg);background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.seal{width:42px;height:42px;flex:0 0 auto;border:1.5px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:var(--gold2);font-family:"Noto Serif TC","PMingLiU",serif;font-size:20px;background:var(--gold-soft);box-shadow:0 0 26px rgba(201,162,39,.22)}
+.brand h1{font-size:18px;line-height:1.25;letter-spacing:.08em;color:var(--gold2);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand p{font-size:10px;color:var(--faint);letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tools{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+.langs{display:flex;align-items:center;gap:1px;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:2px}
+.langs button{font-size:11px;padding:4px 7px;color:var(--muted);border-radius:999px;line-height:1.3}
+.langs button.on{background:var(--gold);color:var(--gold-ink);font-weight:800}
+.icon-btn{width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;color:var(--muted);background:var(--card2)}
+.icon-btn:hover{color:var(--gold2);border-color:var(--gold)}
+.icon-btn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.acct{width:34px;height:34px;border:1.5px solid var(--gold);border-radius:50%;overflow:hidden;display:grid;place-items:center;color:var(--gold2);font-size:14px;background:var(--gold-soft)}
+.acct img{width:100%;height:100%;object-fit:cover;display:block}
+main{padding-top:4px}
+.view{animation:in .22s ease}
+@keyframes in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.card{background:linear-gradient(165deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:13px;box-shadow:var(--shadow);min-width:0}
+.hero{position:relative;display:flex;flex-direction:column;align-items:center;padding:20px 12px 14px;border:1px solid var(--line);border-radius:28px;background:radial-gradient(420px 260px at 50% 0%,rgba(201,162,39,.16),transparent 70%),linear-gradient(170deg,var(--card),var(--bg2));box-shadow:var(--shadow);overflow:hidden}
+.hero::after{content:"";position:absolute;inset:auto 12% -40% 12%;height:120px;background:radial-gradient(closest-side,rgba(201,162,39,.18),transparent);filter:blur(10px);pointer-events:none}
+.ring{position:relative;width:218px;height:218px;max-width:70vw;max-height:70vw}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .bg{fill:none;stroke:var(--card2);stroke-width:6}
+.ring .fg{fill:none;stroke:var(--gold);stroke-width:6;stroke-linecap:round;stroke-dasharray:326.7;stroke-dashoffset:326.7;transition:stroke-dashoffset .5s ease}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.count{font-size:64px;line-height:1;font-weight:800;color:var(--gold2);font-variant-numeric:tabular-nums;letter-spacing:-.02em;text-shadow:0 0 40px rgba(201,162,39,.18)}
+.count-label{font-size:12.5px;color:var(--muted);margin-top:4px}
+.target{font-size:10px;color:var(--faint);border:1px solid var(--line);border-radius:999px;padding:1px 8px;margin-top:5px}
+.hero-meta{display:flex;gap:24px;margin-top:16px;position:relative;z-index:1}
+.hero-meta div{display:flex;flex-direction:column;align-items:center;min-width:52px}
+.hero-meta b{font-size:17px;color:var(--text);font-variant-numeric:tabular-nums}
+.hero-meta span{font-size:10px;color:var(--faint);letter-spacing:.04em}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:11px}
+.card-head h2{font-size:14.5px;color:var(--gold2);letter-spacing:.06em;font-weight:800}
+.pill{font-size:10px;color:var(--gold2);border:1px solid var(--line2);border-radius:999px;padding:2px 8px;white-space:nowrap;background:var(--gold-soft)}
+.track-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px}
+.track-tabs button{font-size:11.5px;padding:6px 11px;border:1px solid var(--line);color:var(--muted);background:var(--card2);border-radius:999px}
+.track-tabs button.on{border-color:var(--gold);color:var(--gold2);background:var(--gold-soft);font-weight:700}
+.play-row{display:flex;align-items:center;gap:10px}
+.play-btn{display:flex;align-items:center;justify-content:center;gap:8px;flex:1;min-height:56px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--gold-ink);font-weight:900;font-size:16px;letter-spacing:.06em;box-shadow:0 12px 30px rgba(201,162,39,.24);border-radius:18px}
+.play-btn:active{transform:scale(.985)}
+.play-btn svg{width:20px;height:20px;fill:currentColor;stroke:none}
+.plus-btn{width:56px;height:56px;border:1px solid var(--line2);background:var(--card2);color:var(--gold2);font-size:16px;font-weight:800;border-radius:18px}
+.progress{height:7px;background:var(--card2);border:1px solid var(--line);border-radius:999px;overflow:hidden;margin:13px 0 4px}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:999px;transition:width .25s linear}
+.time-row{display:flex;justify-content:space-between;font-size:10px;color:var(--faint);font-variant-numeric:tabular-nums}
+.seg{display:flex;gap:2px;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:3px;margin-top:12px}
+.seg button{flex:1;font-size:11px;padding:6px 4px;color:var(--muted);border-radius:999px;white-space:nowrap}
+.seg button.on{background:var(--gold);color:var(--gold-ink);font-weight:800}
+.mini-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.ghost{font-size:11.5px;padding:7px 12px;border:1px solid var(--line);background:var(--card2);color:var(--muted);border-radius:999px}
+.ghost.on{color:var(--jade);border-color:var(--jade);background:var(--jade-soft)}
+.ghost:hover{color:var(--gold2);border-color:var(--gold)}
+.status{font-size:12px;color:var(--jade);min-height:20px;margin-top:9px}
+.status.warn{color:var(--gold2)}
+.fine{font-size:10.5px;color:var(--faint);line-height:1.6;margin-top:3px;overflow-wrap:anywhere}
+.verse{font-family:"Noto Serif TC","PMingLiU",serif;text-align:center;color:var(--gold2);font-size:14.5px;letter-spacing:.06em;line-height:1.9;padding:6px 8px 0}
+.view-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 2px 12px}
+.view-head h2{font-size:17px;color:var(--gold2);letter-spacing:.08em}
+.passage{border-top:1px solid var(--line);padding:17px 0 6px}
+.passage:first-child{border-top:0;padding-top:2px}
+.passage h3{font-size:12.5px;color:var(--gold);letter-spacing:.08em;margin-bottom:8px}
+.han{font-family:"Noto Serif TC","PMingLiU","Songti TC",serif;font-size:21px;line-height:1.95;letter-spacing:.04em;color:var(--text);overflow-wrap:anywhere}
+.roman{font-family:Consolas,"SFMono-Regular",monospace;font-size:12px;color:var(--jade);overflow-wrap:anywhere;margin-top:3px}
+.orig-note{font-size:11px;color:var(--faint);margin-top:7px;line-height:1.7}
+.translation{font-size:14.5px;line-height:1.85;margin-top:10px;color:var(--text);background:var(--card2);border-left:2px solid var(--gold);border-radius:0 12px 12px 0;padding:10px 12px}
+.p-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.note-box{margin-top:9px;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:9px}
+.note-box textarea{min-height:72px;font-size:13px;background:var(--card)}
+.note-box .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.fold{border:1px solid var(--line);border-radius:16px;background:var(--card);margin-bottom:11px;overflow:hidden}
+.fold summary{cursor:pointer;list-style:none;padding:13px 15px;font-size:13px;color:var(--gold2);font-weight:700;display:flex;align-items:center;justify-content:space-between}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary::after{content:"+";color:var(--gold);font-size:16px}
+.fold[open] summary::after{content:"−"}
+.fold .body{padding:0 15px 15px}
+.fold h3{font-size:12.5px;color:var(--gold);margin:14px 0 7px;letter-spacing:.06em}
+.fold ul{list-style:none;display:grid;gap:6px}
+.fold li{font-size:12.3px;color:var(--muted);padding-left:14px;position:relative;line-height:1.75}
+.fold li::before{content:"·";position:absolute;left:2px;color:var(--gold);font-weight:900}
+.mudra{border:1px solid var(--line);border-radius:14px;padding:11px;margin-bottom:8px;background:var(--card2)}
+.mudra b{font-size:12.5px;color:var(--gold2)}
+.mudra .sub{font-size:10px;color:var(--faint);margin-bottom:5px}
+.mudra ol{padding-left:18px;display:grid;gap:2px}
+.mudra li{font-size:11.8px;color:var(--muted)}
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:7px}
+.plan{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--card2)}
+.plan b{font-size:12px;color:var(--gold2)}
+.plan .m{font-size:10px;color:var(--jade);margin:1px 0 4px}
+.plan p{font-size:11px;color:var(--muted)}
+.benefit{font-size:12.2px;color:var(--muted);line-height:1.75;border-left:2px solid var(--gold);padding:1px 0 1px 9px;margin-bottom:8px}
+.benefit.trad{border-left-color:var(--jade)}
+.source-list{display:grid;gap:7px}
+.source-list a{font-size:12px;overflow-wrap:anywhere}
+.source-list .s{font-size:10.5px;color:var(--faint);display:block}
+.word-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-top:8px}
+.word-table th,.word-table td{text-align:left;padding:6px 7px;border-bottom:1px solid var(--line)}
+.word-table th{color:var(--gold);font-weight:700}
+.word-table td.rom{font-family:Consolas,monospace;color:var(--jade)}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:11px}
+.stat{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:10px 5px;text-align:center;min-width:0}
+.stat b{display:block;font-size:21px;color:var(--gold2);font-variant-numeric:tabular-nums;line-height:1.25}
+.stat span{font-size:9.5px;color:var(--muted);display:block;line-height:1.4}
+.checkin-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.primary{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--gold-ink);font-weight:800;font-size:13px;padding:9px 18px;border-radius:999px}
+.primary[disabled]{opacity:.6;cursor:default}
+.calendar{border:1px solid var(--line);border-radius:16px;padding:11px;margin-top:12px;background:var(--card2)}
+.cal-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.cal-head b{font-size:12px;color:var(--gold2)}
+.cal-head button{width:28px;height:28px;border:1px solid var(--line);border-radius:50%;color:var(--muted);font-size:14px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-w{text-align:center;font-size:9px;color:var(--faint);padding:2px 0}
+.cal-d{aspect-ratio:1/1.05;border-radius:7px;border:1px solid transparent;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10.5px;color:var(--muted);position:relative;min-width:0}
+.cal-d.checked{border-color:var(--gold);background:var(--gold-soft);color:var(--gold2);font-weight:700}
+.cal-d.today{box-shadow:inset 0 0 0 1px var(--jade)}
+.cal-d.empty{background:transparent;border-color:transparent}
+.cal-d.future{opacity:.35}
+.cal-d .n{font-size:7.5px;color:var(--gold);line-height:1}
+.notes-list{display:grid;gap:6px}
+.note-row{border-top:1px solid var(--line);padding:7px 0;font-size:11.5px;color:var(--muted);overflow-wrap:anywhere}
+.note-row:first-child{border-top:0}
+.note-row b{color:var(--gold2);font-size:10.5px;margin-right:6px}
+.note-row p{display:inline}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.set-row:first-child{border-top:0;padding-top:0}
+.set-row .s-main{flex:1;min-width:150px}
+.set-row .s-title{font-size:12px;font-weight:600}
+.set-row .s-desc{font-size:10.5px;color:var(--faint);line-height:1.55}
+.switch{position:relative;width:44px;height:25px;flex:0 0 auto;border-radius:999px;background:var(--card2);border:1px solid var(--line)}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:var(--muted);transition:transform .2s,background .2s}
+.switch[aria-checked="true"]{background:var(--gold-soft);border-color:var(--gold)}
+.switch[aria-checked="true"]::after{transform:translateX(19px);background:var(--gold)}
+.acct-card{display:flex;align-items:center;gap:11px;min-width:0}
+.acct-av{width:48px;height:48px;border-radius:50%;border:2px solid var(--gold);object-fit:cover;display:grid;place-items:center;background:var(--gold-soft);color:var(--gold2);font-size:18px;flex:0 0 auto}
+.acct-name{font-size:13px;color:var(--gold2);font-weight:700}
+.acct-sub{font-size:10.5px;color:var(--faint);overflow-wrap:anywhere}
+.msg{font-size:11px;color:var(--muted);line-height:1.6;margin-top:7px;overflow-wrap:anywhere}
+.msg.err{color:var(--danger)}
+.dock{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:780px;z-index:50;display:grid;grid-template-columns:repeat(5,1fr);background:var(--bg);background:color-mix(in srgb,var(--bg) 90%,transparent);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+.dock button{display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--faint);font-size:9.5px;padding:5px 2px;border-radius:12px}
+.dock button.on{color:var(--gold2)}
+.dock button.on svg{stroke:var(--gold2)}
+.dock svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.toast{position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom));transform:translate(-50%,12px);max-width:calc(100vw - 32px);background:var(--gold);color:var(--gold-ink);font-size:12px;font-weight:800;padding:9px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:.22s;z-index:100;text-align:center;line-height:1.45;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.about p{font-size:11.5px;color:var(--muted);line-height:1.75}
+.about h3{font-size:12px;color:var(--gold);margin:11px 0 5px}
+@media(max-width:430px){
+  .brand h1{font-size:16px}
+  .brand p{display:none}
+  .langs button{padding:4px 5.5px;font-size:10px}
+  .ring{width:190px;height:190px}
+  .count{font-size:54px}
+  .hero-meta{gap:18px}
+  .dock{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<a class="skip-link" href="#main">跳至主要內容</a>
-
-<div class="shell">
-
-  <header class="masthead">
-    <div class="masthead-inner">
-      <div class="brand">
-        <span class="brand-mark" aria-hidden="true">佛</span>
-        <div class="brand-text">
-          <h1 class="brand-title">光明真言<span class="brand-dot">・</span>專修系統 <span class="ver-pill" id="brand-version">v2.4.3</span></h1>
-          <p class="brand-sub">四語・108 遍・原生播放</p>
-        </div>
+<a class="skip" href="#main">跳至主要內容</a>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="seal" data-no-i18n aria-hidden="true">光</span>
+      <div style="min-width:0">
+        <h1 id="brandTitle" data-no-i18n>光明真言</h1>
+        <p>不空大灌頂光真言</p>
       </div>
-      <div class="masthead-tools">
-        <span class="today-chip" id="today-chip">—</span>
-        <div class="gm-lang-switch" role="group" aria-label="Language / 語言">
-          <button type="button" data-gmlang="yue" class="on">粵</button>
-          <button type="button" data-gmlang="cmn">普</button>
-          <button type="button" data-gmlang="en">EN</button>
-          <button type="button" data-gmlang="vi">VI</button>
-        </div>
-        <button class="ghost-btn" id="theme-toggle" type="button" aria-pressed="true" title="切換淺色主題">主題：黑金</button>
-        <a class="ghost-btn" href="mahapratisara/">大隨求陀羅尼</a>
-        <a class="ghost-btn" href="library.html">咒音庫・次第</a>
+    </div>
+    <div class="tools">
+      <div class="langs" id="langs" role="group" aria-label="Language">
+        <button type="button" data-lang="yue" class="on" data-no-i18n>粵</button>
+        <button type="button" data-lang="cmn" data-no-i18n>普</button>
+        <button type="button" data-lang="en" data-no-i18n>EN</button>
+        <button type="button" data-lang="vi" data-no-i18n>VI</button>
       </div>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="主題">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path id="themeIcon" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+      <button class="acct" id="acctBtn" type="button" aria-label="帳號"><span id="acctAv" data-no-i18n>佛</span></button>
     </div>
   </header>
 
-  <section class="gm-auth" aria-label="Google 登入同步">
-    <div class="gm-auth-row">
-      <img id="gm-avatar" class="gm-avatar" alt="" hidden referrerpolicy="no-referrer">
-      <button class="btn btn-primary" id="gm-google-login" type="button">用 Google 登入同步</button>
-      <button class="btn btn-quiet" id="gm-google-redirect" type="button" hidden>彈窗冇反應？改用跳轉登入</button>
-      <button class="btn btn-quiet" id="gm-google-switch" type="button" hidden>切換帳號</button>
-      <button class="btn btn-quiet" id="gm-google-logout" type="button" hidden>登出</button>
-      <span class="muted" id="gm-sync-user">未登入</span>
-    </div>
-    <p class="gm-auth-status" id="gm-sync-status" role="status">未登入：紀錄只存本機。</p>
-    <p class="gm-auth-status" id="gm-auth-domain" style="opacity:.75">登入網域檢查：—</p>
-  </section>
-
-  <nav class="tabs gm-tabs" aria-label="光明真言專修分區">
-    <a class="tab" href="#section-text">咒文對照</a>
-    <a class="tab" href="#section-mudra">手印與日課</a>
-    <a class="tab" href="#section-practice">播放與計次</a>
-    <a class="tab" href="#section-checkin">修行打卡</a>
-    <a class="tab" href="#section-records">功課紀錄</a>
-    <a class="tab" href="#section-source">功德與出處</a>
-  </nav>
-
-  <main class="main" id="main">
-
-    <section class="gm-hero" aria-labelledby="gm-title">
-      <p class="gm-kicker">唐密・不空大灌頂光真言</p>
-      <h2 class="gm-title" id="gm-title">光明真言</h2>
-      <p class="gm-sub" id="gm-intro">以光明遍照為德的真言。咒文、四語意譯、手印與日課集中在這一頁；播放 108 遍音檔會自動計次，紀錄只存於你嘅瀏覽器。</p>
-      <div class="gm-meta" aria-label="專修頁重點">
-        <span>108 遍・12:31 音檔</span>
-        <span>四語對照</span>
-        <span>自動計次</span>
-        <span>紀錄本機</span>
+  <main id="main">
+    <!-- 課誦 -->
+    <section class="view" id="view-practice" data-view="practice">
+      <div class="hero">
+        <div class="ring">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="bg" cx="60" cy="60" r="52"></circle>
+            <circle class="fg" id="ringFg" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="ring-center">
+            <div class="count" id="todayCount" aria-live="polite">0</div>
+            <div class="count-label">今日遍數</div>
+            <div class="target">目標 108 遍</div>
+          </div>
+        </div>
+        <div class="hero-meta">
+          <div><b id="totalCount">0</b><span>累計遍數</span></div>
+          <div><b id="streakCount">0</b><span>連續日數</span></div>
+          <div><b id="roundCount">0</b><span>本輪</span></div>
+        </div>
       </div>
-      <div class="gm-actions">
-        <a class="btn btn-primary" href="#section-practice" id="hero-play">開始播放</a>
-        <a class="btn btn-quiet" href="guangming-practice.html">課誦模式</a>
-        <a class="btn btn-quiet" href="#section-text">先讀咒文</a>
-        <a class="btn btn-quiet" href="apk/guangming.apk" download>下載 App</a>
+
+      <div class="card" style="margin-top:13px">
+        <div class="card-head"><h2>播放與計次</h2><span class="pill" id="trackBadge">108 遍</span></div>
+        <div class="track-tabs" id="trackTabs"></div>
+        <div class="play-row">
+          <button class="play-btn" id="playBtn" type="button"></button>
+          <button class="plus-btn" id="plusBtn" type="button" aria-label="+1">+1</button>
+        </div>
+        <div class="progress"><i id="bar"></i></div>
+        <div class="time-row"><span id="curTime">0:00</span><span id="durTime">12:31</span></div>
+        <div class="seg" id="loopSeg">
+          <button type="button" data-mode="one" class="on">單曲循環</button>
+          <button type="button" data-mode="all">全輯循環</button>
+          <button type="button" data-mode="off">不循環</button>
+        </div>
+        <div class="mini-row">
+          <button class="ghost" id="wakeBtn" type="button">保持螢幕</button>
+          <button class="ghost" id="restartBtn" type="button">由頭重播</button>
+          <button class="ghost" id="seekBtn" type="button">進度</button>
+        </div>
+        <input class="hidden" id="seek" type="range" min="0" max="1000" value="0" aria-label="進度">
+        <p class="status" id="status" role="status" aria-live="polite">揀「播放」開始；畫面熄咗都會繼續。</p>
+        <p class="fine" id="prefetch"></p>
+        <p class="fine" id="diag"></p>
       </div>
+      <p class="verse" id="dedication"></p>
     </section>
 
-    <div class="stat-row" id="gm-stats" aria-label="功課統計"></div>
-
-    <section class="block gm-section" id="android-app" aria-labelledby="android-app-title">
-      <div class="block-head">
-        <h3 class="block-title" id="android-app-title">光明真言 Android App</h3>
-      </div>
-      <p>專用 App 一開直接入呢頁；MediaPlayer 原生播放，聲音唔經 WebView，支援鎖屏／通知欄控制。</p>
-      <p class="apk-actions">
-        <a class="btn btn-primary" href="apk/guangming.apk" download>下載光明真言 App（v1.1.0）</a>
-      </p>
-      <p class="muted">Package <code>hk.chunkin.tianyuan.guangming</code>；可同佛學系統 App 並存。</p>
-    </section>
-
-    <section class="block gm-section" id="section-text" aria-labelledby="text-title">
-      <div class="block-head">
-        <h3 class="block-title" id="text-title">咒文與四語對照</h3>
-        <button class="btn btn-quiet" id="stop-speak" type="button">停止朗讀</button>
-      </div>
-      <p class="muted">咒文保留漢譯原文，不自行改字；梵文羅馬轉寫與四語意譯並列。朗讀用裝置內建語音，粵語／越南語未必每部機都有，會自動退回系統預設聲。</p>
+    <!-- 經文 -->
+    <section class="view hidden" id="view-text" data-view="text">
+      <div class="view-head"><h2>咒文</h2><button class="ghost" id="stopSpeak" type="button">停止朗讀</button></div>
       <div id="passages"></div>
-      <div class="gm-phrases">
-        <h4 class="gm-subhead">逐字對照</h4>
-        <div class="gm-table-wrap">
-          <table class="gm-table">
-            <caption class="sr-only">光明真言逐字漢譯、梵文與釋義</caption>
-            <thead>
-              <tr><th scope="col">漢譯</th><th scope="col">羅馬轉寫</th><th scope="col">釋義</th></tr>
-            </thead>
-            <tbody id="phrase-body"></tbody>
-          </table>
+      <details class="fold" id="phrasesFold" open>
+        <summary>逐字對照</summary>
+        <div class="body"><div id="phrases"></div><p class="fine" id="phrasesNote"></p></div>
+      </details>
+      <details class="fold" id="mudraFold">
+        <summary>手印與日課</summary>
+        <div class="body"><div id="mudras"></div><h3>誦持要領</h3><ul id="essentials"></ul><h3>日課建議</h3><div class="plan-grid" id="plans"></div></div>
+      </details>
+      <details class="fold" id="sourceFold">
+        <summary>功德與出處</summary>
+        <div class="body"><h3>經說與傳統說法</h3><div id="benefits"></div><h3>出處與參考</h3><div class="source-list" id="sources"></div><h3>注意</h3><ul id="cautions"></ul><div id="preliminary"></div></div>
+      </details>
+    </section>
+
+    <!-- 打卡 -->
+    <section class="view hidden" id="view-checkin" data-view="checkin">
+      <div class="view-head"><h2>修行打卡</h2><span class="pill">每日一記</span></div>
+      <div class="stat-row" id="checkinStats"></div>
+      <div class="checkin-actions">
+        <button class="primary" id="checkinBtn" type="button">今日打卡</button>
+        <button class="ghost hidden" id="undoBtn" type="button">撤銷今日</button>
+      </div>
+      <p class="fine" id="checkinHint" style="margin-top:8px"></p>
+      <div class="calendar">
+        <div class="cal-head"><button type="button" id="prevMonth" aria-label="上一個月">‹</button><b id="calTitle"></b><button type="button" id="nextMonth" aria-label="下一個月">›</button></div>
+        <div class="cal-grid" id="calHead"></div>
+        <div class="cal-grid" id="calGrid"></div>
+        <p class="fine" style="margin-top:8px">格內數字＝當日遍數；金框＝已打卡；綠框＝今日。</p>
+      </div>
+    </section>
+
+    <!-- 筆記 -->
+    <section class="view hidden" id="view-notes" data-view="notes">
+      <div class="view-head"><h2>筆記</h2><span class="pill" id="notesCount">0</span></div>
+      <div class="card">
+        <div class="card-head"><h2 style="font-size:12.5px">今日札記（只存此瀏覽器）</h2></div>
+        <textarea id="dailyNote" maxlength="4000" placeholder="例：今日誦 108 遍，心比較定；明日試金剛持。"></textarea>
+        <div class="mini-row" style="align-items:center"><button class="primary" id="saveNote" type="button">儲存</button><span class="fine" id="noteStatus"></span></div>
+      </div>
+      <h3 style="font-size:12.5px;color:var(--gold);margin:4px 2px 7px">最近札記</h3>
+      <div class="notes-list" id="recentNotes"></div>
+      <h3 style="font-size:12.5px;color:var(--gold);margin:15px 2px 7px">逐段筆記</h3>
+      <div class="notes-list" id="passageNotes"></div>
+    </section>
+
+    <!-- 設定 -->
+    <section class="view hidden" id="view-settings" data-view="settings">
+      <div class="view-head"><h2>設定</h2><span class="pill" id="verPill">v3.0.0</span></div>
+
+      <div class="card">
+        <div class="card-head"><h2>帳號與同步</h2><span class="pill" id="acctBadge">訪客</span></div>
+        <div class="acct-card" id="acctCard"></div>
+        <div class="mini-row" style="margin-top:10px">
+          <button class="primary" id="loginBtn" type="button">用 Google 登入同步</button>
+          <button class="ghost hidden" id="switchBtn" type="button">切換帳號</button>
+          <button class="ghost hidden" id="logoutBtn" type="button">登出</button>
+          <button class="ghost hidden" id="syncBtn" type="button">立即同步</button>
         </div>
-        <p class="muted" id="phrases-note"></p>
-      </div>
-    </section>
-
-    <section class="block gm-section" id="section-mudra" aria-labelledby="mudra-title">
-      <div class="block-head">
-        <h3 class="block-title" id="mudra-title">手印與日課</h3>
-      </div>
-      <p class="muted">光明真言本身屬公開持誦的真言，未受灌頂亦可誦念；手印與觀想則屬密教事相。以下手印只作公開資料整理與參考，正式修法的結印、觀想、次第，請依具格上師面授。未受灌頂者可先專誦咒文，不必勉強結印。</p>
-      <div class="gm-mudra-grid" id="mudras"></div>
-
-      <h4 class="gm-subhead">誦持要領</h4>
-      <ul class="gm-list" id="essentials"></ul>
-
-      <h4 class="gm-subhead">日課建議</h4>
-      <div class="gm-plan-grid" id="plans"></div>
-      <p class="muted">遍數是方便，不是比賽；質在字句分明、心不散亂。身體不適時應休息、就醫，不必勉強完成功課。</p>
-    </section>
-
-    <section class="block gm-section" id="section-practice" aria-labelledby="practice-title">
-      <div class="block-head">
-        <h3 class="block-title" id="practice-title">播放與計次</h3>
-        <span class="gm-badge" id="track-badge">108 遍</span>
-        <a class="btn btn-quiet practice-only" id="focus-exit" href="guangming.html">返回完整模式</a>
-      </div>
-
-      <div class="gm-player">
-        <div class="gm-track-tabs" id="track-tabs" role="group" aria-label="選擇音檔"></div>
-
-        <div class="gm-player-grid">
-          <div class="gm-counter">
-            <div class="gm-big-count" id="today-count" aria-live="polite">0</div>
-            <div class="gm-big-label">今日遍數</div>
-            <div class="gm-target">
-              <div class="gm-target-head"><span>今日目標 108 遍</span><span id="target-text">0 / 108</span></div>
-              <div class="gm-progress" role="progressbar" aria-label="今日目標進度" aria-valuemin="0" aria-valuemax="108" aria-valuenow="0" id="target-progress">
-                <div class="gm-bar" id="target-bar"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="gm-play-side">
-            <div class="gm-controls">
-              <button class="btn btn-primary gm-play" id="play-btn" type="button">播放</button>
-              <button class="btn" id="loop-btn" type="button" aria-pressed="true">全輯循環</button>
-              <button class="btn" id="plus-btn" type="button">+1 遍</button>
-              <button class="btn btn-quiet" id="wake-btn" type="button" aria-pressed="false">保持螢幕</button>
-            </div>
-            <div class="gm-time-row">
-              <span id="cur-time">0:00</span>
-              <input class="gm-seek" id="seek" type="range" min="0" max="0" step="1" value="0" aria-label="播放進度">
-              <span id="dur-time">0:00</span>
-            </div>
-            <p class="gm-status" id="player-status" role="status">揀「播放」開始；循環預設單曲，鎖屏都會繼續。</p>
-            <p class="muted gm-auto-note" id="gm-prefetch">本機預載：準備中…</p>
-            <p class="muted gm-auto-note" id="gm-bgdiag">背景自癒：檢查中…</p>
-            <p class="muted gm-auto-note">自動計次只計 108 遍音檔：按播放時長比例估算（每遍約 6.95 秒），拖動進度會重新對齊、不補計；功德開示不計次。要精準可撳「+1 遍」。</p>
-            <p class="muted gm-auto-note" id="gm-bg-note">鎖屏貼士：預設「單曲循環」用瀏覽器原生 loop，唔靠 JS，最穩；「全輯循環」換段要靠 JS，手機省電模式可能停喺段落尾。要 100% 鎖屏穩定可用 APK（MediaPlayer 前台服務）。</p>
-          </div>
+        <p class="msg" id="authMsg">未登入：紀錄只存本機。</p>
+        <p class="fine" id="authDomain"></p>
+        <div class="set-row" style="margin-top:6px">
+          <div class="s-main"><div class="s-title">雲端同步</div><div class="s-desc">登入後把打卡、遍數、筆記寫入 Firebase 你自己嘅 uid 文件；唔登入就只存本機。</div></div>
+          <div class="switch" id="cloudToggle" role="switch" aria-checked="true" tabindex="0"></div>
         </div>
+        <p class="fine">登入係可選；唔登入都用得全部功能。請用 Chrome／Safari 直接開本頁，App 內建瀏覽器會被 Google 封鎖。</p>
       </div>
 
-      <p class="gm-dedication verse" id="dedication"></p>
-      <audio id="gm-audio" preload="metadata"></audio>
-    </section>
-
-    <section class="block gm-section" id="section-checkin" aria-labelledby="checkin-title">
-      <div class="block-head">
-        <h3 class="block-title" id="checkin-title">修行打卡</h3>
-        <span class="gm-badge">每日一記</span>
-      </div>
-      <p class="muted">打卡係提醒自己相續，唔係交數；滿 108 遍會自動打卡，亦可以自己補打卡。紀錄同遍數一齊存本機／雲端。</p>
-      <div class="stat-row" id="checkin-stats" aria-label="打卡統計"></div>
-      <div class="gm-checkin-actions">
-        <button class="btn btn-primary" id="checkin-btn" type="button">今日打卡</button>
-        <button class="btn btn-quiet" id="checkin-undo" type="button" hidden>撤銷今日</button>
-        <span class="muted" id="checkin-hint" role="status" aria-live="polite"></span>
-      </div>
-      <div class="gm-calendar">
-        <div class="gm-cal-head">
-          <button class="btn btn-quiet gm-cal-nav" id="cal-prev" type="button" aria-label="上一個月">‹</button>
-          <span class="gm-cal-title" id="cal-title"></span>
-          <button class="btn btn-quiet gm-cal-nav" id="cal-next" type="button" aria-label="下一個月">›</button>
+      <div class="card">
+        <div class="card-head"><h2>音檔與播放</h2></div>
+        <div class="set-row">
+          <div class="s-main"><div class="s-title">預載音檔</div><div class="s-desc">一次落載 108 遍（約 12 MB）＋功德（約 1.8 MB）；之後斷網、鎖屏照播。</div></div>
+          <div class="switch" id="prefToggle" role="switch" aria-checked="true" tabindex="0"></div>
         </div>
-        <div class="gm-cal-grid" id="cal-head"></div>
-        <div class="gm-cal-grid" id="cal-grid"></div>
-        <p class="muted">格內數字＝當日遍數；金框＝已打卡；綠框＝今日。</p>
+        <div class="set-row">
+          <div class="s-main"><div class="s-title">保持螢幕</div><div class="s-desc">用 Wake Lock 阻止熄屏；會用多啲電。</div></div>
+          <div class="switch" id="wakeToggle" role="switch" aria-checked="false" tabindex="0"></div>
+        </div>
+        <p class="fine" id="audioInfo"></p>
       </div>
-    </section>
 
-    <section class="block gm-section" id="section-records" aria-labelledby="records-title">
-      <div class="block-head">
-        <h3 class="block-title" id="records-title">功課紀錄</h3>
-        <div class="gm-record-actions">
-          <button class="btn btn-quiet" id="export-btn" type="button">匯出</button>
-          <button class="btn btn-quiet" id="import-btn" type="button">匯入</button>
-          <button class="btn btn-danger" id="clear-btn" type="button">清除</button>
-          <input id="import-file" type="file" accept="application/json" hidden>
+      <div class="card">
+        <div class="card-head"><h2>外觀</h2></div>
+        <div class="set-row">
+          <div class="s-main"><div class="s-title">主題</div><div class="s-desc">黑金／淺色；同其他頁共用 `foguang.theme.v1`。</div></div>
+          <button class="ghost" id="themeBtn2" type="button">切換主題</button>
         </div>
       </div>
-      <div class="gm-sync-row">
-        <button class="btn btn-primary" id="sync-btn" type="button">同步到主系統</button>
-        <a class="btn btn-quiet" href="library.html?tab=records">去進階功課紀錄</a>
-        <span class="muted" id="sync-status" role="status" aria-live="polite"></span>
+
+      <div class="card">
+        <div class="card-head"><h2>資料備份</h2></div>
+        <div class="mini-row">
+          <button class="ghost" id="exportBtn" type="button">匯出備份（JSON）</button>
+          <button class="ghost" id="importBtn" type="button">匯入備份</button>
+          <button class="ghost" id="clearBtn" type="button" style="color:var(--danger);border-color:var(--danger)">清除本機紀錄</button>
+          <input id="importFile" type="file" accept="application/json" class="hidden">
+        </div>
+        <p class="fine" id="storageInfo"></p>
       </div>
-      <p class="muted">滿 108 遍後可同步：只會更新主系統今日「已完成」與輪數，不會改動主系統其他紀錄；主系統若正開著，請重新載入一次先見到。</p>
-      <p class="muted" id="records-summary">—</p>
-      <div class="gm-history" id="history" aria-label="最近 14 日功課紀錄"></div>
-      <div class="gm-note-box">
-        <label for="note-input">今日札記（只存此瀏覽器）</label>
-        <textarea id="note-input" rows="3" placeholder="例：今日誦 108 遍，心比較定；明日試金剛持。"></textarea>
-        <button class="btn btn-quiet" id="save-note" type="button">儲存札記</button>
-        <span class="muted" id="note-status" role="status"></span>
+
+      <div class="card about">
+        <div class="card-head"><h2>關於</h2></div>
+        <p id="aboutIntro" data-no-i18n></p>
+        <p style="margin-top:6px">咒文依 CBETA 大正藏；四語意譯並列。手印與觀想屬密教事相，正式修法請依具格上師面授。本頁不宣稱治病、消災保證，身心不適請就醫。</p>
+        <h3>出處</h3>
+        <div class="source-list" id="aboutSources"></div>
+        <h3>App</h3>
+        <p><a href="apk/guangming.apk" download>下載光明真言 Android App</a>（MediaPlayer 原生播放＋NativeTts；載入本頁，會自動跟最新版）。</p>
+        <p class="fine" id="aboutMore"></p>
       </div>
-      <h4 class="gm-subhead">最近札記</h4>
-      <div id="note-history"></div>
-      <h4 class="gm-subhead">逐段筆記</h4>
-      <div id="passage-notes"></div>
     </section>
-
-    <section class="block gm-section" id="section-source" aria-labelledby="source-title">
-      <div class="block-head">
-        <h3 class="block-title" id="source-title">功德與出處</h3>
-      </div>
-
-      <h4 class="gm-subhead">經說與傳統說法</h4>
-      <ul class="gm-benefits" id="benefits"></ul>
-      <p class="muted">「經說」指經文所載；「傳統說法」屬後代應用與流通解釋，不是經文保證。本頁不宣稱治病、消災或神通，身心不適請就醫。</p>
-
-      <h4 class="gm-subhead">出處與參考</h4>
-      <ul class="gm-source-list" id="sources"></ul>
-
-      <details class="gm-details" id="preliminary"></details>
-
-      <h4 class="gm-subhead">注意</h4>
-      <ul class="gm-list gm-caution" id="cautions"></ul>
-      <p class="muted">本頁為個人修學整理，非官方教材；密法儀軌須依具格上師傳承。咒文以 CBETA 大正藏為準，坊間譯音差異已並列註明。</p>
-    </section>
-
   </main>
 
-  <footer class="site-foot">
-    <p><span id="foot-version">光明真言系統</span>・四語專修・個人修學整理，非官方教材。</p>
-    <p><a href="apk/guangming.apk" download>下載光明真言 App（v1.1.0）</a></p>
-    <p class="foot-verse">願以此功德，普及於一切；我等與眾生，皆共成佛道。</p>
-  </footer>
+  <nav class="dock" id="dock" aria-label="主要分頁">
+    <button type="button" data-tab="practice" class="on">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg><span>課誦</span>
+    </button>
+    <button type="button" data-tab="text">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h10a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4z"/><path d="M9 8h6M9 12h6"/></svg><span>經文</span>
+    </button>
+    <button type="button" data-tab="checkin">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16M8 15l2 2 4-4"/></svg><span>打卡</span>
+    </button>
+    <button type="button" data-tab="notes">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v5h4M9 12h7M9 16h5"/></svg><span>筆記</span>
+    </button>
+    <button type="button" data-tab="settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg><span>設定</span>
+    </button>
+  </nav>
 </div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<audio id="audio" preload="auto" playsinline></audio>
 
-<div class="toast-root" id="toast-root" role="status" aria-live="polite"></div>
+<script src="data.js"></script>
+<script src="guangming-i18n.js"></script>
+<script src="native-audio.js"></script>
+<script>
+"use strict";
+/* ============================================================================
+   光明真言・獨立課誦系統 v3.0.0
+   - 只做《光明真言》，只此一咒。
+   - 全新版面：光環計次、底部五格、四語一次一語。
+   - 四語、登入、Firestore、背景播放、打卡、札記、逐段筆記。
+   ========================================================================== */
+(function () {
+  var VERSION = "3.0.0";
+  var STORE = "foguang.guangming.v1";
+  var THEME_KEY = "foguang.theme.v1";
+  var LANG_KEY = "guangming.lang";
+  var TARGET = 108;
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); };
+  var pad2 = function (n) { return n < 10 ? "0" + n : String(n); };
+  var nn = function (n) { return Math.max(0, Math.floor(Number(n) || 0)); };
+  var todayISO = function (d) { d = d || new Date(); return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); };
+  var dateOffset = function (n) { var d = new Date(); d.setDate(d.getDate() + n); return todayISO(d); };
+  var fmt = function (s) { s = Math.max(0, Math.floor(Number(s) || 0)); var m = Math.floor(s / 60), x = s % 60; return m + ":" + pad2(x); };
+  var LANGS = {
+    yue: { html: "zh-Hant-HK", tts: "yue-Hant-HK" },
+    cmn: { html: "zh-Hans-CN", tts: "zh-CN" },
+    en: { html: "en", tts: "en-US" },
+    vi: { html: "vi", tts: "vi-VN" }
+  };
+  var lang = "yue";
+  try { var sl = localStorage.getItem(LANG_KEY); if (LANGS[sl]) { lang = sl; } } catch (e) {}
 
-<noscript>
-  <p class="noscript-note">本頁需要啟用 JavaScript 才能顯示咒文對照、播放器與計次。</p>
-</noscript>
+  /* ---------- 新增／補充字串（其餘用 guangming-i18n.js 嘅 GM_STRINGS） ---------- */
+  var APP = {
+    "不空大灌頂光真言": { zh: "不空大灌顶光真言", en: "Amogha Great Empowerment Light Mantra", vi: "Chân ngôn Đại Quán đỉnh Quang Minh Bất Không" },
+    "課誦": { zh: "课诵", en: "Practice", vi: "Tụng niệm" },
+    "經文": { zh: "经文", en: "Text", vi: "Kinh văn" },
+    "打卡": { zh: "打卡", en: "Check-in", vi: "Điểm danh" },
+    "筆記": { zh: "笔记", en: "Notes", vi: "Ghi chú" },
+    "設定": { zh: "设置", en: "Settings", vi: "Cài đặt" },
+    "目標 108 遍": { zh: "目标 108 遍", en: "Goal 108", vi: "Mục tiêu 108" },
+    "本輪": { zh: "本轮", en: "This round", vi: "Vòng này" },
+    "由頭重播": { zh: "从头重播", en: "Restart", vi: "Phát lại từ đầu" },
+    "背景自癒": { zh: "背景自愈", en: "Background recovery", vi: "Tự phục hồi nền" },
+    "本機預載": { zh: "本机预载", en: "Local preload", vi: "Tải trước cục bộ" },
+    "已存本機": { zh: "已存本机", en: "Saved locally", vi: "Đã lưu cục bộ" },
+    "預載中": { zh: "预载中", en: "Preloading", vi: "Đang tải trước" },
+    "網絡串流": { zh: "网络串流", en: "Network stream", vi: "Luồng mạng" },
+    "原生播放": { zh: "原生播放", en: "Native playback", vi: "Phát gốc" },
+    "已暫停": { zh: "已暂停", en: "Paused", vi: "Đã tạm dừng" },
+    "循環": { zh: "循环", en: "Loop", vi: "Lặp" },
+    "音檔": { zh: "音档", en: "Audio", vi: "Âm thanh" },
+    "播放中": { zh: "播放中", en: "Playing", vi: "Đang phát" },
+    "帳號與同步": { zh: "账号与同步", en: "Account & sync", vi: "Tài khoản & đồng bộ" },
+    "訪客模式": { zh: "访客模式", en: "Guest mode", vi: "Chế độ khách" },
+    "雲端同步": { zh: "云端同步", en: "Cloud sync", vi: "Đồng bộ đám mây" },
+    "立即同步": { zh: "立即同步", en: "Sync now", vi: "Đồng bộ ngay" },
+    "已同步": { zh: "已同步", en: "Synced", vi: "Đã đồng bộ" },
+    "同步中": { zh: "同步中", en: "Syncing", vi: "Đang đồng bộ" },
+    "主題": { zh: "主题", en: "Theme", vi: "Chủ đề" },
+    "黑金": { zh: "黑金", en: "Black-gold", vi: "Đen-vàng" },
+    "淺色": { zh: "浅色", en: "Light", vi: "Sáng" },
+    "音檔與播放": { zh: "音档与播放", en: "Audio & playback", vi: "Âm thanh & phát" },
+    "預載音檔": { zh: "预载音档", en: "Preload audio", vi: "Tải trước âm thanh" },
+    "資料備份": { zh: "数据备份", en: "Data backup", vi: "Sao lưu dữ liệu" },
+    "匯出備份（JSON）": { zh: "导出备份（JSON）", en: "Export backup (JSON)", vi: "Xuất sao lưu (JSON)" },
+    "匯入備份": { zh: "导入备份", en: "Import backup", vi: "Nhập sao lưu" },
+    "清除本機紀錄": { zh: "清除本机记录", en: "Clear local records", vi: "Xóa ghi chép cục bộ" },
+    "關於": { zh: "关于", en: "About", vi: "Giới thiệu" },
+    "版本": { zh: "版本", en: "Version", vi: "Phiên bản" },
+    "下載光明真言 Android App": { zh: "下载光明真言 Android App", en: "Download the Mantra of Light Android App", vi: "Tải ứng dụng Chân ngôn Quang Minh cho Android" },
+    "已登入：紀錄會分開儲存。": { zh: "已登录：记录会分开保存。", en: "Signed in: records are kept separately.", vi: "Đã đăng nhập: ghi chép được lưu riêng." },
+    "已登入": { zh: "已登录", en: "Signed in", vi: "Đã đăng nhập" },
+    "今日已打咗卡": { zh: "今日已打过卡", en: "Already checked in today", vi: "Hôm nay đã điểm danh" },
+    "播放失敗": { zh: "播放失败", en: "Playback failed", vi: "Phát thất bại" },
+    "音檔載入失敗": { zh: "音档加载失败", en: "Audio failed to load", vi: "Tải âm thanh thất bại" },
+    "打卡日曆": { zh: "打卡日历", en: "Check-in calendar", vi: "Lịch điểm danh" },
+    "登入失敗": { zh: "登录失败", en: "Sign-in failed", vi: "Đăng nhập thất bại" },
+    "登入已取消": { zh: "登录已取消", en: "Sign-in cancelled", vi: "Đã hủy đăng nhập" },
+    "網絡未通": { zh: "网络未通", en: "Network unavailable", vi: "Mạng không khả dụng" },
+    "已播完；不循環，唔會自動續播。": { zh: "已播完；不循环，不会自动续播。", en: "Finished; no loop, playback stopped.", vi: "Đã hết; không lặp, đã dừng phát." },
+    "已暫停；再撳「播放」可繼續。": { zh: "已暂停；再按「播放」可继续。", en: "Paused. Tap Play to continue.", vi: "Đã tạm dừng. Nhấn Phát để tiếp tục." },
+    "確定撤銷今日打卡？": { zh: "确定撤销今日打卡？", en: "Undo today’s check-in?", vi: "Hoàn tác điểm danh hôm nay?" },
+    "今日滿 108 遍，已自動打卡": { zh: "今日满 108 遍，已自动打卡", en: "108 recitations today — checked in automatically", vi: "Hôm nay đủ 108 lần — đã tự động điểm danh" },
+    "尚未有札記": { zh: "尚未有札记", en: "No notes yet", vi: "Chưa có ghi chú" },
+    "尚未有逐段筆記": { zh: "尚未有逐段笔记", en: "No passage notes yet", vi: "Chưa có ghi chú đoạn" },
+    "逐段筆記": { zh: "逐段笔记", en: "Passage note", vi: "Ghi chú đoạn" },
+    "修改逐段筆記": { zh: "修改逐段笔记", en: "Edit passage note", vi: "Sửa ghi chú đoạn" },
+    "寫低呢一段嘅心得…": { zh: "写下这一段的心得…", en: "Write your reflection on this passage…", vi: "Viết cảm nhận của bạn về đoạn này…" },
+    "儲存": { zh: "保存", en: "Save", vi: "Lưu" },
+    "清除": { zh: "清除", en: "Clear", vi: "Xóa" },
+    "已保存": { zh: "已保存", en: "Saved", vi: "Đã lưu" },
+    "今日札記（只存此瀏覽器）": { zh: "今日札记（只存此浏览器）", en: "Today’s note (this browser only)", vi: "Ghi chú hôm nay (chỉ trình duyệt này)" },
+    "最近札記": { zh: "最近札记", en: "Recent notes", vi: "Ghi chú gần đây" },
+    "修行打卡": { zh: "修行打卡", en: "Practice check-in", vi: "Điểm danh tu tập" },
+    "每日一記": { zh: "每日一记", en: "One mark a day", vi: "Mỗi ngày một dấu" },
+    "連續打卡（日）": { zh: "连续打卡（日）", en: "Check-in streak (days)", vi: "Chuỗi điểm danh (ngày)" },
+    "累計打卡（日）": { zh: "累计打卡（日）", en: "Total check-ins (days)", vi: "Tổng điểm danh (ngày)" },
+    "今月打卡（日）": { zh: "本月打卡（日）", en: "This month (days)", vi: "Tháng này (ngày)" },
+    "今日打卡": { zh: "今日打卡", en: "Check in today", vi: "Điểm danh hôm nay" },
+    "今日已打卡": { zh: "今日已打卡", en: "Checked in today", vi: "Đã điểm danh hôm nay" },
+    "撤銷今日": { zh: "撤销今日", en: "Undo today", vi: "Hoàn tác hôm nay" },
+    "已打卡": { zh: "已打卡", en: "Checked in", vi: "Đã điểm danh" },
+    "格內數字＝當日遍數；金框＝已打卡；綠框＝今日。": { zh: "格内数字＝当日遍数；金框＝已打卡；绿框＝今日。", en: "Number = recitations that day; gold = checked in; green = today.", vi: "Số = số lần ngày đó; vàng = đã điểm danh; xanh = hôm nay." },
+    "上一個月": { zh: "上一个月", en: "Previous month", vi: "Tháng trước" },
+    "下一個月": { zh: "下一个月", en: "Next month", vi: "Tháng sau" },
+    "播放與計次": { zh: "播放与计次", en: "Playback & counting", vi: "Phát & đếm" },
+    "停止朗讀": { zh: "停止朗读", en: "Stop reading", vi: "Dừng đọc" },
+    "逐字對照": { zh: "逐字对照", en: "Word by word", vi: "Đối chiếu từng chữ" },
+    "手印與日課": { zh: "手印与日课", en: "Mudrā & daily practice", vi: "Ấn & khóa tu" },
+    "誦持要領": { zh: "诵持要领", en: "Recitation essentials", vi: "Yếu lĩnh trì tụng" },
+    "日課建議": { zh: "日课建议", en: "Daily practice suggestions", vi: "Gợi ý khóa tu" },
+    "功德與出處": { zh: "功德与出处", en: "Benefits & sources", vi: "Công đức & nguồn" },
+    "經說與傳統說法": { zh: "经说与传统说法", en: "Sutra & tradition", vi: "Kinh & truyền thống" },
+    "出處與參考": { zh: "出处与参考", en: "Sources & references", vi: "Nguồn & tham khảo" },
+    "注意": { zh: "注意", en: "Caution", vi: "Lưu ý" },
+    "切換主題": { zh: "切换主题", en: "Switch theme", vi: "Đổi chủ đề" },
+    "光明真言獨立課誦系統": { zh: "光明真言独立课诵系统", en: "Mantra of Light standalone practice system", vi: "Hệ thống tụng niệm Chân ngôn Quang Minh độc lập" },
+    "只收《光明真言》（不空大灌頂光真言），不列其他法門。": {
+      zh: "只收《光明真言》（不空大灌顶光真言），不列其他法门。",
+      en: "Only the Mantra of Light (Amogha Great Empowerment Light Mantra); no other practices.",
+      vi: "Chỉ có Chân ngôn Quang Minh (Chân ngôn Đại Quán đỉnh Quang Minh Bất Không); không có pháp môn khác."
+    },
+    "（MediaPlayer 原生播放＋NativeTts；載入本頁，會自動跟最新版）。": {
+      zh: "（MediaPlayer 原生播放＋NativeTts；载入本页，会自动跟最新版）。",
+      en: "(Native MediaPlayer playback + NativeTts; it loads this page and follows the latest version automatically).",
+      vi: "(Phát bằng MediaPlayer gốc + NativeTts; ứng dụng tải trang này và tự động theo bản mới nhất)."
+    },
+    "帳號": { zh: "账号", en: "Account", vi: "Tài khoản" },
+    "外觀": { zh: "外观", en: "Appearance", vi: "Giao diện" },
+    "出處": { zh: "出处", en: "Source", vi: "Nguồn" },
+    "咒文": { zh: "咒文", en: "Mantra text", vi: "Chú văn" },
+    "進度": { zh: "进度", en: "Seek", vi: "Tua" },
+    "保持螢幕：開": { zh: "保持屏幕：开", en: "Keep screen on", vi: "Giữ màn hình" },
+    "系統暫停": { zh: "系统暂停", en: "system pauses", vi: "lần hệ thống dừng" },
+    "省數據": { zh: "省数据", en: "data saver", vi: "tiết kiệm dữ liệu" },
+    "失敗": { zh: "失败", en: "failed", vi: "thất bại" },
+    "清除本機紀錄?": { zh: "清除本机记录？", en: "Clear local records?", vi: "Xóa ghi chép cục bộ?" },
+    "登入後把打卡、遍數、筆記寫入 Firebase 你自己嘅 uid 文件；唔登入就只存本機。": {
+      zh: "登录后把打卡、遍数、笔记写入 Firebase 你自己的 uid 文件；不登录就只存本机。",
+      en: "When signed in, check-ins, counts and notes are written to your own Firebase uid document; otherwise they stay on this device.",
+      vi: "Khi đăng nhập, điểm danh, số lần và ghi chú được ghi vào tài liệu uid Firebase của bạn; nếu không, chỉ lưu trên thiết bị."
+    },
+    "登入係可選；唔登入都用得全部功能。請用 Chrome／Safari 直接開本頁，App 內建瀏覽器會被 Google 封鎖。": {
+      zh: "登录是可选的；不登录也能用全部功能。请用 Chrome／Safari 直接打开本页，App 内置浏览器会被 Google 封锁。",
+      en: "Sign-in is optional; all features work without it. Open this page directly in Chrome or Safari — in-app browsers are blocked by Google.",
+      vi: "Đăng nhập là tùy chọn; mọi tính năng vẫn dùng được. Hãy mở trang trực tiếp bằng Chrome hoặc Safari — trình duyệt trong ứng dụng bị Google chặn."
+    },
+    "一次落載 108 遍（約 12 MB）＋功德（約 1.8 MB）；之後斷網、鎖屏照播。": {
+      zh: "一次下载 108 遍（约 12 MB）＋功德（约 1.8 MB）；之后断网、锁屏照播。",
+      en: "Preload the 108-recitation track (about 12 MB) and the benefit talk (about 1.8 MB); afterwards it plays offline and with the screen off.",
+      vi: "Tải trước bản 108 lần (khoảng 12 MB) và bài công đức (khoảng 1,8 MB); sau đó phát được khi mất mạng và tắt màn hình."
+    },
+    "用 Wake Lock 阻止熄屏；會用多啲電。": {
+      zh: "用 Wake Lock 阻止熄屏；会多用一些电。",
+      en: "Use Wake Lock to keep the screen on; this uses more battery.",
+      vi: "Dùng Wake Lock để giữ màn hình sáng; sẽ tốn pin hơn."
+    },
+    "黑金／淺色；同其他頁共用 `foguang.theme.v1`。": {
+      zh: "黑金／浅色；与其他页共用 `foguang.theme.v1`。",
+      en: "Black-gold / light; shared with other pages via `foguang.theme.v1`.",
+      vi: "Đen-vàng / sáng; dùng chung với các trang khác qua `foguang.theme.v1`."
+    },
+    "咒文依 CBETA 大正藏；四語意譯並列。手印與觀想屬密教事相，正式修法請依具格上師面授。本頁不宣稱治病、消災保證，身心不適請就醫。": {
+      zh: "咒文依 CBETA 大正藏；四语意译并列。手印与观想属密教事相，正式修法请依具格上师面授。本页不宣称治病、消灾保证，身心不适请就医。",
+      en: "The mantra follows the CBETA Taishō canon; four-language translations are given. Mudrās and visualisations are esoteric ritual details; formal practice should follow a qualified teacher. This page does not claim healing or guaranteed disaster relief; seek medical care when unwell.",
+      vi: "Chân ngôn theo Đại Chánh tạng CBETA; bản dịch bốn thứ tiếng được nêu. Ấn và quán tưởng thuộc nghi quỹ Mật tông; tu tập chính thức nên theo bậc thầy đủ tư cách. Trang này không tuyên bố chữa bệnh hay bảo đảm tiêu tai; khi thân tâm không khỏe hãy đi khám."
+    },
+    "MediaPlayer 原生播放＋NativeTts；載入本頁，會自動跟最新版。": {
+      zh: "MediaPlayer 原生播放＋NativeTts；载入本页，会自动跟最新版。",
+      en: "Native MediaPlayer playback + NativeTts; it loads this page and follows the latest version automatically.",
+      vi: "Phát bằng MediaPlayer gốc + NativeTts; ứng dụng tải trang này và tự động theo bản mới nhất."
+    },
+    "《不空羂索神變真言經》卷第二十八〈灌頂真言成就品第六十八〉（T20 no. 1092，唐・菩提流志譯）": {
+      zh: "《不空羂索神变真言经》卷第二十八〈灌顶真言成就品第六十八〉（T20 no. 1092，唐·菩提流志译）",
+      en: "Sutra of the Divine Transformation of Amoghapāśa, fascicle 28 (T20 no. 1092; trans. Bodhiruci, Tang)",
+      vi: "Kinh Bất Không Quyến Sở Thần Biến Chân Ngôn, quyển 28 (T20 số 1092; Bồ Đề Lưu Chí dịch, đời Đường)"
+    },
+    "《不空羂索毘盧遮那佛大灌頂光真言》一卷（T19 no. 1002）": {
+      zh: "《不空羂索毗卢遮那佛大灌顶光真言》一卷（T19 no. 1002）",
+      en: "The Amoghapāśa Vairocana Great Empowerment Light Mantra, one fascicle (T19 no. 1002)",
+      vi: "Chân ngôn Đại Quán đỉnh Quang Minh của Phật Tỳ Lô Giá Na Bất Không Quyến Sở, một quyển (T19 số 1002)"
+    },
+    "《大輪金剛陀羅尼》相關經本（T19 no. 921、T21 no. 1230 等）": {
+      zh: "《大轮金刚陀罗尼》相关经本（T19 no. 921、T21 no. 1230 等）",
+      en: "Great Wheel Vajra Dhāraṇī related texts (T19 no. 921, T21 no. 1230, etc.)",
+      vi: "Các kinh liên quan Đại Luân Kim Cương Đà-la-ni (T19 số 921, T21 số 1230, v.v.)"
+    },
+    "唐密重要真言，用於灌頂、除罪、加持土沙施亡者；音檔為 108 遍版本。": {
+      zh: "唐密重要真言，用于灌顶、除罪、加持土沙施亡者；音档为 108 遍版本。",
+      en: "An important Tang Esoteric mantra used for empowerment, purification of karma, and blessing sand for the deceased; the audio is the 108-recitation version.",
+      vi: "Chân ngôn quan trọng của Mật tông Đường, dùng để quán đảnh, trừ tội, gia trì cát cho người quá vãng; âm thanh là bản 108 lần."
+    },
+    "唐密・漢傳": { zh: "唐密·汉传", en: "Tang Esoteric · Chinese", vi: "Mật tông Đường · Hán truyền" },
+    "大輪金剛陀羅尼（傳統前行）": { zh: "大轮金刚陀罗尼（传统前行）", en: "Great Wheel Vajra Dhāraṇī (traditional preliminary)", vi: "Đại Luân Kim Cương Đà-la-ni (phần chuẩn bị truyền thống)" },
+    "經說：卷二十八——若有過去十惡五逆四重諸罪，「燼然除滅」。": {
+      zh: "经说：卷二十八——若有过去十恶五逆四重诸罪，「烬然除灭」。",
+      en: "Sutra: fascicle 28 — past karma of the ten evils, five rebellious acts and four grave offences is “burned away completely”.",
+      vi: "Kinh: quyển 28 — tội thập ác, ngũ nghịch, tứ trọng trong quá khứ đều “bị thiêu rụi”."
+    },
+    "經說：眾生隨處得聞此大灌頂光真言「二三七遍經耳根者，即得除滅一切罪障」（「二三七遍」傳統常取 21 遍；經文句讀待考）。": {
+      zh: "经说：众生随处得闻此大灌顶光真言「二三七遍经耳根者，即得除灭一切罪障」（「二三七遍」传统常取 21 遍；经文句读待考）。",
+      en: "Sutra: whoever hears this Great Empowerment Light Mantra — “twenty-one times passing the ear” — has all karmic obstacles removed (the traditional reading takes 21 times; punctuation pending).",
+      vi: "Kinh: chúng sinh nghe chân ngôn này — “hai ba bảy lần qua tai” — liền trừ diệt tất cả tội chướng (truyền thống lấy 21 lần; câu đọc còn chờ khảo)."
+    },
+    "經說：以真言加持土沙一百八遍，散亡者屍骸上或墓塔上，亡者「應時即得光明及身，除諸罪報捨所苦身，往於西方極樂國土蓮華化生，乃至菩提更不墮落」。": {
+      zh: "经说：以真言加持土沙一百八遍，散亡者尸骸上或墓塔上，亡者「应时即得光明及身，除诸罪报舍所苦身，往于西方极乐国土莲华化生，乃至菩提更不堕落」。",
+      en: "Sutra: bless sand with the mantra 108 times and scatter it on the deceased or their stupa; the deceased “at once receives light and a body, removes karmic retribution, leaves the suffering body, and is born by transformation in a lotus in the Western Pure Land, never falling back until awakening”.",
+      vi: "Kinh: gia trì cát 108 lần rồi rải lên thân người quá vãng hoặc bảo tháp; người ấy “tức thời được ánh sáng và thân, trừ các báo tội, bỏ thân khổ, sinh hóa trong hoa sen ở Tây phương Cực Lạc, không còn đọa lạc cho đến Bồ đề”."
+    },
+    "經說：病者前每日高聲誦一千八十遍（CBETA T19 no. 1002 作「一千八十一遍」，異文待考），「則得除滅宿業病障」；為鬼嬈失音者，加持手一百八遍摩捫頭面；鬼神魍魎之病加持五色線一百八結；瘧病加持白線一百八結。": {
+      zh: "经说：病者前每日高声诵一千八十遍（CBETA T19 no. 1002 作「一千八十一遍」，异文待考），「则得除灭宿业病障」；为鬼娆失音者，加持手一百八遍摩扪头面；鬼神魍魉之病加持五色线一百八结；疟病加持白线一百八结。",
+      en: "Sutra: chant aloud 1,080 times daily before the sick to remove karmic illness; for those afflicted by spirits, bless the hand 108 times and touch the face; use five-colour thread with 108 knots for ghostly illness, white thread with 108 knots for malaria (T19 no. 1002 has a textual variant).",
+      vi: "Kinh: tụng to 1.080 lần mỗi ngày trước người bệnh để trừ bệnh chướng; cho người bị quỷ ám, gia trì tay 108 lần rồi xoa mặt; dùng chỉ năm màu 108 nút cho bệnh do quỷ thần, chỉ trắng 108 nút cho bệnh sốt rét (T19 số 1002 có dị bản)."
+    },
+    "傳統說法：東密以光明真言為「破地獄」要咒，多用於施食、超度、土砂加持；此為傳統應用說法。": {
+      zh: "传统说法：东密以光明真言为「破地狱」要咒，多用于施食、超度、土砂加持；此为传统应用说法。",
+      en: "Traditional: in Japanese Esoteric Buddhism the Mantra of Light is a key mantra for “breaking open hell”, used in food offering, memorial rites and sand blessing. This is a traditional application, not a scriptural guarantee.",
+      vi: "Truyền thống: Mật tông Nhật Bản xem Chân ngôn Quang Minh là chú quan trọng để “phá địa ngục”, dùng trong thực thí, cầu siêu, gia trì cát. Đây là cách ứng dụng truyền thống, không phải bảo đảm của kinh."
+    }
+  };
+  function tr(s) {
+    if (!s) { return ""; }
+    if (lang === "yue") { return s; }
+    var target = lang === "cmn" ? "zh" : lang;
+    var e = (window.GM_STRINGS && window.GM_STRINGS[s]) || APP[s];
+    return (e && e[target]) || s;
+  }
+  function tc(s) {
+    if (!s) { return ""; }
+    if (lang === "yue") { return s; }
+    var target = lang === "cmn" ? "zh" : lang;
+    var e = (window.GM_STRINGS && window.GM_STRINGS[s]) || APP[s];
+    return (e && e[target]) || "";
+  }
+  function toast(msg) { var t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(function () { t.classList.remove("show"); }, 2200); }
+  function toastTr(msg) { toast(tr(msg)); }
 
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js?v=2.4.3"></script>
-<script src="data.js?v=2.4.3"></script>
-<script src="guangming-i18n.js?v=2.4.3"></script>
-<script src="native-audio.js?v=2.4.3"></script>
-<script src="guangming.js?v=2.4.3"></script>
+  /* ---------- 內容 ---------- */
+  var mantra = null, practice = null, tracks = [];
+  (function loadContent() {
+    var d = window.FO_DATA;
+    if (!d || !Array.isArray(d.mantras)) { return; }
+    for (var i = 0; i < d.mantras.length; i++) {
+      if (d.mantras[i] && d.mantras[i].id === "guangming-zhenyan") { mantra = d.mantras[i]; break; }
+    }
+    if (!mantra) { return; }
+    practice = mantra.practice || null;
+    (mantra.audio || []).forEach(function (a) {
+      if (a && a.file) { tracks.push({ file: a.file, label: a.label || ("音檔 " + (tracks.length + 1)), n: tracks.length }); }
+    });
+  })();
+
+  /* ---------- 狀態 ---------- */
+  function defaultState() { return { days: {}, passageNotes: {}, settings: { loopMode: "one", track: 0, bgFix: 2, prefetch: true, cloud: true } }; }
+  function normalize(raw) {
+    var s = defaultState();
+    raw = raw && typeof raw === "object" ? raw : {};
+    var days = raw.days && typeof raw.days === "object" ? raw.days : {};
+    Object.keys(days).forEach(function (k) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) { return; }
+      var x = days[k]; if (!x || typeof x !== "object") { return; }
+      var auto = nn(x.auto), manual = nn(x.manual);
+      var note = typeof x.note === "string" ? x.note.slice(0, 4000) : "";
+      var checked = x.checked === true;
+      if (auto || manual || note || checked) { s.days[k] = { auto: auto, manual: manual, note: note, checked: checked }; }
+    });
+    var pn = raw.passageNotes && typeof raw.passageNotes === "object" ? raw.passageNotes : {};
+    Object.keys(pn).forEach(function (k) { if (typeof pn[k] === "string" && pn[k].trim()) { s.passageNotes[k] = pn[k].slice(0, 5000); } });
+    var st = raw.settings && typeof raw.settings === "object" ? raw.settings : {};
+    s.settings.loopMode = (st.loopMode === "one" || st.loopMode === "all" || st.loopMode === "off") ? st.loopMode : "one";
+    s.settings.track = Number(st.track) === 1 ? 1 : 0;
+    s.settings.bgFix = 2;
+    s.settings.prefetch = st.prefetch !== false;
+    s.settings.cloud = st.cloud !== false;
+    return s;
+  }
+  var state = (function () { try { return normalize(JSON.parse(localStorage.getItem(STORE) || "null")); } catch (e) { return defaultState(); } })();
+  function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} schedulePush(); }
+
+  function dayData(k) { k = k || todayISO(); if (!state.days[k]) { state.days[k] = { auto: 0, manual: 0, note: "", checked: false }; } if (typeof state.days[k].checked !== "boolean") { state.days[k].checked = false; } return state.days[k]; }
+  function dTotal(x) { return x ? nn(x.auto) + nn(x.manual) : 0; }
+  function totalCount() { var t = 0; Object.keys(state.days).forEach(function (k) { t += dTotal(state.days[k]); }); return t; }
+  function todayData() { return state.days[todayISO()] || null; }
+  function todayTotal() { return dTotal(todayData()); }
+  function streakDays() {
+    var n = 0, d = new Date();
+    if (!todayData() || dTotal(todayData()) <= 0) { d.setDate(d.getDate() - 1); }
+    while (n < 4000) { if (dTotal(state.days[todayISO(d)]) > 0) { n++; d.setDate(d.getDate() - 1); } else { break; } }
+    return n;
+  }
+  function checkStats() {
+    var days = 0, month = 0, ym = todayISO().slice(0, 7);
+    Object.keys(state.days).forEach(function (k) { if (state.days[k] && state.days[k].checked) { days++; if (k.indexOf(ym) === 0) { month++; } } });
+    var n = 0, d = new Date();
+    if (!(state.days[todayISO()] && state.days[todayISO()].checked)) { d.setDate(d.getDate() - 1); }
+    while (n < 4000 && state.days[todayISO(d)] && state.days[todayISO(d)].checked) { n++; d.setDate(d.getDate() - 1); }
+    return { days: days, month: month, streak: n };
+  }
+  function autoCheck() {
+    var x = dayData(todayISO());
+    if (dTotal(x) >= TARGET && !x.checked) { x.checked = true; save(); renderCheckin(); renderPractice(); toastTr("今日滿 108 遍，已自動打卡"); }
+  }
+  function addCount(n, source) {
+    n = nn(n); if (!n) { return; }
+    var x = dayData(todayISO());
+    if (source === "manual") { x.manual += n; } else { x.auto += n; }
+    save();
+    renderPractice(); renderCheckin(); renderNotes();
+    autoCheck();
+  }
+
+  /* ---------- 語言／靜態翻譯 ---------- */
+  function applyStatic() {
+    document.documentElement.lang = LANGS[lang].html;
+    document.title = lang === "cmn" ? "光明真言｜不空大灌顶光真言" : (lang === "en" ? "Mantra of Light | Amogha Great Empowerment Light Mantra" : (lang === "vi" ? "Chân ngôn Quang Minh | Chân ngôn Đại Quán đỉnh Quang Minh Bất Không" : "光明真言｜不空大灌頂光真言"));
+    $("brandTitle").textContent = lang === "cmn" ? "光明真言" : (lang === "en" ? "Mantra of Light" : (lang === "vi" ? "Chân ngôn Quang Minh" : "光明真言"));
+    var map = { yue: "粵", cmn: "普", en: "EN", vi: "VI" };
+    Array.prototype.forEach.call(document.querySelectorAll("#langs [data-lang]"), function (b) {
+      var code = b.getAttribute("data-lang");
+      b.classList.toggle("on", code === lang);
+      b.textContent = code === "yue" && lang === "cmn" ? "粤" : map[code];
+    });
+    var theme = document.documentElement.getAttribute("data-theme") === "light";
+    $("themeBtn").setAttribute("aria-label", theme ? tr("淺色") : tr("黑金"));
+    // 靜態中文節點翻譯（唔碰原文／用戶文字）
+    var skip = "script,style,noscript,[data-no-i18n],.han,.roman,.translation,.orig-note,.note-row p,.note-box textarea,.toast";
+    var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+    var n;
+    while ((n = walker.nextNode())) {
+      var t = (n.nodeValue || "").trim();
+      if (!t || !/[\u3400-\u9FFF]/.test(t)) { continue; }
+      if (n.parentElement && n.parentElement.closest(skip)) { continue; }
+      var rep = tr(t);
+      if (rep && rep !== t) { n.nodeValue = n.nodeValue.replace(t, rep); }
+    }
+    Array.prototype.forEach.call(document.querySelectorAll("[placeholder],[aria-label],[title]"), function (el) {
+      ["placeholder", "aria-label", "title"].forEach(function (a) {
+        var v = el.getAttribute(a);
+        if (v && /[\u3400-\u9FFF]/.test(v) && !el.hasAttribute("data-no-i18n")) { el.setAttribute(a, tr(v)); }
+      });
+    });
+  }
+  function setLang(next) {
+    if (!LANGS[next]) { return; }
+    lang = next;
+    try { localStorage.setItem(LANG_KEY, next); } catch (e) {}
+    applyStatic();
+    buildText();
+    renderAll();
+    renderDomain();
+  }
+
+  /* ---------- 渲染：課誦 ---------- */
+  function updateRing() {
+    var today = todayTotal();
+    var pct = Math.min(1, today / TARGET);
+    var c = 2 * Math.PI * 52;
+    var fg = $("ringFg");
+    fg.style.strokeDasharray = c.toFixed(1);
+    fg.style.strokeDashoffset = (c * (1 - pct)).toFixed(1);
+  }
+  function renderPractice() {
+    var today = todayTotal();
+    $("todayCount").textContent = today;
+    $("totalCount").textContent = totalCount();
+    $("streakCount").textContent = streakDays();
+    var per = countPeriod();
+    $("roundCount").textContent = per ? Math.floor(player.acc / per + 1e-4) : "—";
+    updateRing();
+    if (!tracks.length) { return; }
+    var t = tracks[player.track] || tracks[0];
+    $("trackBadge").textContent = t.n === 0 ? tr("108 遍") : tr("功德開示（1:48）");
+    $("trackTabs").innerHTML = tracks.map(function (x, i) {
+      return '<button type="button" data-track="' + i + '" class="' + (i === player.track ? "on" : "") + '">' + esc(tr(x.label)) + '</button>';
+    }).join("");
+    $("durTime").textContent = fmt(player.duration || (t.n === 0 ? 750.811 : 107.912));
+    $("curTime").textContent = fmt(audio.currentTime || 0);
+    $("bar").style.width = Math.min(100, ((audio.currentTime || 0) / (player.duration || 750.811)) * 100) + "%";
+    $("playBtn").innerHTML = player.playing
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg><span>' + esc(tr("暫停")) + '</span>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><span>' + esc(tr("播放")) + '</span>';
+    $("playBtn").setAttribute("aria-label", player.playing ? tr("暫停") : tr("播放"));
+    Array.prototype.forEach.call(document.querySelectorAll("#loopSeg [data-mode]"), function (b) { b.classList.toggle("on", b.getAttribute("data-mode") === state.settings.loopMode); });
+    $("wakeBtn").classList.toggle("on", wakeOn);
+    $("wakeBtn").textContent = tr(wakeOn ? "保持螢幕：開" : "保持螢幕");
+    var st = player.switching ? tr("音檔") + "…" : (!audio.paused ? tr("播放中") + (isBlob() ? " · " + tr("已存本機") : " · " + (nativePlayer ? tr("原生播放") : tr("網絡串流"))) : (player.intended ? tr("已暫停") + "…" : tr("已暫停")));
+    $("status").textContent = st;
+    $("status").classList.toggle("warn", player.intended && audio.paused);
+    updatePrefetchLine();
+    $("diag").textContent = tr("背景自癒") + "：" + bg.rescue + " · " + tr("系統暫停") + " " + bg.sysPause;
+    if (practice && practice.dedication) { $("dedication").textContent = tc(practice.dedication); }
+  }
+  function updatePrefetchLine() {
+    var t = tracks[player.track]; if (!t) { return; }
+    var el = $("prefetch");
+    if (nativePlayer) { el.textContent = tr("本機預載") + "：" + tr("原生播放") + "（APK）"; return; }
+    if (blobCache[t.file]) { el.textContent = tr("本機預載") + "：" + tr("已存本機"); return; }
+    if (blobPending[t.file]) { el.textContent = tr("本機預載") + "：" + tr("預載中") + " " + (blobProgress[t.file] || 0) + "%"; return; }
+    if (blobFailed[t.file]) { el.textContent = tr("本機預載") + "：" + blobFailed[t.file]; return; }
+    el.textContent = tr("本機預載") + "：—";
+  }
+
+  /* ---------- 播放器 ---------- */
+  var nativePlayer = !!(window.NativeAudio && window.NativeAudio.available && window.NativeAudio.available());
+  var audio = nativePlayer ? window.NativeAudio.create("audio") : $("audio");
+  var player = { track: clampTrack(state.settings.track), playing: false, intended: false, switching: false, seeking: false, duration: 0, acc: 0, base: 0, lastPos: 0, lastWall: now(), pauseCount: 0, pauseSeen: 0, pos: 0 };
+  var blobCache = {}, blobPending = {}, blobProgress = {}, blobFailed = {};
+  var wakeLock = null, wakeOn = false, wakeBusy = false;
+  var bg = { rescue: 0, sysPause: 0 };
+  var lastResume = 0;
+  function now() { return window.performance ? performance.now() : Date.now(); }
+  function clampTrack(i) { i = Number(i) || 0; return i >= 0 && i < (tracks.length || 1) ? i : 0; }
+  function cur() { return tracks[player.track] || null; }
+  function isBlob() { return /^blob:/.test(String(audio.src || "")); }
+  function trackUrl(f) {
+    f = String(f || "").trim(); if (!f) { return ""; }
+    if (/^[a-z][a-z0-9+.-]*:/i.test(f) || f.indexOf("//") === 0) { return f; }
+    f = f.replace(/\\/g, "/");
+    return f.split("/").map(function (seg) { return seg && !/%[0-9A-Fa-f]{2}/.test(seg) && /[^\x21-\x7E]/.test(seg) ? encodeURIComponent(seg) : seg; }).join("/");
+  }
+  function countPeriod() { var t = cur(); if (!t || t.n !== 0) { return 0; } var d = player.duration > 1 ? player.duration : 750.811; return d / TARGET; }
+  function loadTrack(i, autoplay) {
+    if (!tracks[i]) { return; }
+    savePos();
+    player.track = i; state.settings.track = i; save();
+    player.acc = 0; player.base = 0; player.duration = 0; player.lastPos = 0; player.pos = 0; player.lastWall = now(); player.switching = true;
+    var t = tracks[i];
+    try { audio.pause(); } catch (e) {}
+    audio.src = blobCache[t.file] || trackUrl(t.file);
+    audio.loop = state.settings.loopMode === "one";
+    audio.load();
+    renderPractice(); updateMedia();
+    prefetch(i, false);
+    if (autoplay) { playAudio(); }
+  }
+  function playAudio() {
+    if (!cur()) { return; }
+    player.intended = true; player.lastWall = now(); player.lastPos = audio.currentTime || 0;
+    try { var p = audio.play(); if (p && p.catch) { p.catch(function (e) { player.intended = false; toast(tr("播放失敗") + "：" + ((e && e.message) || e)); renderPractice(); }); } }
+    catch (e) { player.intended = false; toast(tr("播放失敗")); }
+  }
+  function pauseAudio() { player.intended = false; tick(); try { audio.pause(); } catch (e) {} savePos(); save(); renderPractice(); }
+  function setLoop(mode) {
+    if (["one", "all", "off"].indexOf(mode) < 0) { return; }
+    state.settings.loopMode = mode; audio.loop = mode === "one"; save(); renderPractice();
+  }
+  function tick() {
+    var tnow = now(), pos = audio.currentTime || 0;
+    if (!player.intended || audio.paused || audio.ended || player.switching || player.seeking) { player.lastPos = pos; player.lastWall = tnow; player.pauseSeen = player.pauseCount; return; }
+    var wall = (tnow - player.lastWall) / 1000, dt;
+    if (wall > 3 && player.pauseCount === player.pauseSeen) { dt = wall; }
+    else {
+      dt = pos - player.lastPos;
+      if (dt < -0.5) { dt += player.duration || 0; }
+      if (dt < 0) { dt = 0; }
+      if (dt > 30) { dt = 30; }
+    }
+    if (dt > 8 * 3600) { dt = 8 * 3600; }
+    if (dt > 0) { player.acc += dt * (audio.playbackRate || 1); commitCredit(); }
+    player.lastPos = pos; player.lastWall = tnow; player.pauseSeen = player.pauseCount;
+  }
+  function commitCredit() {
+    var per = countPeriod(); if (!per) { return; }
+    var n = Math.floor(player.acc / per + 1e-4);
+    if (n > player.base) { var d = n - player.base; player.base = n; addCount(d, "auto"); }
+  }
+  function savePos() { state.settings.track = player.track; try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} }
+  function prefetch(i, manual) {
+    var t = tracks[i]; if (!t || nativePlayer || location.protocol === "file:") { updatePrefetchLine(); return; }
+    if (blobCache[t.file] || blobPending[t.file] || blobFailed[t.file]) { updatePrefetchLine(); return; }
+    if (!manual && state.settings.prefetch === false) { updatePrefetchLine(); return; }
+    if (!manual && navigator.connection && (navigator.connection.saveData || /(^|-)2g$/.test(navigator.connection.effectiveType || ""))) { blobFailed[t.file] = "省數據"; updatePrefetchLine(); return; }
+    blobPending[t.file] = true; blobProgress[t.file] = 0; updatePrefetchLine();
+    fetch(trackUrl(t.file), { cache: "force-cache" }).then(function (r) {
+      if (!r.ok) { throw new Error("HTTP " + r.status); }
+      var total = Number(r.headers.get("content-length")) || 0;
+      if (!r.body || !r.body.getReader) { return r.arrayBuffer().then(function (b) { return { b: b, total: total }; }); }
+      var reader = r.body.getReader(), chunks = [], got = 0;
+      function pump() { return reader.read().then(function (x) { if (x.done) { var out = new Uint8Array(got), off = 0; chunks.forEach(function (c) { out.set(c, off); off += c.length; }); return { b: out.buffer, total: got }; } chunks.push(x.value); got += x.value.length; if (total) { blobProgress[t.file] = Math.min(99, Math.round(got / total * 100)); updatePrefetchLine(); } return pump(); }); }
+      return pump();
+    }).then(function (o) {
+      blobCache[t.file] = URL.createObjectURL(new Blob([o.b], { type: "audio/mpeg" }));
+      blobPending[t.file] = false; blobProgress[t.file] = 100; updatePrefetchLine();
+      if (i === player.track && audio.paused && !player.intended) { var p = audio.currentTime || 0; audio.src = blobCache[t.file]; audio.load(); player.pos = p; }
+    }).catch(function (e) { blobPending[t.file] = false; blobFailed[t.file] = ((e && e.message) || "失敗"); updatePrefetchLine(); });
+  }
+  function tryResume() {
+    if (!player.intended || audio.ended || !audio.paused) { return; }
+    var t = Date.now(); if (t - lastResume < 2200) { return; } lastResume = t;
+    try { var p = audio.play(); if (p && p.then) { p.then(function () { bg.rescue++; renderPractice(); }).catch(function () {}); } } catch (e) {}
+  }
+  function updateMedia() {
+    if (!("mediaSession" in navigator)) { return; }
+    try {
+      if (window.MediaMetadata) {
+        navigator.mediaSession.metadata = new MediaMetadata({ title: cur() ? tr(cur().label) : tr("光明真言"), artist: "光明真言", album: tr("不空大灌頂光真言"), artwork: [{ src: "icons/icon-192.png", sizes: "192x192", type: "image/png" }, { src: "icons/icon-512.png", sizes: "512x512", type: "image/png" }] });
+      }
+      navigator.mediaSession.playbackState = audio.paused ? "paused" : "playing";
+    } catch (e) {}
+  }
+  function updateProgressUI() {
+    var d = player.duration || 750.811;
+    $("curTime").textContent = fmt(audio.currentTime || 0);
+    $("bar").style.width = Math.min(100, ((audio.currentTime || 0) / d) * 100) + "%";
+  }
+  function setupPlayer() {
+    if (!tracks.length) { return; }
+    loadTrack(player.track, false);
+    audio.addEventListener("loadedmetadata", function () {
+      player.duration = isFinite(audio.duration) ? audio.duration : (cur() && cur().n === 0 ? 750.811 : 107.912);
+      player.switching = false;
+      if (player.pos) { try { audio.currentTime = Math.min(player.pos, player.duration - 0.5); } catch (e) {} player.pos = 0; }
+      renderPractice(); updateMedia();
+    });
+    audio.addEventListener("play", function () { player.playing = true; player.intended = true; player.switching = false; player.lastPos = audio.currentTime || 0; player.lastWall = now(); player.pauseSeen = player.pauseCount; renderPractice(); updateMedia(); });
+    audio.addEventListener("pause", function () {
+      player.playing = false; player.pauseCount++;
+      if (player.intended && !audio.ended && !player.switching) { bg.sysPause++; setTimeout(tryResume, 650); }
+      renderPractice(); updateMedia();
+    });
+    audio.addEventListener("timeupdate", function () { tick(); updateProgressUI(); });
+    audio.addEventListener("seeking", function () { tick(); player.seeking = true; });
+    audio.addEventListener("seeked", function () { player.seeking = false; player.lastPos = audio.currentTime || 0; player.lastWall = now(); });
+    audio.addEventListener("ended", function () {
+      if (state.settings.loopMode === "all") { loadTrack((player.track + 1) % tracks.length, true); return; }
+      if (state.settings.loopMode === "off") { player.intended = false; $("status").textContent = tr("已播完；不循環，唔會自動續播。"); }
+      renderPractice();
+    });
+    audio.addEventListener("error", function () { toast(tr("音檔載入失敗")); });
+    $("playBtn").addEventListener("click", function () { if (audio.paused) { playAudio(); } else { pauseAudio(); } });
+    $("plusBtn").addEventListener("click", function () { addCount(1, "manual"); toast("+1"); });
+    $("restartBtn").addEventListener("click", function () { tick(); try { audio.currentTime = 0; } catch (e) {} player.acc = 0; player.base = 0; playAudio(); });
+    $("seekBtn").addEventListener("click", function () { $("seek").classList.toggle("hidden"); });
+    $("seek").addEventListener("input", function (e) { var d = player.duration || 0; if (d > 0) { player.seeking = true; try { audio.currentTime = (Number(e.target.value) / 1000) * d; } catch (x) {} } });
+    $("seek").addEventListener("change", function () { player.seeking = false; player.lastPos = audio.currentTime || 0; player.lastWall = now(); });
+    $("wakeBtn").addEventListener("click", function () { setWake(!wakeOn); });
+    $("trackTabs").addEventListener("click", function (e) { var b = e.target.closest && e.target.closest("[data-track]"); if (!b) { return; } var i = Number(b.getAttribute("data-track")); if (i !== player.track) { loadTrack(i, player.intended); } });
+    document.querySelectorAll("#loopSeg [data-mode]").forEach(function (b) { b.addEventListener("click", function () { setLoop(b.getAttribute("data-mode")); }); });
+    setInterval(function () { tick(); if (player.intended && audio.paused && !audio.ended) { tryResume(); } }, 4000);
+    setInterval(function () { if (!document.hidden) { renderPractice(); } }, 5000);
+    setInterval(function () { if ("mediaSession" in navigator && navigator.mediaSession.setPositionState && player.duration > 0 && !audio.paused) { try { navigator.mediaSession.setPositionState({ duration: player.duration, playbackRate: audio.playbackRate || 1, position: Math.min(audio.currentTime || 0, player.duration - 0.01) }); } catch (e) {} } }, 5000);
+    document.addEventListener("visibilitychange", function () { if (document.hidden) { tick(); savePos(); } else { tick(); tryResume(); if (wakeOn && !wakeLock) { setWake(true); } renderPractice(); } });
+    if ("mediaSession" in navigator) {
+      try {
+        navigator.mediaSession.setActionHandler("play", playAudio);
+        navigator.mediaSession.setActionHandler("pause", pauseAudio);
+        navigator.mediaSession.setActionHandler("seekbackward", function () { try { audio.currentTime = Math.max(0, (audio.currentTime || 0) - 15); } catch (e) {} });
+        navigator.mediaSession.setActionHandler("seekforward", function () { try { audio.currentTime = Math.min(player.duration || 0, (audio.currentTime || 0) + 15); } catch (e) {} });
+      } catch (e) {}
+    }
+    prefetch(0, false); prefetch(1, false);
+  }
+  function setWake(on) {
+    if (!("wakeLock" in navigator)) { toast(tr("保持螢幕")); wakeOn = false; renderPractice(); return; }
+    if (!on) { if (wakeLock) { try { wakeLock.release(); } catch (e) {} wakeLock = null; } wakeOn = false; renderPractice(); return; }
+    if (wakeBusy) { return; } wakeBusy = true;
+    navigator.wakeLock.request("screen").then(function (l) { wakeLock = l; wakeOn = true; wakeBusy = false; try { l.addEventListener("release", function () { wakeLock = null; if (wakeOn && !document.hidden) { setWake(true); } }); } catch (e) {} renderPractice(); }).catch(function () { wakeBusy = false; wakeOn = false; renderPractice(); });
+  }
+
+  /* ---------- 經文 ---------- */
+  function langKey() { return lang === "cmn" ? "zh" : lang; }
+  function buildText() {
+    var box = $("passages"); if (!box || !practice) { return; }
+    var key = langKey();
+    var html = "";
+    (practice.passages || []).forEach(function (p, i) {
+      var id = p.id || ("p" + i);
+      var trans = p[key] || "";
+      var note = tc(p.note || "");
+      var pn = state.passageNotes[id] || "";
+      html += '<article class="passage" data-p="' + esc(id) + '">';
+      html += '<h3>' + esc(tc(p.title || "")) + '</h3>';
+      if (p.han) { html += '<div class="han" data-no-i18n>' + esc(p.han) + '</div>'; }
+      if (p.roman) { html += '<div class="roman" data-no-i18n>' + esc(p.roman) + '</div>'; }
+      if (lang === "yue" && p.variant) { html += '<p class="orig-note" data-no-i18n>流通譯音（對照）：' + esc(p.variant) + '</p>'; }
+      if (note) { html += '<p class="orig-note">' + esc(note) + '</p>'; }
+      if (trans) { html += '<div class="translation" data-no-i18n>' + esc(trans) + '</div>'; }
+      html += '<div class="p-actions"><button class="ghost" type="button" data-speak="' + i + '">' + esc(tr("朗讀")) + '</button>' +
+        '<button class="ghost" type="button" data-pnote="' + i + '">' + esc(tr(pn ? "修改逐段筆記" : "逐段筆記")) + '</button></div>';
+      html += '<div class="note-box hidden" data-pnote-box="' + i + '"><textarea maxlength="5000" data-pnote-input="' + i + '" placeholder="' + esc(tr("寫低呢一段嘅心得…")) + '">' + esc(pn) + '</textarea><div class="row"><button class="ghost" type="button" data-pnote-save="' + i + '">' + esc(tr("儲存")) + '</button><button class="ghost" type="button" data-pnote-clear="' + i + '">' + esc(tr("清除")) + '</button><span class="fine" data-pnote-status="' + i + '"></span></div></div>';
+      html += '</article>';
+    });
+    box.innerHTML = html;
+    renderPhrases(); renderMudras(); renderEssentials(); renderPlans(); renderBenefits(); renderSources(); renderCautions(); renderPreliminary();
+    $("phrasesFold").hidden = lang !== "yue";
+    if (practice.dedication) { $("dedication").textContent = tc(practice.dedication); }
+  }
+  function renderPhrases() {
+    var box = $("phrases"); if (!box || !practice) { return; }
+    box.innerHTML = '<table class="word-table"><thead><tr><th>' + esc(tr("漢譯")) + '</th><th>' + esc(tr("羅馬轉寫")) + '</th><th>' + esc(tr("釋義")) + '</th></tr></thead><tbody>' +
+      (practice.phrases || []).map(function (x) { return '<tr><td data-no-i18n>' + esc(x.han) + '</td><td class="rom" data-no-i18n>' + esc(x.roman) + '</td><td data-no-i18n>' + esc(x.gloss) + '</td></tr>'; }).join("") + '</tbody></table>';
+    $("phrasesNote").textContent = tc(practice.phrasesNote || "");
+  }
+  function renderMudras() {
+    var box = $("mudras"); if (!box || !practice) { return; }
+    box.innerHTML = (practice.mudras || []).map(function (m) {
+      var title = tc(m.title), sub = tc(m.subtitle), note = tc(m.note);
+      if (!title) { return ""; }
+      return '<div class="mudra"><b>' + esc(title) + '</b><div class="sub">' + esc(sub) + '</div><ol>' +
+        (m.steps || []).map(function (s) { var x = tc(s); return x ? '<li>' + esc(x) + '</li>' : ""; }).join("") + '</ol>' +
+        (note ? '<p class="fine">' + esc(note) + '</p>' : "") + '</div>';
+    }).join("");
+  }
+  function renderEssentials() {
+    var box = $("essentials"); if (!box || !practice) { return; }
+    box.innerHTML = (practice.essentials || []).map(function (s) { var x = tc(s); return x ? '<li>' + esc(x) + '</li>' : ""; }).join("");
+  }
+  function renderPlans() {
+    var box = $("plans"); if (!box || !practice) { return; }
+    box.innerHTML = (practice.plans || []).map(function (p) {
+      var l = tc(p.label), d = tc(p.desc);
+      if (!l) { return ""; }
+      return '<div class="plan"><b>' + esc(l) + '</b><div class="m">' + p.minutes + " · " + p.target + '</div><p>' + esc(d) + '</p></div>';
+    }).join("");
+  }
+  function renderBenefits() {
+    var box = $("benefits"); if (!box) { return; }
+    box.innerHTML = (mantra.benefits || []).map(function (b) {
+      var x = tc(b); if (!x) { return ""; }
+      return '<div class="benefit' + (String(b).indexOf("傳統") === 0 ? " trad" : "") + '">' + esc(x) + '</div>';
+    }).join("");
+  }
+  function renderSources() {
+    var box = $("sources"); if (!box || !practice) { return; }
+    box.innerHTML = (practice.sources || []).map(function (s) {
+      var l = tc(s.label), n = tc(s.note);
+      if (!l) { return ""; }
+      return '<div><a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(l) + '</a>' + (n ? '<span class="s">' + esc(n) + '</span>' : "") + '</div>';
+    }).join("");
+    var about = $("aboutSources");
+    if (about) { about.innerHTML = (practice.sources || []).map(function (s) { var l = tc(s.label); return l ? '<a href="' + esc(s.url) + '" target="_blank" rel="noopener">' + esc(l) + '</a>' : ""; }).join(""); }
+  }
+  function renderCautions() {
+    var box = $("cautions"); if (!box) { return; }
+    box.innerHTML = (mantra.caution || []).map(function (c) { var x = tc(c); return x ? '<li>' + esc(x) + '</li>' : ""; }).join("");
+  }
+  function renderPreliminary() {
+    var box = $("preliminary"); if (!box || !practice || !practice.preliminary) { return; }
+    var p = practice.preliminary, title = tc(p.title), intro = tc(p.intro), note = tc(p.note);
+    if (!title) { box.innerHTML = ""; return; }
+    box.innerHTML = '<div class="mudra"><b>' + esc(title) + '</b><p class="fine">' + esc(intro) + '</p>' + (p.text ? '<div class="han" style="font-size:15px;margin-top:7px" data-no-i18n>' + esc(p.text) + '</div>' : "") + (note ? '<p class="fine">' + esc(note) + '</p>' : "") + '</div>';
+  }
+  function speak(text, tts, btn) {
+    if (!text) { return; }
+    if (window.NativeTts && window.NativeTts.isAvailable && window.NativeTts.isAvailable()) {
+      try { if (btn) { btn.classList.add("on"); } window.NativeTts.speak(text, tts); return; } catch (e) {}
+    }
+    if (!("speechSynthesis" in window)) { toast(tr("停止朗讀")); return; }
+    try { speechSynthesis.cancel(); } catch (e) {}
+    var u = new SpeechSynthesisUtterance(text); u.lang = tts; u.rate = 0.92;
+    var vs = speechSynthesis.getVoices() || [], l = String(tts).toLowerCase(), v = null;
+    for (var i = 0; i < vs.length; i++) { var vl = String(vs[i].lang || "").toLowerCase(); if (vl === l) { v = vs[i]; break; } if (!v && vl.indexOf(l.split("-")[0]) === 0) { v = vs[i]; } }
+    if (v) { u.voice = v; }
+    if (btn) { btn.classList.add("on"); }
+    u.onend = u.onerror = function () { if (btn) { btn.classList.remove("on"); } };
+    speechSynthesis.speak(u);
+  }
+
+  /* ---------- 打卡 ---------- */
+  var calOffset = 0;
+  function renderCheckin() {
+    var c = checkStats();
+    $("checkinStats").innerHTML = '<div class="stat"><b>' + c.streak + '</b><span>' + esc(tr("連續打卡（日）")) + '</span></div>' +
+      '<div class="stat"><b>' + c.days + '</b><span>' + esc(tr("累計打卡（日）")) + '</span></div>' +
+      '<div class="stat"><b>' + c.month + '</b><span>' + esc(tr("今月打卡（日）")) + '</span></div>';
+    var x = todayData(), checked = !!(x && x.checked), total = dTotal(x);
+    $("checkinBtn").textContent = tr(checked ? "今日已打卡" : "今日打卡");
+    $("checkinBtn").disabled = checked;
+    $("undoBtn").hidden = !checked;
+    $("checkinHint").textContent = lang === "en" ? (checked ? "Checked in for " + todayISO() + "; " + total + " recitations today." : "Not checked in yet for " + todayISO() + ".") :
+      lang === "vi" ? (checked ? "Đã điểm danh ngày " + todayISO() + "; hôm nay " + total + " lần." : "Hôm nay (" + todayISO() + ") chưa điểm danh.") :
+      lang === "cmn" ? (checked ? "今日（" + todayISO() + "）已打卡；今日 " + total + " 遍。" : "今日（" + todayISO() + "）还未打卡。") :
+      (checked ? "今日（" + todayISO() + "）已打卡；今日 " + total + " 遍。" : "今日（" + todayISO() + "）仲未打卡。");
+    var base = new Date(), d = new Date(base.getFullYear(), base.getMonth() + calOffset, 1), y = d.getFullYear(), m = d.getMonth();
+    try { $("calTitle").textContent = new Intl.DateTimeFormat(lang === "cmn" ? "zh-CN" : lang === "en" ? "en-US" : lang === "vi" ? "vi-VN" : "zh-HK", { year: "numeric", month: "long" }).format(d); }
+    catch (e) { $("calTitle").textContent = y + " / " + (m + 1); }
+    var wk = lang === "en" ? ["S", "M", "T", "W", "T", "F", "S"] : lang === "vi" ? ["CN", "T2", "T3", "T4", "T5", "T6", "T7"] : ["日", "一", "二", "三", "四", "五", "六"];
+    $("calHead").innerHTML = wk.map(function (w) { return '<div class="cal-w">' + w + '</div>'; }).join("");
+    var first = new Date(y, m, 1).getDay(), days = new Date(y, m + 1, 0).getDate(), cells = "";
+    for (var b = 0; b < first; b++) { cells += '<div class="cal-d empty"></div>'; }
+    for (var day = 1; day <= days; day++) {
+      var k = y + "-" + pad2(m + 1) + "-" + pad2(day), it = state.days[k], n = dTotal(it);
+      var cls = "cal-d" + (it && it.checked ? " checked" : "") + (k === todayISO() ? " today" : "") + (k > todayISO() ? " future" : "");
+      cells += '<div class="' + cls + '" title="' + esc(k + " · " + n) + '">' + day + (n ? '<span class="n">' + (n > 999 ? "999+" : n) + '</span>' : "") + '</div>';
+    }
+    $("calGrid").innerHTML = cells;
+  }
+
+  /* ---------- 筆記 ---------- */
+  function renderNotes() {
+    var input = $("dailyNote");
+    if (input && document.activeElement !== input) { var x = todayData(); input.value = x && x.note ? x.note : ""; }
+    var keys = Object.keys(state.days).filter(function (k) { return state.days[k] && state.days[k].note; }).sort().reverse().slice(0, 10);
+    $("recentNotes").innerHTML = keys.length ? keys.map(function (k) { return '<div class="note-row"><b>' + esc(k) + '</b><p>' + esc(state.days[k].note) + '</p></div>'; }).join("") : '<p class="fine">' + esc(tr("尚未有札記")) + '</p>';
+    var pn = Object.keys(state.passageNotes || {});
+    $("notesCount").textContent = pn.length;
+    $("passageNotes").innerHTML = pn.length ? pn.map(function (k) {
+      var title = k; if (practice) { for (var i = 0; i < practice.passages.length; i++) { if ((practice.passages[i].id || ("p" + i)) === k) { title = tc(practice.passages[i].title || k); } } }
+      return '<div class="note-row"><b>' + esc(title) + '</b><p>' + esc(state.passageNotes[k]) + '</p></div>';
+    }).join("") : '<p class="fine">' + esc(tr("尚未有逐段筆記")) + '</p>';
+  }
+
+  /* ---------- 設定／登入 ---------- */
+  var AUTH = { ready: false, user: null, db: null, busy: false };
+  var domainOK = null;
+  function setAuthMsg(m, err) { var el = $("authMsg"); el.textContent = m; el.classList.toggle("err", !!err); }
+  function setCloud(m) { /* 只用 authMsg，避免重複 */ }
+  function loadScript(src, ms) {
+    return new Promise(function (res, rej) {
+      var s = document.createElement("script"); s.src = src; s.async = true;
+      var to = setTimeout(function () { rej(new Error("timeout")); }, ms || 9000);
+      s.onload = function () { clearTimeout(to); res(); };
+      s.onerror = function () { clearTimeout(to); rej(new Error("load")); };
+      document.head.appendChild(s);
+    });
+  }
+  function initAuth() {
+    if (!navigator.onLine) { setAuthMsg(tr("網絡未通") + "；" + tr("未登入：紀錄只存本機。")); return; }
+    loadScript("https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js").then(function () { return loadScript("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"); }).then(function () { return loadScript("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"); }).then(function () { return loadScript("firebase-config.js"); }).then(function () {
+      if (!window.firebase || !window.FY_AUTH) { throw new Error("no firebase"); }
+      AUTH.ready = true; AUTH.db = window.FY_DB || null;
+      try { window.FY_AUTH.useDeviceLanguage(); } catch (e) {}
+      if (window.firebase.auth.Auth && window.firebase.auth.Auth.Persistence) { window.FY_AUTH.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL).catch(function () {}); }
+      window.FY_AUTH.onAuthStateChanged(function (u) { setUser(u); });
+      checkDomain();
+      setAuthMsg(tr("未登入：紀錄只存本機。"));
+      renderSettings();
+    }).catch(function () { setAuthMsg(tr("登入失敗") + "：" + tr("網絡未通") + "；" + tr("未登入：紀錄只存本機。"), true); renderSettings(); });
+  }
+  function renderDomain() {
+    var el = $("authDomain"); if (!el) { return; }
+    if (domainOK === null) { el.textContent = ""; return; }
+    var h = location.hostname;
+    el.textContent = lang === "en" ? (domainOK ? "Sign-in domain: authorized (" + h + ")" : "Sign-in domain not authorized: " + h)
+      : lang === "vi" ? (domainOK ? "Tên miền đăng nhập: đã ủy quyền (" + h + ")" : "Tên miền đăng nhập chưa ủy quyền: " + h)
+      : lang === "cmn" ? (domainOK ? "登录域名：已授权（" + h + "）" : "登录域名未授权：" + h)
+      : (domainOK ? "登入網域：已授權（" + h + "）" : "登入網域未授權：" + h);
+  }
+  function checkDomain() {
+    var cfg = window.FY_FIREBASE; if (!cfg || !cfg.apiKey) { return; }
+    fetch("https://identitytoolkit.googleapis.com/v1/accounts:createAuthUri?key=" + encodeURIComponent(cfg.apiKey), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ providerId: "google.com", continueUri: location.origin + "/" }) })
+      .then(function (r) { return r.json(); }).then(function (j) { domainOK = !!(j && j.authUri); renderDomain(); }).catch(function () { domainOK = null; renderDomain(); });
+  }
+  function setUser(u) {
+    AUTH.user = u || null;
+    var av = $("acctAv");
+    if (u) { av.innerHTML = u.photoURL ? '<img src="' + esc(u.photoURL) + '" alt="" referrerpolicy="no-referrer" onerror="this.style.display=\'none\'">' : "佛"; }
+    else { av.textContent = "佛"; }
+    renderSettings();
+    if (u) { setAuthMsg((lang === "en" ? "Signed in: " : lang === "vi" ? "Đã đăng nhập: " : lang === "cmn" ? "已登录：" : "已登入：") + (u.displayName || "") + (lang === "en" ? ". Records sync to your account." : lang === "vi" ? ". Ghi chép đồng bộ vào tài khoản." : lang === "cmn" ? "。记录同步到账号。" : "。紀錄同步到帳號。")); pullCloud(); }
+    else { setAuthMsg(tr("未登入：紀錄只存本機。")); }
+  }
+  function signIn() {
+    if (!AUTH.ready) { toast(tr("登入失敗") + "：" + tr("網絡未通")); return; }
+    if (AUTH.busy) { return; } AUTH.busy = true;
+    var provider = new window.firebase.auth.GoogleAuthProvider(); provider.setCustomParameters({ prompt: "select_account" });
+    window.FY_AUTH.signInWithPopup(provider).catch(function (e) {
+      var code = (e && e.code) || "";
+      if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") { setAuthMsg(tr("登入已取消")); }
+      else if (code === "auth/popup-blocked") { setAuthMsg(tr("登入失敗") + "：popup blocked → redirect"); try { window.FY_AUTH.signInWithRedirect(provider); } catch (e) {} }
+      else if (code === "auth/unauthorized-domain") { setAuthMsg(tr("登入失敗") + "：unauthorized-domain（" + location.hostname + "）", true); }
+      else if (code === "auth/operation-not-supported-in-this-environment" || code === "auth/web-storage-unsupported") { setAuthMsg(tr("登入失敗") + "：App 內建瀏覽器封鎖；請用 Chrome／Safari。", true); }
+      else if (code === "auth/network-request-failed") { setAuthMsg(tr("登入失敗") + "：" + tr("網絡未通"), true); }
+      else { setAuthMsg(tr("登入失敗") + "：" + (code || "unknown"), true); }
+      AUTH.busy = false;
+    }).then(function () { AUTH.busy = false; });
+  }
+  function logout() { if (AUTH.ready) { window.FY_AUTH.signOut(); } }
+  function mergeRemote(days, notes) {
+    var changed = false;
+    if (days && typeof days === "object") {
+      Object.keys(days).forEach(function (k) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || !days[k]) { return; }
+        var r = days[k], l = state.days[k] || { auto: 0, manual: 0, note: "", checked: false };
+        var auto = Math.max(nn(l.auto), nn(r.auto)), manual = Math.max(nn(l.manual), nn(r.manual));
+        var note = l.note || (typeof r.note === "string" ? r.note.slice(0, 4000) : "");
+        var checked = !!(l.checked || r.checked);
+        if (auto !== nn(l.auto) || manual !== nn(l.manual) || note !== (l.note || "") || checked !== !!l.checked) { state.days[k] = { auto: auto, manual: manual, note: note, checked: checked }; changed = true; }
+      });
+    }
+    if (notes && typeof notes === "object") { Object.keys(notes).forEach(function (k) { if (!state.passageNotes[k] && typeof notes[k] === "string" && notes[k].trim()) { state.passageNotes[k] = notes[k].slice(0, 5000); changed = true; } }); }
+    return changed;
+  }
+  var pullBusy = false, pushTimer = null;
+  function pullCloud() {
+    if (!AUTH.user || !AUTH.db || pullBusy || state.settings.cloud === false) { return; } pullBusy = true;
+    AUTH.db.collection("users").doc(AUTH.user.uid).get().then(function (snap) {
+      if (snap && snap.exists) { var d = snap.data() || {}; if (mergeRemote(d.guangmingCounts, d.guangmingPassageNotes)) { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) {} renderAll(); } }
+      pullBusy = false;
+    }).catch(function (e) { pullBusy = false; setAuthMsg(tr("登入失敗") + "：" + ((e && e.code) || "sync"), true); });
+  }
+  function schedulePush() { if (!AUTH.user || !AUTH.db || state.settings.cloud === false) { return; } clearTimeout(pushTimer); pushTimer = setTimeout(pushCloud, 2500); }
+  function pushCloud() {
+    if (!AUTH.user || !AUTH.db) { return; }
+    AUTH.db.collection("users").doc(AUTH.user.uid).set({ guangmingCounts: state.days, guangmingPassageNotes: state.passageNotes, guangmingUpdatedAt: window.firebase.firestore.FieldValue.serverTimestamp() }, { merge: true }).catch(function () {});
+  }
+  function txt(id, v) { var el = $(id); if (el) { el.textContent = v; } }
+  function hide(id, h) { var el = $(id); if (el) { el.classList.toggle("hidden", !!h); } }
+  function renderSettings() {
+    var u = AUTH.user;
+    txt("acctBadge", u ? tr("已登入") : tr("訪客模式"));
+    var acct = $("acctCard");
+    if (acct) { acct.innerHTML = (u ? (u.photoURL ? '<img class="acct-av" src="' + esc(u.photoURL) + '" alt="" referrerpolicy="no-referrer">' : '<div class="acct-av" data-no-i18n>佛</div>') : '<div class="acct-av" data-no-i18n>佛</div>') +
+      '<div style="min-width:0"><div class="acct-name">' + esc(u ? (u.displayName || tr("已登入")) : tr("訪客模式")) + '</div><div class="acct-sub">' + esc(u ? (lang === "en" ? "Records sync to your account." : lang === "vi" ? "Ghi chép đồng bộ vào tài khoản." : lang === "cmn" ? "记录同步到账号。" : "紀錄同步到帳號。") : (lang === "en" ? "Records stay on this device." : lang === "vi" ? "Ghi chép lưu trên thiết bị này." : lang === "cmn" ? "记录存在此设备。" : "紀錄存在呢部裝置。")) + '</div></div>'; }
+    hide("loginBtn", !!u);
+    if ($("loginBtn")) { $("loginBtn").disabled = !AUTH.ready; }
+    hide("switchBtn", !u);
+    hide("logoutBtn", !u);
+    hide("syncBtn", !u);
+    if ($("cloudToggle")) { $("cloudToggle").setAttribute("aria-checked", state.settings.cloud === false ? "false" : "true"); }
+    if ($("prefToggle")) { $("prefToggle").setAttribute("aria-checked", state.settings.prefetch === false ? "false" : "true"); }
+    if ($("wakeToggle")) { $("wakeToggle").setAttribute("aria-checked", wakeOn ? "true" : "false"); }
+    txt("audioInfo", (tracks[player.track] ? tr(tracks[player.track].label) : "") + " · " + (nativePlayer ? tr("原生播放") : (blobCache[(tracks[player.track] || {}).file] ? tr("已存本機") : tr("網絡串流"))));
+    txt("verPill", "v" + VERSION);
+    txt("aboutIntro", tr("光明真言獨立課誦系統") + " v" + VERSION + "。" + tr("只收《光明真言》（不空大灌頂光真言），不列其他法門。"));
+    renderSources();
+    try { txt("storageInfo", (lang === "en" ? "Local records: " : lang === "vi" ? "Ghi chép cục bộ: " : lang === "cmn" ? "本机记录：" : "本機紀錄：") + totalCount() + " · " + Object.keys(state.passageNotes).length + " notes"); } catch (e) {}
+  }
+
+  /* ---------- 分頁 ---------- */
+  function switchView(name) {
+    if (["practice", "text", "checkin", "notes", "settings"].indexOf(name) < 0) { name = "practice"; }
+    document.querySelectorAll("[data-view]").forEach(function (v) { v.classList.toggle("hidden", v.getAttribute("data-view") !== name); });
+    document.querySelectorAll("#dock [data-tab]").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-tab") === name); });
+    if (history.replaceState) { history.replaceState(null, "", location.pathname + (name === "practice" ? "" : "?tab=" + name)); }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (name === "checkin") { renderCheckin(); }
+    if (name === "notes") { renderNotes(); }
+    if (name === "settings") { renderSettings(); }
+    if (name === "text") { buildText(); }
+  }
+  function renderAll() { renderPractice(); renderCheckin(); renderNotes(); renderSettings(); }
+
+  /* ---------- 事件 ---------- */
+  function setupUI() {
+    document.querySelectorAll("#langs [data-lang]").forEach(function (b) { b.addEventListener("click", function () { setLang(b.getAttribute("data-lang")); }); });
+    $("themeBtn").addEventListener("click", toggleTheme);
+    $("themeBtn2").addEventListener("click", toggleTheme);
+    $("acctBtn").addEventListener("click", function () { if (AUTH.user) { switchView("settings"); } else { signIn(); } });
+    $("dock").addEventListener("click", function (e) { var b = e.target.closest && e.target.closest("[data-tab]"); if (b) { switchView(b.getAttribute("data-tab")); } });
+    $("stopSpeak").addEventListener("click", function () { try { if (window.NativeTts) { window.NativeTts.stop(); } } catch (e) {} try { speechSynthesis.cancel(); } catch (e) {} });
+    $("passages").addEventListener("click", function (e) {
+      var el = e.target;
+      var sp = el.closest && el.closest("[data-speak]");
+      if (sp) { var i = Number(sp.getAttribute("data-speak")); var p = practice && practice.passages[i]; if (p) { var key = langKey(); speak(p[key] || p.han || "", LANGS[lang].tts, sp); } return; }
+      var np = el.closest && el.closest("[data-pnote]");
+      if (np) { var ni = Number(np.getAttribute("data-pnote")); var bx = document.querySelector('[data-pnote-box="' + ni + '"]'); if (bx) { bx.classList.toggle("hidden"); if (!bx.classList.contains("hidden")) { var ta = bx.querySelector("textarea"); if (ta) { ta.focus(); } } } return; }
+      var sv = el.closest && el.closest("[data-pnote-save]");
+      if (sv) { var si = Number(sv.getAttribute("data-pnote-save")); var sb = document.querySelector('[data-pnote-box="' + si + '"]'); var sta = sb && sb.querySelector("textarea"); savePN(si, sta ? sta.value : ""); return; }
+      var cl = el.closest && el.closest("[data-pnote-clear]");
+      if (cl) { var ci = Number(cl.getAttribute("data-pnote-clear")); var cb = document.querySelector('[data-pnote-box="' + ci + '"]'); if (cb) { cb.querySelector("textarea").value = ""; } savePN(ci, ""); }
+    });
+    $("passages").addEventListener("input", function (e) {
+      var ta = e.target; if (!ta || !ta.closest || !ta.closest("[data-pnote-input]")) { return; }
+      var i = Number(ta.getAttribute("data-pnote-input")); clearTimeout(ta._t); ta._t = setTimeout(function () { savePN(i, ta.value, true); }, 800);
+    });
+    $("checkinBtn").addEventListener("click", function () { var x = dayData(todayISO()); if (x.checked) { return; } x.checked = true; save(); renderCheckin(); renderPractice(); toastTr("打卡成功"); });
+    $("undoBtn").addEventListener("click", function () { if (!confirm(tr("確定撤銷今日打卡？"))) { return; } var x = state.days[todayISO()]; if (x) { x.checked = false; save(); renderCheckin(); renderPractice(); toastTr("已撤銷今日打卡"); } });
+    $("prevMonth").addEventListener("click", function () { calOffset--; renderCheckin(); });
+    $("nextMonth").addEventListener("click", function () { calOffset++; renderCheckin(); });
+    $("saveNote").addEventListener("click", saveDaily);
+    $("dailyNote").addEventListener("input", function () { clearTimeout($("dailyNote")._t); $("dailyNote")._t = setTimeout(function () { saveDaily(true); }, 900); });
+    $("loginBtn").addEventListener("click", signIn);
+    $("switchBtn").addEventListener("click", signIn);
+    $("logoutBtn").addEventListener("click", logout);
+    $("syncBtn").addEventListener("click", function () { pullCloud(); });
+    $("cloudToggle").addEventListener("click", function () { state.settings.cloud = !(state.settings.cloud !== false); save(); this.setAttribute("aria-checked", state.settings.cloud ? "true" : "false"); if (state.settings.cloud) { pullCloud(); } });
+    $("prefToggle").addEventListener("click", function () { state.settings.prefetch = !(state.settings.prefetch !== false); save(); this.setAttribute("aria-checked", state.settings.prefetch ? "true" : "false"); if (state.settings.prefetch) { prefetch(0, true); prefetch(1, true); } });
+    $("wakeToggle").addEventListener("click", function () { setWake(!wakeOn); });
+    $("exportBtn").addEventListener("click", exportData);
+    $("importBtn").addEventListener("click", function () { $("importFile").click(); });
+    $("importFile").addEventListener("change", importData);
+    $("clearBtn").addEventListener("click", function () { if (!confirm(tr("清除本機紀錄") + "?")) { return; } state = defaultState(); try { localStorage.removeItem(STORE); } catch (e) {} save(); renderAll(); buildText(); toastTr("清除本機紀錄"); });
+    document.addEventListener("keydown", function (e) { if ((e.key === " " || e.key === "Enter") && e.target.classList && e.target.classList.contains("switch")) { e.preventDefault(); e.target.click(); } });
+  }
+  function savePN(i, v, silent) {
+    if (!practice || !practice.passages[i]) { return; }
+    var p = practice.passages[i], id = p.id || ("p" + i); v = String(v || "").trim().slice(0, 5000);
+    if (v) { state.passageNotes[id] = v; } else { delete state.passageNotes[id]; }
+    save(); renderNotes();
+    var b = document.querySelector('[data-pnote="' + i + '"]'); if (b) { b.textContent = tr(v ? "修改逐段筆記" : "逐段筆記"); }
+    var st = document.querySelector('[data-pnote-status="' + i + '"]'); if (st) { st.textContent = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }); }
+    if (!silent) { toastTr(v ? "逐段筆記" : "清除"); }
+  }
+  function saveDaily(silent) {
+    var v = $("dailyNote").value.trim().slice(0, 4000), x = dayData(todayISO()); x.note = v; save(); renderNotes();
+    $("noteStatus").textContent = new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    if (!silent) { toastTr("已保存"); }
+  }
+  function exportData() {
+    var blob = new Blob([JSON.stringify({ app: "guangming", version: VERSION, exportedAt: new Date().toISOString(), state: state }, null, 2)], { type: "application/json" });
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "guangming-" + todayISO() + ".json"; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1500);
+  }
+  function importData(e) {
+    var f = e.target.files && e.target.files[0]; if (!f) { return; }
+    var r = new FileReader();
+    r.onload = function () { try { var o = JSON.parse(r.result); var inc = o && o.state ? o.state : o; var norm = normalize(inc); mergeRemote(norm.days, norm.passageNotes); save(); renderAll(); buildText(); toastTr("已保存"); } catch (x) { toast(tr("音檔載入失敗")); } };
+    r.readAsText(f); e.target.value = "";
+  }
+  function toggleTheme() {
+    var light = document.documentElement.getAttribute("data-theme") === "light";
+    document.documentElement.setAttribute("data-theme", light ? "dark" : "light");
+    try { localStorage.setItem(THEME_KEY, light ? "black-gold" : "light"); } catch (e) {}
+    $("themeMeta").setAttribute("content", light ? "#0a0907" : "#f6f0e2");
+    $("themeIcon").setAttribute("d", light ? "M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" : "M12 4v2M12 18v2M4 12h2M18 12h2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M17.7 6.3l-1.4 1.4M7.7 16.3l-1.4 1.4M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z");
+    renderSettings();
+  }
+  function applyTheme() {
+    var t = "black-gold"; try { t = localStorage.getItem(THEME_KEY) || "black-gold"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t === "light" ? "light" : "dark");
+    $("themeMeta").setAttribute("content", t === "light" ? "#f6f0e2" : "#0a0907");
+    $("themeIcon").setAttribute("d", t === "light" ? "M12 4v2M12 18v2M4 12h2M18 12h2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M17.7 6.3l-1.4 1.4M7.7 16.3l-1.4 1.4M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" : "M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z");
+  }
+  function registerSW() { if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) { navigator.serviceWorker.register("sw.js").catch(function () {}); } }
+
+  function init() {
+    applyTheme();
+    applyStatic();
+    if (!practice) { $("passages").innerHTML = '<p class="fine">資料未載入：請確認 data.js。</p>'; return; }
+    setupUI(); setupPlayer(); initAuth(); renderAll(); renderNotes();
+    var q = new URLSearchParams(location.search);
+    var testMode = q.has("test");
+    switchView(q.get("tab") || (location.hash || "").replace("#", "") || "practice");
+    applyStatic();
+    registerSW();
+    if (testMode) { window.__GM3__ = { state: function () { return state; }, player: player, tracks: function () { return tracks; }, audio: function () { return audio; }, switchView: switchView, addCount: addCount, lang: function () { return lang; } }; }
+  }
+  init();
+})();
+</script>
 </body>
 </html>
