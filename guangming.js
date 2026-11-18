@@ -678,8 +678,23 @@
   var speakingButton = null;
   var speechToken = 0;
   var nativeTts = window.NativeTts || null;
+  /* 只要 APK 有注入 NativeTts 物件就用它，唔可以靠 isAvailable() 做唯一判斷：
+     Android TextToSpeech 初始化係非同步，頁面載入後頭一兩秒 isAvailable() 會係 false，
+     但 Java 端會將 speak() 存入 pendingTtsText，等引擎就緒即刻補播。
+     如果呢度因為 isAvailable() 一時 false 而退回 Web Speech，WebView 根本冇
+     speechSynthesis，就會彈「此瀏覽器不支援語音朗讀」。 */
   function hasNativeTts() {
-    try { return !!(nativeTts && nativeTts.isAvailable && nativeTts.isAvailable()); } catch (e) { return false; }
+    try {
+      if (!nativeTts) { return false; }
+      if (typeof nativeTts.speak === 'function') { return true; }
+      return !!(nativeTts.isAvailable && nativeTts.isAvailable());
+    } catch (e) { return false; }
+  }
+  function inWebViewShell() {
+    try {
+      var ua = navigator.userAgent || '';
+      return /;\s*wv\)/.test(ua) || /Version\/\d+\.\d+.*Chrome\/\d+/.test(ua) && !/Chrome\/\d+.*Mobile Safari/.test(ua);
+    } catch (e) { return false; }
   }
   function stopSpeak() {
     speechToken++;
@@ -722,7 +737,12 @@
       }
       return;
     }
-    if (!('speechSynthesis' in window)) { toast(trText('呢個瀏覽器唔支援語音朗讀')); return; }
+    if (!('speechSynthesis' in window)) {
+      toast(inWebViewShell()
+        ? '呢個 App 版本未支援朗讀：請到官網下載最新 APK（v1.1.0 或以上）'
+        : trText('呢個瀏覽器唔支援語音朗讀'));
+      return;
+    }
     stopSpeak();
     var token = speechToken;
     var utterance = new SpeechSynthesisUtterance(text);

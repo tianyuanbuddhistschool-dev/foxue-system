@@ -969,5 +969,10 @@ window.GM_STRINGS = {
     "zh": "已停止朗读",
     "en": "Reading stopped.",
     "vi": "Đã dừng đọc."
+  },
+  "下載光明真言 App（v1.1.0）": {
+    "zh": "下载光明真言 App（v1.1.0）",
+    "en": "Download Mantra of Light App (v1.1.0)",
+    "vi": "Tải ứng dụng Chân ngôn Quang Minh (v1.1.0)"
   }
 };
