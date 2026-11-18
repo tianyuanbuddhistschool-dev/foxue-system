@@ -268,7 +268,7 @@
     }
     var foot = $('foot-version');
     if (foot) {
-      var version = '2.3.2';
+      var version = '2.3.3';
       foot.setAttribute('data-no-i18n', '');
       foot.textContent = lang === 'yue' ? '光明真言系統 v' + version
         : (lang === 'cmn' ? '光明真言系统 v' + version
@@ -1459,11 +1459,11 @@
     updateTodayChip();
     var foot = $('foot-version');
     if (foot) {
-      foot.textContent = '光明真言系統 v2.3.2';
+      foot.textContent = '光明真言系統 v2.3.3';
     }
     var brandVersion = $('brand-version');
     if (brandVersion) {
-      brandVersion.textContent = 'v2.3.2';
+      brandVersion.textContent = 'v2.3.3';
     }
     var intro = $('gm-intro');
     if (intro && practice && practice.intro) { intro.textContent = practice.intro; }
