@@ -55,7 +55,10 @@ body{
   background-attachment:fixed;
   padding-bottom:9.5rem;
   -webkit-text-size-adjust:100%;
+  /* 保險：任何殘留超寬元素都唔可以令整頁可以左右拖出空白 */
+  overflow-x:hidden;
 }
+html{ overflow-x:hidden; max-width:100%; }
 
 body.modal-open{ overflow:hidden; }
 
@@ -164,7 +167,7 @@ input,button{ font-family:inherit; }
   letter-spacing:.18em;
   color:rgba(229,211,162,.72);
 }
-.masthead-tools{ display:flex; align-items:center; gap:.7rem; }
+.masthead-tools{ display:flex; align-items:center; gap:.7rem; flex-wrap:wrap; min-width:0; justify-content:flex-end; }
 .today-chip{
   font-size:.82rem;
   color:rgba(246,240,225,.8);
@@ -1328,7 +1331,10 @@ input,button{ font-family:inherit; }
 @media (max-width: 600px){
   html{ font-size:16px; }
   html.big-text{ font-size:19.5px; }
-  .masthead-inner{ min-height:0; padding:.8rem 0; gap:.7rem; }
+  .masthead-inner{ min-height:0; padding:.8rem 0; gap:.55rem; }
+  /* 頁首工具列：窄機一定要換行，否則會撐爆 viewport，令成頁可以向左拖拉出空白 */
+  .masthead-tools{ width:100%; justify-content:flex-start; gap:.45rem; }
+  .masthead-tools .ghost-btn{ font-size:.78rem; padding:.3rem .6rem; }
   .brand-mark{ width:2.4rem; height:2.4rem; font-size:1.25rem; }
   .brand-title{ font-size:1.1rem; }
   .brand-sub{ font-size:.72rem; letter-spacing:.12em; }
