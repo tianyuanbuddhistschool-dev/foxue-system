@@ -250,16 +250,15 @@
       translateAttributes(document.body);
     }
     var buttons = document.querySelectorAll('[data-gmlang]');
-    var langLabels = {
-      yue: { yue: '粵', cmn: '普', en: '英', vi: '越' },
-      cmn: { yue: '粤', cmn: '普', en: '英', vi: '越' },
-      en: { yue: 'YUE', cmn: 'CMN', en: 'EN', vi: 'VI' },
-      vi: { yue: 'Quảng', cmn: 'Phổ', en: 'Anh', vi: 'Việt' }
-    };
+    /* 使用者指定：粵語 UI「粵/普/EN/VI」；普通話 UI「粤/普/EN/VI」；
+       English／越南文 UI 都用「粵/普/EN/VI」，不再顯示 英/越/YUE/Quảng。 */
+    var langLabels = lang === 'cmn'
+      ? { yue: '粤', cmn: '普', en: 'EN', vi: 'VI' }
+      : { yue: '粵', cmn: '普', en: 'EN', vi: 'VI' };
     for (var j = 0; j < buttons.length; j++) {
       var code = buttons[j].getAttribute('data-gmlang');
       buttons[j].setAttribute('data-no-i18n', '');
-      buttons[j].textContent = (langLabels[lang] && langLabels[lang][code]) || code.toUpperCase();
+      buttons[j].textContent = langLabels[code] || code.toUpperCase();
       buttons[j].classList.toggle('on', code === lang);
     }
     var title = $('gm-title');
@@ -269,7 +268,7 @@
     }
     var foot = $('foot-version');
     if (foot) {
-      var version = '2.3.1';
+      var version = '2.3.2';
       foot.setAttribute('data-no-i18n', '');
       foot.textContent = lang === 'yue' ? '光明真言系統 v' + version
         : (lang === 'cmn' ? '光明真言系统 v' + version
@@ -678,12 +677,17 @@
   /* ---------------- 語音朗讀 ---------------- */
   var speakingButton = null;
   var speechToken = 0;
+  var nativeTts = window.NativeTts || null;
+  function hasNativeTts() {
+    try { return !!(nativeTts && nativeTts.isAvailable && nativeTts.isAvailable()); } catch (e) { return false; }
+  }
   function stopSpeak() {
     speechToken++;
     if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
+    try { if (nativeTts && nativeTts.stop) { nativeTts.stop(); } } catch (e) { /* ignore */ }
     if (speakingButton) {
       speakingButton.setAttribute('aria-pressed', 'false');
-      speakingButton.textContent = '朗讀';
+      speakingButton.textContent = trText('朗讀');
       speakingButton = null;
     }
   }
@@ -701,8 +705,24 @@
     return exact || near || null;
   }
   function speakText(text, lang, button) {
-    if (!text) { toast('呢段冇嘢可以朗讀'); return; }
-    if (!('speechSynthesis' in window)) { toast('呢個瀏覽器唔支援語音朗讀'); return; }
+    if (!text) { toast(trText('呢段冇嘢可以朗讀')); return; }
+    if (hasNativeTts()) {
+      stopSpeak();
+      speakingButton = button || null;
+      if (button) {
+        button.setAttribute('aria-pressed', 'true');
+        button.textContent = trText('朗讀中');
+      }
+      try {
+        nativeTts.speak(text, lang || 'zh-HK');
+        toast(trText('朗讀') + ' ' + lang);
+      } catch (e) {
+        toast(trText('朗讀失敗：呢部機可能冇合適語音'));
+        stopSpeak();
+      }
+      return;
+    }
+    if (!('speechSynthesis' in window)) { toast(trText('呢個瀏覽器唔支援語音朗讀')); return; }
     stopSpeak();
     var token = speechToken;
     var utterance = new SpeechSynthesisUtterance(text);
@@ -712,20 +732,32 @@
     utterance.rate = 0.92;
     utterance.onend = function () {
       if (token !== speechToken) { return; }
-      if (button) { button.setAttribute('aria-pressed', 'false'); button.textContent = '朗讀'; }
+      if (button) { button.setAttribute('aria-pressed', 'false'); button.textContent = trText('朗讀'); }
       if (speakingButton === button) { speakingButton = null; }
     };
     utterance.onerror = function () {
       if (token !== speechToken) { return; }
-      if (button) { button.setAttribute('aria-pressed', 'false'); button.textContent = '朗讀'; }
+      if (button) { button.setAttribute('aria-pressed', 'false'); button.textContent = trText('朗讀'); }
       if (speakingButton === button) { speakingButton = null; }
-      toast('朗讀失敗：呢部機可能冇合適語音');
+      toast(trText('朗讀失敗：呢部機可能冇合適語音'));
     };
     speakingButton = button || null;
-    if (button) { button.setAttribute('aria-pressed', 'true'); button.textContent = '朗讀中'; }
+    if (button) { button.setAttribute('aria-pressed', 'true'); button.textContent = trText('朗讀中'); }
     window.speechSynthesis.speak(utterance);
     toast(voice ? ('朗讀：' + lang) : ('朗讀：' + lang + '（系統預設語音）'));
   }
+
+  window.__nativeTtsEvent = function (type, message) {
+    if (type !== 'done' && type !== 'error') { return; }
+    if (speakingButton) {
+      speakingButton.setAttribute('aria-pressed', 'false');
+      speakingButton.textContent = trText('朗讀');
+      speakingButton = null;
+    }
+    if (type === 'error') {
+      toast('朗讀失敗：' + (message || '系統語音錯誤'));
+    }
+  };
 
   /* ---------------- 播放與自動計次 ---------------- */
   var audio = (window.NativeAudio && window.NativeAudio.available())
@@ -1394,7 +1426,7 @@
     if (stopBtn) {
       stopBtn.addEventListener('click', function () {
         stopSpeak();
-        toast('已停止朗讀');
+        toast(trText('已停止朗讀'));
       });
     }
     if (window.speechSynthesis) {
@@ -1407,11 +1439,11 @@
     updateTodayChip();
     var foot = $('foot-version');
     if (foot) {
-      foot.textContent = '光明真言系統 v2.3.1';
+      foot.textContent = '光明真言系統 v2.3.2';
     }
     var brandVersion = $('brand-version');
     if (brandVersion) {
-      brandVersion.textContent = 'v2.3.1';
+      brandVersion.textContent = 'v2.3.2';
     }
     var intro = $('gm-intro');
     if (intro && practice && practice.intro) { intro.textContent = practice.intro; }

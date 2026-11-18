@@ -247,8 +247,8 @@ window.GM_STRINGS = {
   },
   "停止朗讀": {
     "zh": "停止朗读",
-    "en": "stop reading",
-    "vi": "ngừng đọc"
+    "en": "Stop reading",
+    "vi": "Dừng đọc"
   },
   "傳統前行之來源；咒文待校。": {
     "zh": "传统前行之来源；咒文待校。",
@@ -612,8 +612,8 @@ window.GM_STRINGS = {
   },
   "朗讀": {
     "zh": "朗读",
-    "en": "read aloud",
-    "vi": "đọc to"
+    "en": "Read aloud",
+    "vi": "Đọc"
   },
   "未登入": {
     "zh": "未登录",
@@ -944,5 +944,30 @@ window.GM_STRINGS = {
     "zh": "已播完；不循环，不会自动续播。",
     "en": "Finished; no loop, playback stopped.",
     "vi": "Đã phát xong; không lặp, đã dừng."
+  },
+  "朗讀中": {
+    "zh": "朗读中",
+    "en": "Reading…",
+    "vi": "Đang đọc…"
+  },
+  "呢個瀏覽器唔支援語音朗讀": {
+    "zh": "这个浏览器不支持语音朗读",
+    "en": "This browser does not support speech.",
+    "vi": "Trình duyệt này không hỗ trợ đọc tiếng."
+  },
+  "呢段冇嘢可以朗讀": {
+    "zh": "这段没有内容可以朗读",
+    "en": "Nothing to read in this passage.",
+    "vi": "Không có nội dung để đọc."
+  },
+  "朗讀失敗：呢部機可能冇合適語音": {
+    "zh": "朗读失败：这台设备可能没有合适语音",
+    "en": "Speech failed: no suitable voice on this device.",
+    "vi": "Đọc thất bại: thiết bị có thể không có giọng phù hợp."
+  },
+  "已停止朗讀": {
+    "zh": "已停止朗读",
+    "en": "Reading stopped.",
+    "vi": "Đã dừng đọc."
   }
 };
