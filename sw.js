@@ -6,11 +6,12 @@
    ============================================================= */
 'use strict';
 
-var CACHE = 'guangming-shell-v2.4.0-20261118';
+var CACHE = 'guangming-shell-v2.4.1-20261118';
 var SHELL = [
   './',
   './index.html',
   './guangming.html',
+  './guangming-practice.html',
   './library.html',
   './app.js',
   './guangming.js',

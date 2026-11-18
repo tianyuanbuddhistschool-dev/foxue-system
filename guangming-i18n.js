@@ -678,7 +678,7 @@ window.GM_STRINGS = {
   "清除": {
     "zh": "清除",
     "en": "Clear",
-    "vi": "Thông thoáng"
+    "vi": "Xóa"
   },
   "滿 108 遍後可同步：只會更新主系統今日「已完成」與輪數，不會改動主系統其他紀錄；主系統若正開著，請重新載入一次先見到。": {
     "zh": "满 108 遍后可同步：只会更新主系统今日「已完成」与轮数，不会改动主系统其他记录；主系统若正开着，请重新载入一次先见到。",
@@ -1034,5 +1034,165 @@ window.GM_STRINGS = {
     "zh": "已登录",
     "en": "Signed in",
     "vi": "Đã đăng nhập"
+  },
+  "修行打卡": {
+    "zh": "修行打卡",
+    "en": "Practice check-in",
+    "vi": "Điểm danh tu tập"
+  },
+  "每日一記": {
+    "zh": "每日一记",
+    "en": "One mark a day",
+    "vi": "Mỗi ngày một dấu"
+  },
+  "連續打卡（日）": {
+    "zh": "连续打卡（日）",
+    "en": "Check-in streak (days)",
+    "vi": "Chuỗi điểm danh (ngày)"
+  },
+  "累計打卡（日）": {
+    "zh": "累计打卡（日）",
+    "en": "Total check-ins (days)",
+    "vi": "Tổng điểm danh (ngày)"
+  },
+  "今月打卡（日）": {
+    "zh": "本月打卡（日）",
+    "en": "This month (days)",
+    "vi": "Tháng này (ngày)"
+  },
+  "今日打卡": {
+    "zh": "今日打卡",
+    "en": "Check in today",
+    "vi": "Điểm danh hôm nay"
+  },
+  "今日已打卡": {
+    "zh": "今日已打卡",
+    "en": "Checked in today",
+    "vi": "Đã điểm danh hôm nay"
+  },
+  "撤銷今日": {
+    "zh": "撤销今日",
+    "en": "Undo today",
+    "vi": "Hoàn tác hôm nay"
+  },
+  "已打卡": {
+    "zh": "已打卡",
+    "en": "Checked in",
+    "vi": "Đã điểm danh"
+  },
+  "尚未有札記": {
+    "zh": "尚未有札记",
+    "en": "No notes yet",
+    "vi": "Chưa có ghi chú"
+  },
+  "最近札記": {
+    "zh": "最近札记",
+    "en": "Recent notes",
+    "vi": "Ghi chú gần đây"
+  },
+  "確定撤銷今日打卡？": {
+    "zh": "确定撤销今日打卡？",
+    "en": "Undo today’s check-in?",
+    "vi": "Hoàn tác điểm danh hôm nay?"
+  },
+  "打卡成功": {
+    "zh": "打卡成功",
+    "en": "Checked in",
+    "vi": "Điểm danh thành công"
+  },
+  "已撤銷今日打卡": {
+    "zh": "已撤销今日打卡",
+    "en": "Today’s check-in removed",
+    "vi": "Đã hoàn tác điểm danh hôm nay"
+  },
+  "今日已打咗卡": {
+    "zh": "今日已打过卡",
+    "en": "Already checked in today",
+    "vi": "Hôm nay đã điểm danh"
+  },
+  "今日滿 108 遍，已自動打卡": {
+    "zh": "今日满 108 遍，已自动打卡",
+    "en": "108 recitations today — checked in automatically",
+    "vi": "Hôm nay đủ 108 lần — đã tự động điểm danh"
+  },
+  "上一個月": {
+    "zh": "上一个月",
+    "en": "Previous month",
+    "vi": "Tháng trước"
+  },
+  "下一個月": {
+    "zh": "下一个月",
+    "en": "Next month",
+    "vi": "Tháng sau"
+  },
+  "課誦模式": {
+    "zh": "课诵模式",
+    "en": "Practice mode",
+    "vi": "Chế độ tụng niệm"
+  },
+  "返回完整模式": {
+    "zh": "返回完整模式",
+    "en": "Full mode",
+    "vi": "Chế độ đầy đủ"
+  },
+  "打卡統計": {
+    "zh": "打卡统计",
+    "en": "Check-in statistics",
+    "vi": "Thống kê điểm danh"
+  },
+  "打卡係提醒自己相續，唔係交數；滿 108 遍會自動打卡，亦可以自己補打卡。紀錄同遍數一齊存本機／雲端。": {
+    "zh": "打卡是提醒自己相续，不是交数；满 108 遍会自动打卡，也可以自己补打卡。记录和遍数一起存本机／云端。",
+    "en": "Check-in is a reminder for continuity, not a quota. Reaching 108 recitations checks you in automatically; you can also check in manually. Records and counts are saved locally and in the cloud.",
+    "vi": "Điểm danh là lời nhắc liên tục, không phải chỉ tiêu. Đủ 108 lần sẽ tự động điểm danh; bạn cũng có thể tự điểm danh. Ghi chép và số lần được lưu cục bộ và trên đám mây."
+  },
+  "格內數字＝當日遍數；金框＝已打卡；綠框＝今日。": {
+    "zh": "格内数字＝当日遍数；金框＝已打卡；绿框＝今日。",
+    "en": "Number in each cell = recitations that day; gold border = checked in; green border = today.",
+    "vi": "Số trong ô = số lần ngày đó; viền vàng = đã điểm danh; viền xanh = hôm nay."
+  },
+  "札記已儲存": {
+    "zh": "札记已保存",
+    "en": "Note saved",
+    "vi": "Đã lưu ghi chú"
+  },
+  "札記已清空": {
+    "zh": "札记已清空",
+    "en": "Note cleared",
+    "vi": "Đã xóa ghi chú"
+  },
+  "逐段筆記": {
+    "zh": "逐段笔记",
+    "en": "Passage note",
+    "vi": "Ghi chú từng đoạn"
+  },
+  "修改逐段筆記": {
+    "zh": "修改逐段笔记",
+    "en": "Edit passage note",
+    "vi": "Sửa ghi chú đoạn"
+  },
+  "寫低呢一段嘅心得…": {
+    "zh": "写下这一段的心得…",
+    "en": "Write your reflection on this passage…",
+    "vi": "Viết cảm nhận của bạn về đoạn này…"
+  },
+  "逐段筆記已儲存": {
+    "zh": "逐段笔记已保存",
+    "en": "Passage note saved",
+    "vi": "Đã lưu ghi chú đoạn"
+  },
+  "逐段筆記已清除": {
+    "zh": "逐段笔记已清除",
+    "en": "Passage note cleared",
+    "vi": "Đã xóa ghi chú đoạn"
+  },
+  "尚未有逐段筆記": {
+    "zh": "尚未有逐段笔记",
+    "en": "No passage notes yet",
+    "vi": "Chưa có ghi chú đoạn"
+  },
+  "儲存": {
+    "zh": "保存",
+    "en": "Save",
+    "vi": "Lưu"
   }
 };

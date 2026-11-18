@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta http-equiv="refresh" content="0; url=guangming.html?mode=practice">
+<title>光明真言・課誦模式</title>
+<style>
+  html,body{height:100%;margin:0;background:#050505;color:#f3e9cf;font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif}
+  body{display:grid;place-items:center;text-align:center;padding:2rem}
+  .mark{width:5rem;height:5rem;border:2px solid #d4af37;border-radius:50%;display:grid;place-items:center;margin:0 auto 1rem;color:#f0d77a;font-size:2.4rem;font-family:serif;box-shadow:0 0 30px rgba(212,175,55,.25)}
+  h1{font-size:1.3rem;letter-spacing:.12em;color:#f0d77a;margin:0 0 .5rem}
+  p{color:#a99e83;font-size:.85rem;line-height:1.8;margin:.3rem 0}
+  a{color:#d4af37}
+</style>
+</head>
+<body>
+  <main>
+    <div class="mark" aria-hidden="true">光</div>
+    <h1>光明真言・課誦模式</h1>
+    <p>正在進入計次、播放與打卡…</p>
+    <p><a href="guangming.html?mode=practice">按此進入</a></p>
+  </main>
+  <script>
+    /* 2026-11-18 v2.4.1：
+       澳門上載版嘅單頁入口已經併入正式光明真言系統嘅「課誦模式」。
+       唔再另外維護一套四語並列頁，避免兩套系統、兩套登入、兩套紀錄。
+       所有內容、四語切換、登入、Firestore、背景播放都由 guangming.html 提供。 */
+    location.replace('guangming.html?mode=practice' + (location.hash || ''));
+  </script>
+</body>
+</html>

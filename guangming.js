@@ -97,7 +97,8 @@
     return {
       version: 1,
       days: {},
-      /* 2026-11-18 v2.4.0：預設改「單曲循環」。
+      passageNotes: {},
+      /* 2026-11-18 v2.4.1：預設改「單曲循環」。
          全輯循環要靠 JS 嘅 ended 事件換段；手機熄屏後 JS 會被系統凍結，
          12:31 播完就停（用家回報嘅「熄屏後背景播音停止」根因之一）。
          單曲循環用瀏覽器原生 loop，唔靠 JS，鎖屏照轉。 */
@@ -108,6 +109,14 @@
   function normalizeState(raw) {
     var safe = defaultState();
     if (!raw || typeof raw !== 'object') { return safe; }
+    if (raw.passageNotes && typeof raw.passageNotes === 'object') {
+      Object.keys(raw.passageNotes).forEach(function (key) {
+        var value = raw.passageNotes[key];
+        if (typeof value === 'string' && value.trim()) {
+          safe.passageNotes[key] = value.slice(0, 5000);
+        }
+      });
+    }
     if (raw.days && typeof raw.days === 'object') {
       Object.keys(raw.days).forEach(function (key) {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) { return; }
@@ -116,8 +125,9 @@
         var auto = Math.max(0, Math.floor(Number(item.auto) || 0));
         var manual = Math.max(0, Math.floor(Number(item.manual) || 0));
         var note = typeof item.note === 'string' ? item.note.slice(0, 4000) : '';
-        if (auto || manual || note) {
-          safe.days[key] = { auto: auto, manual: manual, note: note };
+        var checked = item.checked === true;
+        if (auto || manual || note || checked) {
+          safe.days[key] = { auto: auto, manual: manual, note: note, checked: checked };
         }
       });
     }
@@ -164,6 +174,7 @@
   var LANG_TARGET = { yue: 'yue', cmn: 'zh', en: 'en', vi: 'vi' };
   var LANG_HTML = { yue: 'zh-Hant-HK', cmn: 'zh-Hans-CN', en: 'en', vi: 'vi' };
   var lang = 'yue';
+  var calMonthOffset = 0;
   var lastStatus = { message: '', kind: '' };
   try {
     var savedLang = window.localStorage.getItem(LANG_KEY);
@@ -285,7 +296,7 @@
     }
     var foot = $('foot-version');
     if (foot) {
-      var version = '2.4.0';
+      var version = '2.4.1';
       foot.setAttribute('data-no-i18n', '');
       foot.textContent = lang === 'yue' ? '光明真言系統 v' + version
         : (lang === 'cmn' ? '光明真言系统 v' + version
@@ -341,7 +352,8 @@
   }
   function dayData(key) {
     var k = key || todayISO();
-    if (!state.days[k]) { state.days[k] = { auto: 0, manual: 0, note: '' }; }
+    if (!state.days[k]) { state.days[k] = { auto: 0, manual: 0, note: '', checked: false }; }
+    if (typeof state.days[k].checked !== 'boolean') { state.days[k].checked = false; }
     return state.days[k];
   }
   function dayTotal(item) {
@@ -358,6 +370,8 @@
     var month30 = 0;
     var best = 0;
     var bestKey = '';
+    var checkDays = 0;
+    var checkMonth = 0;
     var ym = todayISO().slice(0, 7);
     keys.forEach(function (key) {
       var n = dayTotal(state.days[key]);
@@ -367,6 +381,10 @@
       if (key.indexOf(ym) === 0) { month += n; }
       if (key >= dateOffset(-29) && key <= todayISO()) { month30 += n; }
       if (n > best) { best = n; bestKey = key; }
+      if (state.days[key] && state.days[key].checked) {
+        checkDays++;
+        if (key.indexOf(ym) === 0) { checkMonth++; }
+      }
     });
     var streak = 0;
     var cursor = new Date();
@@ -375,7 +393,18 @@
       streak++;
       cursor.setDate(cursor.getDate() - 1);
     }
-    return { total: total, today: today, week: week, month: month, month30: month30, streak: streak, best: best, bestKey: bestKey, days: keys.length };
+    var checkStreak = 0;
+    var ccur = new Date();
+    if (!(state.days[todayISO()] && state.days[todayISO()].checked)) { ccur.setDate(ccur.getDate() - 1); }
+    while (state.days[todayISO(ccur)] && state.days[todayISO(ccur)].checked) {
+      checkStreak++;
+      ccur.setDate(ccur.getDate() - 1);
+    }
+    return {
+      total: total, today: today, week: week, month: month, month30: month30, streak: streak,
+      best: best, bestKey: bestKey, days: keys.length,
+      checkDays: checkDays, checkMonth: checkMonth, checkStreak: checkStreak
+    };
   }
 
   /* ---------------- Google 登入／Firestore 同步 ---------------- */
@@ -433,12 +462,25 @@
       if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) { return; }
       var item = remote[key];
       if (!item || typeof item !== 'object') { return; }
-      var local = state.days[key] || { auto: 0, manual: 0, note: '' };
+      var local = state.days[key] || { auto: 0, manual: 0, note: '', checked: false };
       var auto = Math.max(Number(local.auto) || 0, Number(item.auto) || 0);
       var manual = Math.max(Number(local.manual) || 0, Number(item.manual) || 0);
       var note = local.note || (typeof item.note === 'string' ? item.note.slice(0, 4000) : '');
-      if (auto !== (Number(local.auto) || 0) || manual !== (Number(local.manual) || 0) || note !== (local.note || '')) {
-        state.days[key] = { auto: auto, manual: manual, note: note };
+      var checked = local.checked === true || item.checked === true;
+      if (auto !== (Number(local.auto) || 0) || manual !== (Number(local.manual) || 0) ||
+          note !== (local.note || '') || checked !== (local.checked === true)) {
+        state.days[key] = { auto: auto, manual: manual, note: note, checked: checked };
+        changed = true;
+      }
+    });
+    return changed;
+  }
+  function mergeRemotePassageNotes(remote) {
+    if (!remote || typeof remote !== 'object') { return false; }
+    var changed = false;
+    Object.keys(remote).forEach(function (key) {
+      if (!state.passageNotes[key] && typeof remote[key] === 'string' && remote[key].trim()) {
+        state.passageNotes[key] = remote[key].slice(0, 5000);
         changed = true;
       }
     });
@@ -449,13 +491,16 @@
     setAuthStatus('讀取雲端紀錄中…');
     return db.collection('users').doc(currentUser.uid).get().then(function (doc) {
       if (doc.exists) {
-        var changed = mergeRemoteDays((doc.data() || {}).guangmingCounts);
-        if (changed) {
+        var data = doc.data() || {};
+        var changed = mergeRemoteDays(data.guangmingCounts);
+        var notesChanged = mergeRemotePassageNotes(data.guangmingPassageNotes);
+        if (changed || notesChanged) {
           saveState();
           renderStats();
           renderHistory();
           renderRecordsSummary();
           renderNote();
+          if (notesChanged) { renderPassages(); }
         }
       }
       setAuthStatus('已同步：' + totals().total + ' 遍');
@@ -468,6 +513,7 @@
     setAuthStatus('上載中…');
     return db.collection('users').doc(currentUser.uid).set({
       guangmingCounts: state.days,
+      guangmingPassageNotes: state.passageNotes,
       guangmingUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true }).then(function () {
       setAuthStatus('已同步：' + totals().total + ' 遍');
@@ -628,7 +674,7 @@
     });
   }
 
-  /* 登入網域自檢（2026-11-18 v2.4.0）
+  /* 登入網域自檢（2026-11-18 v2.4.1）
      用 Firebase createAuthUri 檢查目前網域有冇加入 Authorized domains。
      有啲「登入唔成功」其實係喺 file://、內建瀏覽器、或未授權網域發生，
      事先講清楚，唔好再令用家以為個掣壞。 */
@@ -689,7 +735,128 @@
     if (targetText) { targetText.textContent = today + ' / ' + TARGET; }
     if (bar) { bar.style.width = Math.min(100, today / TARGET * 100) + '%'; }
     if (progress) { progress.setAttribute('aria-valuenow', String(Math.min(today, TARGET))); }
+    renderCheckin();
     applyLanguage();
+  }
+
+  /* ---------------- 修行打卡（2026-11-18 v2.4.1） ---------------- */
+  function checkinLocale() {
+    return lang === 'cmn' ? 'zh-CN' : (lang === 'en' ? 'en-US' : (lang === 'vi' ? 'vi-VN' : 'zh-HK'));
+  }
+  function checkinWeekdays() {
+    if (lang === 'en') { return ['S', 'M', 'T', 'W', 'T', 'F', 'S']; }
+    if (lang === 'vi') { return ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']; }
+    return ['日', '一', '二', '三', '四', '五', '六'];
+  }
+  function checkinHintText(checked, total) {
+    var k = todayISO();
+    if (lang === 'cmn') { return checked ? '今日（' + k + '）已打卡；今日 ' + total + ' 遍。' : '今日（' + k + '）还未打卡。'; }
+    if (lang === 'en') { return checked ? 'Checked in for ' + k + '; ' + total + ' recitations today.' : 'Not checked in yet for ' + k + '.'; }
+    if (lang === 'vi') { return checked ? 'Đã điểm danh ngày ' + k + '; hôm nay ' + total + ' lần.' : 'Hôm nay (' + k + ') chưa điểm danh.'; }
+    return checked ? '今日（' + k + '）已打卡；今日 ' + total + ' 遍。' : '今日（' + k + '）仲未打卡。';
+  }
+  function renderCheckin() {
+    var box = $('checkin-stats');
+    if (!box) { return; }
+    var t = totals();
+    box.innerHTML =
+      '<div class="stat-card"><span class="stat-label">' + esc(trText('連續打卡（日）')) + '</span><span class="stat-value">' + t.checkStreak + '</span><span class="stat-note">' + esc(trText('日')) + '</span></div>' +
+      '<div class="stat-card"><span class="stat-label">' + esc(trText('累計打卡（日）')) + '</span><span class="stat-value">' + t.checkDays + '</span><span class="stat-note">' + esc(trText('日')) + '</span></div>' +
+      '<div class="stat-card"><span class="stat-label">' + esc(trText('今月打卡（日）')) + '</span><span class="stat-value">' + t.checkMonth + '</span><span class="stat-note">' + esc(trText('日')) + '</span></div>';
+    var todayItem = state.days[todayISO()];
+    var checked = !!(todayItem && todayItem.checked);
+    var total = dayTotal(todayItem);
+    var btn = $('checkin-btn');
+    if (btn) {
+      btn.textContent = trText(checked ? '今日已打卡' : '今日打卡');
+      btn.disabled = checked;
+      btn.style.opacity = checked ? '.65' : '1';
+    }
+    var undo = $('checkin-undo');
+    if (undo) { undo.hidden = !checked; }
+    var hint = $('checkin-hint');
+    if (hint) { hint.textContent = checkinHintText(checked, total); }
+
+    var base = new Date();
+    var d = new Date(base.getFullYear(), base.getMonth() + calMonthOffset, 1);
+    var y = d.getFullYear(), m = d.getMonth();
+    var title = $('cal-title');
+    if (title) {
+      try {
+        title.textContent = new Intl.DateTimeFormat(checkinLocale(), { year: 'numeric', month: 'long' }).format(d);
+      } catch (e) {
+        title.textContent = y + ' 年 ' + (m + 1) + ' 月';
+      }
+    }
+    var head = $('cal-head');
+    if (head) {
+      head.innerHTML = checkinWeekdays().map(function (w) { return '<div class="gm-cal-w">' + esc(w) + '</div>'; }).join('');
+    }
+    var grid = $('cal-grid');
+    if (!grid) { return; }
+    var first = new Date(y, m, 1).getDay();
+    var days = new Date(y, m + 1, 0).getDate();
+    var cells = '';
+    for (var b = 0; b < first; b++) { cells += '<div class="gm-cal-day is-empty"></div>'; }
+    for (var day = 1; day <= days; day++) {
+      var key = y + '-' + pad2(m + 1) + '-' + pad2(day);
+      var item = state.days[key];
+      var n = dayTotal(item);
+      var isChecked = !!(item && item.checked);
+      var cls = 'gm-cal-day' + (isChecked ? ' is-checked' : '') + (key === todayISO() ? ' is-today' : '') + (key > todayISO() ? ' is-future' : '');
+      var label = key + ' · ' + n + ' ' + trText('遍') + (isChecked ? ' · ' + trText('已打卡') : '');
+      cells += '<div class="' + cls + '" title="' + esc(label) + '">' + day + (n ? '<span class="gm-cal-count">' + (n > 999 ? '999+' : n) + '</span>' : '') + '</div>';
+    }
+    grid.innerHTML = cells;
+  }
+  function setupCheckin() {
+    var btn = $('checkin-btn');
+    if (btn) {
+      btn.addEventListener('click', function () {
+        var item = dayData(todayISO());
+        if (item.checked) { toast('今日已打咗卡'); return; }
+        item.checked = true;
+        saveState();
+        renderStats();
+        renderCheckin();
+        toast('打卡成功');
+      });
+    }
+    var undo = $('checkin-undo');
+    if (undo) {
+      undo.addEventListener('click', function () {
+        var item = state.days[todayISO()];
+        if (!item || !item.checked) { return; }
+        if (!window.confirm(trText('確定撤銷今日打卡？'))) { return; }
+        item.checked = false;
+        saveState();
+        renderStats();
+        renderCheckin();
+        toast('已撤銷今日打卡');
+      });
+    }
+    var prev = $('cal-prev');
+    var next = $('cal-next');
+    if (prev) { prev.addEventListener('click', function () { calMonthOffset--; renderCheckin(); }); }
+    if (next) { next.addEventListener('click', function () { calMonthOffset++; renderCheckin(); }); }
+  }
+  function reconcileCheckins() {
+    var item = state.days[todayISO()];
+    if (item && dayTotal(item) >= TARGET && !item.checked) {
+      item.checked = true;
+      saveState();
+    }
+  }
+  /* 課誦模式：?mode=practice 只留計次／播放／打卡／紀錄。
+     澳門上載版嘅大計次 UI，用呢個模式呈現，唔另開一套四語並列頁。 */
+  function setupFocusMode() {
+    var isPractice = /(?:^|[?&])mode=practice(?:&|$)/.test(location.search);
+    if (!isPractice) { return; }
+    document.body.classList.add('practice-mode');
+    setTimeout(function () {
+      var el = $('section-practice');
+      if (el && el.scrollIntoView) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    }, 250);
   }
 
   function renderPassages() {
@@ -697,7 +864,9 @@
     if (!box || !practice) { return; }
     var html = '';
     (practice.passages || []).forEach(function (passage, index) {
-      html += '<article class="gm-passage" data-passage="' + esc(passage.id || index) + '">';
+      var pid = passage.id || ('p' + index);
+      var pnote = state.passageNotes[pid] || '';
+      html += '<article class="gm-passage" data-passage="' + esc(pid) + '">';
       html += '<div class="gm-passage-head"><h4 class="gm-passage-title">' + esc(passage.title || ('段落 ' + (index + 1))) + '</h4>';
       if (passage.roman) { html += '<span class="gm-roman" lang="sa-Latn">' + esc(passage.roman) + '</span>'; }
       html += '</div>';
@@ -714,9 +883,101 @@
           '<button class="gm-tts" type="button" data-tts="' + index + '" data-lang="' + esc(lang.id) + '" aria-pressed="false">朗讀</button></div>' +
           '<p lang="' + esc(lang.tts || '') + '" data-no-i18n>' + esc(value) + '</p></div>';
       });
-      html += '</div></article>';
+      html += '</div>';
+      html += '<div class="gm-pnote"><button class="btn btn-quiet" type="button" data-pnote-toggle="' + esc(pid) + '">' +
+        esc(trText(pnote ? '修改逐段筆記' : '逐段筆記')) + '</button>' +
+        '<div class="gm-pnote-edit" data-pnote-edit="' + esc(pid) + '" hidden>' +
+        '<textarea maxlength="5000" data-pnote-input="' + esc(pid) + '" placeholder="' + esc(trText('寫低呢一段嘅心得…')) + '">' + esc(pnote) + '</textarea>' +
+        '<div class="gm-pnote-actions">' +
+        '<button class="btn btn-quiet" type="button" data-pnote-save="' + esc(pid) + '">' + esc(trText('儲存')) + '</button>' +
+        '<button class="btn btn-quiet" type="button" data-pnote-clear="' + esc(pid) + '">' + esc(trText('清除')) + '</button>' +
+        '<span class="gm-pnote-status" data-pnote-status="' + esc(pid) + '"></span>' +
+        '</div></div></div>';
+      html += '</article>';
     });
     box.innerHTML = html;
+    renderPassageNotes();
+  }
+
+  function passageById(id) {
+    if (!practice) { return null; }
+    for (var i = 0; i < practice.passages.length; i++) {
+      if ((practice.passages[i].id || ('p' + i)) === id) { return practice.passages[i]; }
+    }
+    return null;
+  }
+  function renderPassageNotes() {
+    var box = $('passage-notes');
+    if (!box) { return; }
+    var keys = Object.keys(state.passageNotes || {}).filter(function (key) { return state.passageNotes[key]; });
+    if (!keys.length) {
+      box.innerHTML = '<p class="muted">' + esc(trText('尚未有逐段筆記')) + '</p>';
+      return;
+    }
+    box.innerHTML = keys.map(function (key) {
+      var p = passageById(key);
+      return '<div class="gm-note-row"><span class="gm-note-date">' + esc(p ? p.title : key) + '</span><p>' + esc(state.passageNotes[key]) + '</p></div>';
+    }).join('');
+  }
+  function savePassageNote(id, value, silent) {
+    if (!id) { return; }
+    value = String(value || '').trim().slice(0, 5000);
+    if (value) { state.passageNotes[id] = value; } else { delete state.passageNotes[id]; }
+    saveState();
+    renderPassageNotes();
+    var toggle = document.querySelector('[data-pnote-toggle="' + id + '"]');
+    if (toggle) { toggle.textContent = trText(value ? '修改逐段筆記' : '逐段筆記'); }
+    if (!silent) { toast(value ? '逐段筆記已儲存' : '逐段筆記已清除'); }
+    var status = document.querySelector('[data-pnote-status="' + id + '"]');
+    if (status) {
+      var tm = new Date().toLocaleTimeString(checkinLocale(), { hour: '2-digit', minute: '2-digit' });
+      status.textContent = (lang === 'cmn' ? '已保存 ' : (lang === 'en' ? 'Saved ' : (lang === 'vi' ? 'Đã lưu ' : '已儲存 '))) + tm;
+    }
+  }
+  function setupPassageNotes() {
+    var box = $('passages');
+    if (!box) { return; }
+    var timers = {};
+    box.addEventListener('click', function (event) {
+      var el = event.target;
+      if (!el || !el.closest) { return; }
+      var toggle = el.closest('[data-pnote-toggle]');
+      if (toggle) {
+        var id = toggle.getAttribute('data-pnote-toggle');
+        var editor = document.querySelector('[data-pnote-edit="' + id + '"]');
+        if (editor) {
+          editor.hidden = !editor.hidden;
+          if (!editor.hidden) {
+            var ta = editor.querySelector('textarea');
+            if (ta) { ta.focus(); }
+          }
+        }
+        return;
+      }
+      var save = el.closest('[data-pnote-save]');
+      if (save) {
+        var sid = save.getAttribute('data-pnote-save');
+        var sed = document.querySelector('[data-pnote-edit="' + sid + '"]');
+        var sta = sed ? sed.querySelector('textarea') : null;
+        savePassageNote(sid, sta ? sta.value : '', false);
+        return;
+      }
+      var clear = el.closest('[data-pnote-clear]');
+      if (clear) {
+        var cid = clear.getAttribute('data-pnote-clear');
+        var ced = document.querySelector('[data-pnote-edit="' + cid + '"]');
+        var cta = ced ? ced.querySelector('textarea') : null;
+        if (cta) { cta.value = ''; }
+        savePassageNote(cid, '', false);
+      }
+    });
+    box.addEventListener('input', function (event) {
+      var ta = event.target;
+      if (!ta || !ta.closest || !ta.closest('[data-pnote-input]')) { return; }
+      var id = ta.getAttribute('data-pnote-input');
+      clearTimeout(timers[id]);
+      timers[id] = setTimeout(function () { savePassageNote(id, ta.value, true); }, 800);
+    });
   }
 
   function renderPhrases() {
@@ -947,7 +1208,7 @@
   var pendingPlay = false;
   var userWantsPlay = false;
 
-  /* ===== 2026-11-18 v2.4.0：鎖屏背景播放加固 =====
+  /* ===== 2026-11-18 v2.4.1：鎖屏背景播放加固 =====
      根因（兩層）：
      ① 舊預設「全輯循環」用 JS ended 事件換段；手機熄屏後 JS 被凍結，
         12:31 播完冇人換段 → 停。已改預設「單曲循環」用原生 loop。
@@ -1185,9 +1446,17 @@
     var item = dayData(todayISO());
     if (source === 'manual') { item.manual += n; }
     else { item.auto += n; }
+    /* 滿 108 遍自動打卡：唔使另外撳，亦唔會重複。 */
+    var justChecked = false;
+    if (dayTotal(item) >= TARGET && !item.checked) {
+      item.checked = true;
+      justChecked = true;
+    }
     saveState();
     renderStats();
     renderHistory();
+    renderCheckin();
+    if (justChecked) { toast('今日滿 108 遍，已自動打卡'); }
   }
 
   function autoCredit(now) {
@@ -1597,7 +1866,22 @@
     if (!input) { return; }
     var item = state.days[todayISO()];
     input.value = item && item.note ? item.note : '';
+    renderNoteHistory();
     applyLanguage();
+  }
+  function renderNoteHistory() {
+    var box = $('note-history');
+    if (!box) { return; }
+    var keys = Object.keys(state.days).filter(function (key) {
+      return state.days[key] && typeof state.days[key].note === 'string' && state.days[key].note.trim();
+    }).sort().reverse().slice(0, 7);
+    if (!keys.length) {
+      box.innerHTML = '<p class="muted">' + esc(trText('尚未有札記')) + '</p>';
+      return;
+    }
+    box.innerHTML = keys.map(function (key) {
+      return '<div class="gm-note-row"><span class="gm-note-date">' + esc(key) + '</span><p>' + esc(state.days[key].note) + '</p></div>';
+    }).join('');
   }
 
   function setSyncStatus(message, isError) {
@@ -1666,7 +1950,11 @@
     saveState();
     if (!silent) { toast(value ? '札記已儲存' : '札記已清空'); }
     var status = $('note-status');
-    if (status) { status.textContent = '已儲存 ' + new Date().toLocaleTimeString('zh-HK', { hour: '2-digit', minute: '2-digit' }); }
+    if (status) {
+      var tm = new Date().toLocaleTimeString(checkinLocale(), { hour: '2-digit', minute: '2-digit' });
+      status.textContent = (lang === 'cmn' ? '已保存 ' : (lang === 'en' ? 'Saved ' : (lang === 'vi' ? 'Đã lưu ' : '已儲存 '))) + tm;
+    }
+    renderNoteHistory();
   }
 
   function exportRecords() {
@@ -1787,11 +2075,11 @@
     updateTodayChip();
     var foot = $('foot-version');
     if (foot) {
-      foot.textContent = '光明真言系統 v2.4.0';
+      foot.textContent = '光明真言系統 v2.4.1';
     }
     var brandVersion = $('brand-version');
     if (brandVersion) {
-      brandVersion.textContent = 'v2.4.0';
+      brandVersion.textContent = 'v2.4.1';
     }
     var intro = $('gm-intro');
     if (intro && practice && practice.intro) { intro.textContent = practice.intro; }
@@ -1803,9 +2091,15 @@
     }
   }
 
+  function registerServiceWorker() {
+    if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) { return; }
+    navigator.serviceWorker.register('sw.js').catch(function () { /* 離線快取失敗唔影響主功能 */ });
+  }
+
   function init() {
     initChrome();
     initAuth();
+    registerServiceWorker();
     var langButtons = document.querySelectorAll('[data-gmlang]');
     for (var li = 0; li < langButtons.length; li++) {
       langButtons[li].addEventListener('click', function () {
@@ -1830,11 +2124,16 @@
     renderPreliminary();
     renderCautions();
     renderDedication();
+    reconcileCheckins();
     renderStats();
     setupSpeech();
+    setupPassageNotes();
     setupPlayer();
     exposeNativeHooks();
     setupRecords();
+    setupCheckin();
+    renderNoteHistory();
+    setupFocusMode();
     var heroPlay = $('hero-play');
     if (heroPlay) {
       heroPlay.addEventListener('click', function () {

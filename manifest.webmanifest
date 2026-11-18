@@ -30,6 +30,15 @@
       "icons": [
         { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }
       ]
+    },
+    {
+      "name": "光明真言・課誦",
+      "short_name": "課誦",
+      "description": "大計次、播放、修行打卡、每日札記",
+      "url": "./guangming-practice.html",
+      "icons": [
+        { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }
+      ]
     }
   ],
   "icons": [

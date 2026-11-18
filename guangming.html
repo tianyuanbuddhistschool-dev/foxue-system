@@ -15,10 +15,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="光明真言">
 <title>光明真言系統｜佛音靈氣標準</title>
-<script src="theme.js?v=2.4.0"></script>
-<link rel="stylesheet" href="styles.css?v=2.4.0">
-<link rel="stylesheet" href="guangming.css?v=2.4.0">
-<link rel="stylesheet" href="theme-black-gold.css?v=2.4.0">
+<script src="theme.js?v=2.4.1"></script>
+<link rel="stylesheet" href="styles.css?v=2.4.1">
+<link rel="stylesheet" href="guangming.css?v=2.4.1">
+<link rel="stylesheet" href="theme-black-gold.css?v=2.4.1">
 <style>
   .gm-auth{max-width:1100px;margin:.4rem auto 0;padding:0 1.15rem}
   .gm-auth-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;font-size:.8rem;color:var(--muted)}
@@ -35,6 +35,40 @@
   html[lang="en"] #gm-auth-domain, html[lang="vi"] #gm-auth-domain,
   html[lang="zh-Hans-CN"] #gm-prefetch, html[lang="zh-Hans-CN"] #gm-bgdiag,
   html[lang="zh-Hans-CN"] #gm-bg-note, html[lang="zh-Hans-CN"] #gm-auth-domain{display:none!important}
+
+  /* 修行打卡（v2.4.1） */
+  .gm-checkin-actions{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin:1rem 0}
+  .gm-calendar{margin-top:1rem;border:1px solid rgba(212,175,55,.20);border-radius:14px;padding:.9rem;background:rgba(255,255,255,.02)}
+  .gm-cal-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.6rem}
+  .gm-cal-title{font-weight:700;color:#f0d77a}
+  .gm-cal-nav{padding:.22rem .7rem;font-size:1.15rem;line-height:1.2}
+  .gm-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .gm-cal-w{text-align:center;font-size:.68rem;opacity:.6;padding:.2rem 0}
+  .gm-cal-day{aspect-ratio:1/1.05;border:1px solid transparent;border-radius:8px;background:rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.8rem;position:relative;min-width:0;color:inherit}
+  .gm-cal-day.is-checked{border-color:rgba(212,175,55,.65);background:rgba(212,175,55,.14);color:#f0d77a;font-weight:700}
+  .gm-cal-day.is-today{box-shadow:inset 0 0 0 1px #4ade80}
+  .gm-cal-day.is-empty{background:transparent;border-color:transparent}
+  .gm-cal-day.is-future{opacity:.35}
+  .gm-cal-count{font-size:.62rem;color:#d4af37;line-height:1}
+  .gm-note-row{display:flex;gap:.6rem;border-top:1px solid rgba(255,255,255,.08);padding:.55rem 0;font-size:.8rem}
+  .gm-note-row:first-child{border-top:0}
+  .gm-note-date{color:#d4af37;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .gm-note-row p{margin:0;opacity:.85;overflow-wrap:anywhere}
+  .gm-pnote{margin-top:.7rem}
+  .gm-pnote-edit{margin-top:.55rem;border:1px solid rgba(212,175,55,.22);border-radius:10px;padding:.6rem;background:rgba(255,255,255,.02)}
+  .gm-pnote-edit textarea{width:100%;min-height:70px;background:rgba(0,0,0,.25);color:inherit;border:1px solid rgba(212,175,55,.25);border-radius:8px;padding:.55rem;font:inherit;font-size:.85rem;resize:vertical}
+  .gm-pnote-edit .gm-pnote-actions{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;margin-top:.4rem}
+  .gm-pnote-status{font-size:.7rem;opacity:.7}
+
+  /* 課誦模式：收起長文，只留計次、播放、打卡、紀錄 */
+  .practice-only{display:none!important}
+  body.practice-mode #android-app, body.practice-mode #section-text, body.practice-mode #section-mudra,
+  body.practice-mode #section-source, body.practice-mode .gm-hero{display:none!important}
+  body.practice-mode .gm-tabs a[href="#section-text"], body.practice-mode .gm-tabs a[href="#section-mudra"],
+  body.practice-mode .gm-tabs a[href="#section-source"]{display:none!important}
+  body.practice-mode .practice-only{display:inline-flex!important}
+  body.practice-mode #section-practice .gm-big-count{font-size:4.6rem;line-height:1.05}
+  body.practice-mode #section-practice{margin-top:.4rem}
 </style>
 </head>
 <body>
@@ -47,7 +81,7 @@
       <div class="brand">
         <span class="brand-mark" aria-hidden="true">佛</span>
         <div class="brand-text">
-          <h1 class="brand-title">光明真言<span class="brand-dot">・</span>專修系統 <span class="ver-pill" id="brand-version">v2.4.0</span></h1>
+          <h1 class="brand-title">光明真言<span class="brand-dot">・</span>專修系統 <span class="ver-pill" id="brand-version">v2.4.1</span></h1>
           <p class="brand-sub">四語・108 遍・原生播放</p>
         </div>
       </div>
@@ -83,6 +117,7 @@
     <a class="tab" href="#section-text">咒文對照</a>
     <a class="tab" href="#section-mudra">手印與日課</a>
     <a class="tab" href="#section-practice">播放與計次</a>
+    <a class="tab" href="#section-checkin">修行打卡</a>
     <a class="tab" href="#section-records">功課紀錄</a>
     <a class="tab" href="#section-source">功德與出處</a>
   </nav>
@@ -101,6 +136,7 @@
       </div>
       <div class="gm-actions">
         <a class="btn btn-primary" href="#section-practice" id="hero-play">開始播放</a>
+        <a class="btn btn-quiet" href="guangming-practice.html">課誦模式</a>
         <a class="btn btn-quiet" href="#section-text">先讀咒文</a>
         <a class="btn btn-quiet" href="apk/guangming.apk" download>下載 App</a>
       </div>
@@ -160,6 +196,7 @@
       <div class="block-head">
         <h3 class="block-title" id="practice-title">播放與計次</h3>
         <span class="gm-badge" id="track-badge">108 遍</span>
+        <a class="btn btn-quiet practice-only" id="focus-exit" href="guangming.html">返回完整模式</a>
       </div>
 
       <div class="gm-player">
@@ -202,6 +239,30 @@
       <audio id="gm-audio" preload="metadata"></audio>
     </section>
 
+    <section class="block gm-section" id="section-checkin" aria-labelledby="checkin-title">
+      <div class="block-head">
+        <h3 class="block-title" id="checkin-title">修行打卡</h3>
+        <span class="gm-badge">每日一記</span>
+      </div>
+      <p class="muted">打卡係提醒自己相續，唔係交數；滿 108 遍會自動打卡，亦可以自己補打卡。紀錄同遍數一齊存本機／雲端。</p>
+      <div class="stat-row" id="checkin-stats" aria-label="打卡統計"></div>
+      <div class="gm-checkin-actions">
+        <button class="btn btn-primary" id="checkin-btn" type="button">今日打卡</button>
+        <button class="btn btn-quiet" id="checkin-undo" type="button" hidden>撤銷今日</button>
+        <span class="muted" id="checkin-hint" role="status" aria-live="polite"></span>
+      </div>
+      <div class="gm-calendar">
+        <div class="gm-cal-head">
+          <button class="btn btn-quiet gm-cal-nav" id="cal-prev" type="button" aria-label="上一個月">‹</button>
+          <span class="gm-cal-title" id="cal-title"></span>
+          <button class="btn btn-quiet gm-cal-nav" id="cal-next" type="button" aria-label="下一個月">›</button>
+        </div>
+        <div class="gm-cal-grid" id="cal-head"></div>
+        <div class="gm-cal-grid" id="cal-grid"></div>
+        <p class="muted">格內數字＝當日遍數；金框＝已打卡；綠框＝今日。</p>
+      </div>
+    </section>
+
     <section class="block gm-section" id="section-records" aria-labelledby="records-title">
       <div class="block-head">
         <h3 class="block-title" id="records-title">功課紀錄</h3>
@@ -226,6 +287,10 @@
         <button class="btn btn-quiet" id="save-note" type="button">儲存札記</button>
         <span class="muted" id="note-status" role="status"></span>
       </div>
+      <h4 class="gm-subhead">最近札記</h4>
+      <div id="note-history"></div>
+      <h4 class="gm-subhead">逐段筆記</h4>
+      <div id="passage-notes"></div>
     </section>
 
     <section class="block gm-section" id="section-source" aria-labelledby="source-title">
@@ -265,10 +330,10 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js?v=2.4.0"></script>
-<script src="data.js?v=2.4.0"></script>
-<script src="guangming-i18n.js?v=2.4.0"></script>
-<script src="native-audio.js?v=2.4.0"></script>
-<script src="guangming.js?v=2.4.0"></script>
+<script src="firebase-config.js?v=2.4.1"></script>
+<script src="data.js?v=2.4.1"></script>
+<script src="guangming-i18n.js?v=2.4.1"></script>
+<script src="native-audio.js?v=2.4.1"></script>
+<script src="guangming.js?v=2.4.1"></script>
 </body>
 </html>
