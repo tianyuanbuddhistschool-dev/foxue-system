@@ -6,7 +6,7 @@
    ============================================================= */
 'use strict';
 
-var CACHE = 'guangming-shell-v2.3.2-20261118';
+var CACHE = 'guangming-shell-v2.3.4-20261118';
 var SHELL = [
   './',
   './index.html',
@@ -60,6 +60,27 @@ self.addEventListener('fetch', function (event) {
 
   /* 音檔：大檔＋Range 請求，唔經 cache，直接上網（GitHub Pages 支援 206） */
   if (url.pathname.indexOf('/audio/') !== -1 || req.headers.has('range')) { return; }
+
+  /* 導航請求（HTML）：network-first —— 一定要拿到最新版面，離線才退回 cache。
+     之前用 stale-while-revalidate，用戶會見到舊版面（例如手機橫向溢出已修好但仍然見到舊樣）。 */
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req).then(function (res) {
+        if (res && res.ok) {
+          var copy = res.clone();
+          caches.open(CACHE).then(function (cache) { cache.put(req, copy); }).catch(function () {});
+        }
+        return res;
+      }).catch(function () {
+        return caches.open(CACHE).then(function (cache) {
+          return cache.match(req, { ignoreSearch: true }).then(function (cached) {
+            return cached || cache.match('./guangming.html') || cache.match('./index.html') || Response.error();
+          });
+        });
+      })
+    );
+    return;
+  }
 
   event.respondWith(
     caches.open(CACHE).then(function (cache) {
